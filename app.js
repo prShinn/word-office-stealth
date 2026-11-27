@@ -1,7 +1,7 @@
 (function () {
   const STORAGE_KEY = "word_office_stealth_v3";
   const AUTH_KEY = "word_office_current_user";
-  const DAILY_HINT_GRANT = 1;
+  const DAILY_HINT_GRANT = 0;
 
   function trackEvent(name, params) {
     try {
@@ -10,7 +10,7 @@
       }
     } catch (_) {}
   }
-  const INITIAL_HINT_QUOTA = 3;
+  const INITIAL_HINT_QUOTA = 1;
   const DEADLINE_SECONDS = 90;
 
   const ACHIEVEMENTS = [
@@ -576,6 +576,8 @@
       const match = tab.dataset.lang === state.lang && tab.dataset.mode === state.mode;
       tab.classList.toggle("active", match);
     });
+    $("btn-lang-vi")?.classList.toggle("active", state.lang === "vi");
+    $("btn-lang-en")?.classList.toggle("active", state.lang === "en");
   }
 
   function updateHudUI() {
@@ -622,9 +624,10 @@
 
   // Mỗi ngày mở game được thêm lượt; không cộng bù ngày vắng, chỉnh lùi đồng hồ không được thêm
   function grantDailyHint() {
+    if (DAILY_HINT_GRANT <= 0) return;
     const today = window.Engagement.toDayNumber(new Date());
     if (state.hintDay === null) {
-      state.hintDay = today; // ngày đầu đã có sẵn lượt mặc định
+      state.hintDay = today;
     } else if (today > state.hintDay) {
       state.hintDay = today;
       state.hintQuota += DAILY_HINT_GRANT;
@@ -1234,9 +1237,8 @@
 
     let bonusMsg = `Extra Ref: ${kpiNote(pts)}`;
     const rec = getRecord(lvl);
-    const milestone = Math.floor(state.bonusWords.length / 3);
-    if (milestone > (rec.bonusPaid || 0)) {
-      rec.bonusPaid = milestone;
+    if (state.bonusWords.length >= 6 && !(rec.bonusPaid > 0)) {
+      rec.bonusPaid = 1;
       state.hintQuota += 1;
       unlockAchievement("extra_ref");
       bonusMsg = `Extra Ref +${pts} KPI · Thưởng +1 Gợi ý!`;
@@ -1858,6 +1860,17 @@
         state.mode = tab.dataset.mode;
         loadLevel(0);
       });
+    });
+
+    $("btn-lang-vi")?.addEventListener("click", () => {
+      if (state.lang === "vi") return;
+      state.lang = "vi";
+      loadLevel(0);
+    });
+    $("btn-lang-en")?.addEventListener("click", () => {
+      if (state.lang === "en") return;
+      state.lang = "en";
+      loadLevel(0);
     });
 
     $("btn-shuffle").addEventListener("click", () => {

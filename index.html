@@ -78,7 +78,7 @@
       </button>
       <button class="game-btn game-btn-hint" id="btn-hint" title="Gợi ý có giới hạn (F2)">
         <span class="tool-ico">fx</span>
-        <span id="btn-hint-text">Gợi ý: 3 (F2)</span>
+        <span id="btn-hint-text">Gợi ý: 1 (F2)</span>
       </button>
       <button class="game-btn game-btn-timer" id="btn-deadline-mode" title="Bật/tắt thử thách đếm ngược 90 giây để nhận x1.5 KPI">
         <span>⏱ Deadline 90s</span>
@@ -101,6 +101,13 @@
     <div class="tool-group batch-select-wrap">
       <label for="level-select" class="tool-label"><strong>Phiên:</strong></label>
       <select id="level-select" class="office-select"></select>
+    </div>
+
+    <div class="tool-sep"></div>
+
+    <div class="tool-group" title="Chuyển nhanh ngôn ngữ từ vựng">
+      <button class="game-btn" id="btn-lang-vi" type="button">Tiếng Việt</button>
+      <button class="game-btn" id="btn-lang-en" type="button">English</button>
     </div>
 
     <div class="ribbon-spacer"></div>
@@ -403,12 +410,12 @@
   <!-- Thanh Sheet Tabs & Status Bar đáy màn hình -->
   <footer class="status-footer">
     <div class="sheet-tabs">
-      <button class="sheet-tab active" data-lang="en" data-mode="connect">Sheet1: O_Chu_EN</button>
-      <button class="sheet-tab" data-lang="vi" data-mode="connect">Sheet2: O_Chu_VI</button>
-      <button class="sheet-tab" data-lang="en" data-mode="merge">Sheet3: Ghep_Tu_EN</button>
-      <button class="sheet-tab" data-lang="vi" data-mode="merge">Sheet4: Ghep_Tu_VI</button>
-      <button class="sheet-tab" data-lang="en" data-mode="connections">Sheet5: Phan_Nhom_EN</button>
-      <button class="sheet-tab" data-lang="vi" data-mode="connections">Sheet6: Phan_Nhom_VI</button>
+      <button class="sheet-tab active" data-lang="en" data-mode="connect">EN · Nối chữ</button>
+      <button class="sheet-tab" data-lang="vi" data-mode="connect">VI · Nối chữ</button>
+      <button class="sheet-tab" data-lang="en" data-mode="merge">EN · Ghép từ</button>
+      <button class="sheet-tab" data-lang="vi" data-mode="merge">VI · Ghép từ</button>
+      <button class="sheet-tab" data-lang="en" data-mode="connections">EN · Phân nhóm</button>
+      <button class="sheet-tab" data-lang="vi" data-mode="connections">VI · Phân nhóm</button>
     </div>
     <div class="status-stats">
       <span id="stat-daily">Chuyên cần: 0 ngày</span>

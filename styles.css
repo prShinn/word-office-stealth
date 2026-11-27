@@ -1397,8 +1397,8 @@ body.theme-docs .connections-view {
   border: none;
   border-right: 1px solid var(--accent-border);
   background: var(--accent-light);
-  padding: 0 10px;
-  font-size: 11px;
+  padding: 0 13px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--accent);
   cursor: pointer;
