@@ -750,7 +750,8 @@
       state.bossMode ||
       state.timerWaiting ||
       document.hidden ||
-      window.RewardedAd.isOpen() ||
+      window.RewardedAd?.isOpen?.() ||
+      window.Leaderboard?.isOpen?.() ||
       ["achievements-modal", "auth-modal", "legal-modal"].some((id) => {
         const el = $(id);
         return el && !el.classList.contains("hidden");
@@ -2017,7 +2018,17 @@
 
     els.btnDeadlineMode.addEventListener("click", () => {
       state.deadlineMode = !state.deadlineMode;
-      loadLevel(state.levelIndex);
+      const hasProgress =
+        state.solvedTargets.size > 0 || state.solvedPairs.size > 0 || state.connSolvedLevels.length > 0;
+      loadLevel(state.levelIndex, hasProgress);
+      if (hasProgress) {
+        setStatus(
+          state.deadlineMode
+            ? "Đã bật Tăng tốc x1.5 KPI · Bắt đầu Phiên mới!"
+            : "Đã tắt Tăng tốc · Bắt đầu Phiên mới!",
+          "warn"
+        );
+      }
     });
 
     $("btn-prev-level").addEventListener("click", () => loadLevel(state.levelIndex - 1, true));
