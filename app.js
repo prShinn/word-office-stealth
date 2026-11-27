@@ -2,6 +2,14 @@
   const STORAGE_KEY = "word_office_stealth_v3";
   const AUTH_KEY = "word_office_current_user";
   const DAILY_HINT_GRANT = 1;
+
+  function trackEvent(name, params) {
+    try {
+      if (typeof window.gtag === "function") {
+        window.gtag("event", name, params || {});
+      }
+    } catch (_) {}
+  }
   const INITIAL_HINT_QUOTA = 3;
   const DEADLINE_SECONDS = 90;
 
@@ -520,6 +528,7 @@
 
   async function requestHintByAd() {
     if (window.RewardedAd.isOpen()) return;
+    trackEvent("ad_hint_click", { mode: state.mode, lang: state.lang });
     const rewarded = await window.RewardedAd.show();
     if (!rewarded) {
       setStatus("Chưa hoàn tất xem quảng cáo để nhận gợi ý", "warn");
@@ -527,6 +536,7 @@
     }
     state.hintQuota += 1;
     saveProgress();
+    trackEvent("ad_hint_rewarded", { mode: state.mode, lang: state.lang });
     setStatus("Đã nhận +1 Gợi ý", "ok");
     updateStatsUI();
   }
@@ -834,6 +844,7 @@
       }
     }
     const lvl = getCurrentLevel();
+    trackEvent("level_start", { level_id: lvl.id, mode: state.mode, lang: state.lang, tier: lvl.tier });
 
     els.batchLabel.textContent = lvl.id;
     els.dailyTag.classList.toggle("hidden", !isCurrentDaily());
@@ -1136,6 +1147,7 @@
     let msg = `Hoàn tất ${lvl.id}! Bấm "Tiếp" sang Phiên mới`;
     if (!state.completedBatches.has(lvl.id)) {
       state.completedBatches.add(lvl.id);
+      trackEvent("level_complete", { level_id: lvl.id, mode: state.mode, lang: state.lang, mistakes: state.mistakes });
       state.streak += 1;
       let clearBonus = lvl.tier === "Nâng cao" ? 120 : lvl.tier === "Trung bình" ? 80 : 60;
       if (state.deadlineMode) clearBonus = Math.round(clearBonus * 1.5);
@@ -1808,6 +1820,7 @@
       ].join("\n");
       try {
         await navigator.clipboard.writeText(text);
+        trackEvent("share_kpi", { level_id: lvl.id, score: state.score });
         setStatus("Đã copy Báo Cáo KPI vào clipboard!", "ok");
       } catch (_) {
         setStatus("Không thể truy cập clipboard trên trình duyệt này", "warn");
@@ -1842,6 +1855,7 @@
       applyTheme(state.theme);
       loadLevel(state.levelIndex);
       authModal?.classList.add("hidden");
+      trackEvent("auth_login", { method: "local" });
       setStatus(`Đã đăng nhập: ${rawName.toLowerCase()} · Tiến độ sẽ được lưu`, "ok");
     });
     btnLogout?.addEventListener("click", () => {
