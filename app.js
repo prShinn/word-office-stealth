@@ -1,7 +1,7 @@
 (function () {
   const STORAGE_KEY = "word_office_stealth_v3";
   const AUTH_KEY = "word_office_current_user";
-  const APP_VERSION = "20261127-02";
+  const APP_VERSION = "20261127-03";
   const DAILY_HINT_GRANT = 0;
 
   function trackEvent(name, params) {
@@ -321,9 +321,11 @@
       if (Array.isArray(saved.completedBatches)) state.completedBatches = new Set(saved.completedBatches);
       if (Array.isArray(saved.unlockedAch)) state.unlockedAch = new Set(saved.unlockedAch);
       if (saved.collectedWords && typeof saved.collectedWords === "object") {
+        // Bỏ từ không có trong từ điển (cụm tự ghép từng được lưu) để bộ đếm Sưu Tầm đúng
+        const keepKnown = (list, data) => (Array.isArray(list) ? list.filter((w) => data?.DICT?.[w]) : []);
         state.collectedWords = {
-          vi: Array.isArray(saved.collectedWords.vi) ? saved.collectedWords.vi : [],
-          en: Array.isArray(saved.collectedWords.en) ? saved.collectedWords.en : []
+          vi: keepKnown(saved.collectedWords.vi, window.VI_DATA),
+          en: keepKnown(saved.collectedWords.en, window.EN_DATA)
         };
       }
       if (saved.theme === "docs" || saved.theme === "excel") state.theme = saved.theme;
@@ -1272,25 +1274,8 @@
     }
 
     const dict = state.lang === "en" ? window.EN_DATA.DICT : window.VI_DATA.DICT;
-    let entry = dict[wordKey];
-
-    // Với Tiếng Việt: nếu chưa có sẵn trong DICT nhưng tách được thành 2 âm tiết chuẩn (VD: hoa + hong -> hoa hồng)
-    // thì chấp nhận thành Extra Ref mở rộng (không phạt sai từ điển oan!)
-    if (!entry && state.lang === "vi" && wordKey.length >= 4) {
-      for (let split = 2; split <= wordKey.length - 2; split++) {
-        const left = wordKey.slice(0, split);
-        const right = wordKey.slice(split);
-        const leftOk = dict[left] && !dict[left].word.split("/")[0].trim().includes(" ");
-        const rightOk = dict[right] && !dict[right].word.split("/")[0].trim().includes(" ");
-        if (leftOk && rightOk) {
-          const leftLabel = dict[left].word.split("/")[0].trim();
-          const rightLabel = dict[right].word.split("/")[0].trim();
-          entry = { word: `${leftLabel} ${rightLabel}`, meaning: "từ ghép mở rộng Tiếng Việt" };
-          dict[wordKey] = entry;
-          break;
-        }
-      }
-    }
+    // Chỉ nhận từ có trong từ điển: không tự ghép tiếng, vì sẽ ra cụm vô nghĩa. Thiếu từ thì bổ sung vào data
+    const entry = dict[wordKey];
 
     if (!entry) {
       registerMistake(`"${wordKey.toUpperCase()}" sai từ điển`);
