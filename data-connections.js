@@ -221,6 +221,28 @@ window.CONN_DATA = (function () {
         { level: 3, title: "Thuật toán / Giao thức mã hóa", words: ["TLS", "AES", "RSA", "BCRYPT"] },
         { level: 4, title: "Từ bẫy đa nghĩa (Bảo mật & Đời thường)", words: ["SALT", "TOKEN", "HONEYPOT", "FIREWALL"] }
       ]
+    },
+    {
+      id: "EN-C21",
+      tier: "Nâng cao",
+      topic: "[Siêu khó] Bẫy Giao thoa & Đa nghĩa",
+      groups: [
+        { level: 1, title: "Đi sau OVER (Over ___)", words: ["TIME", "FLOW", "HEAD", "RIDE"] },
+        { level: 2, title: "Đi trước LINE (___ Line)", words: ["DEAD", "PIPE", "BASE", "GUIDE"] },
+        { level: 3, title: "Thuật ngữ Git & Branching", words: ["FORK", "CHERRY", "BLAME", "BISECT"] },
+        { level: 4, title: "Từ vừa là Trái cây/Thực phẩm vừa là Tech/Brand", words: ["APPLE", "BLACKBERRY", "RASPBERRY", "COOKIE"] }
+      ]
+    },
+    {
+      id: "EN-C22",
+      tier: "Nâng cao",
+      topic: "[Siêu khó] Bẫy Từ viết tắt & Chơi chữ Dev",
+      groups: [
+        { level: 1, title: "Định dạng dữ liệu / Config", words: ["YAML", "TOML", "JSON", "CSV"] },
+        { level: 2, title: "Cấu trúc / Khái niệm Async", words: ["PROMISE", "FUTURE", "STREAM", "CHANNEL"] },
+        { level: 3, title: "Đi cùng KEY (___ Key / Key ___)", words: ["PRIMARY", "FOREIGN", "PUBLIC", "HOT"] },
+        { level: 4, title: "Từ có 2 nghĩa: Âm nhạc & Lập trình", words: ["THREAD", "LOOP", "SCALE", "SCORE"] }
+      ]
     }
   ];
 
@@ -421,6 +443,28 @@ window.CONN_DATA = (function () {
         { level: 2, title: "Giao thức & Kết nối", words: ["REST API", "GraphQL", "WebSocket", "gRPC"] },
         { level: 3, title: "Hành động xử lý sự cố", words: ["Tái hiện lỗi", "Đọc log", "Rollback", "Hotfix"] },
         { level: 4, title: "Từ vừa là thuật ngữ IT vừa là nghĩa đời thường", words: ["Nhánh", "Cổng", "Luồng", "Hàng đợi"] }
+      ]
+    },
+    {
+      id: "VI-C19",
+      tier: "Nâng cao",
+      topic: "[Siêu khó] Bẫy Giao thoa Công sở & Kỹ thuật",
+      groups: [
+        { level: 1, title: "Đi sau BỘ (Bộ ___)", words: ["Đệm", "Lọc", "Nhớ", "Đếm"] },
+        { level: 2, title: "Đi trước LỖI (___ Lỗi)", words: ["Gỡ", "Bắt", "Báo", "Bỏ"] },
+        { level: 3, title: "Từ chỉ trạng thái hoặc thao tác Mạng", words: ["Treo", "Rớt", "Nghẽn", "Chặn"] },
+        { level: 4, title: "Từ vừa chỉ Động vật vừa là Thuật ngữ/Ẩn dụ IT", words: ["Chuột", "Bọ", "Nhện", "Cáo"] }
+      ]
+    },
+    {
+      id: "VI-C20",
+      tier: "Nâng cao",
+      topic: "[Siêu khó] Chơi chữ Đảo Nghĩa & Đồng Âm",
+      groups: [
+        { level: 1, title: "Đi sau KHÓA (Khóa ___)", words: ["Chính", "Ngoại", "Chéo", "Mềm"] },
+        { level: 2, title: "Đi sau BẢN (Bản ___)", words: ["Vá", "Nháp", "Ghi", "Màu"] },
+        { level: 3, title: "Cặp từ chỉ Chiều dữ liệu", words: ["Đọc", "Ghi", "Xuất", "Nhập"] },
+        { level: 4, title: "Từ đi với MẶT (Mặt ___)", words: ["Bằng", "Tiền", "Cắt", "Nạ"] }
       ]
     }
   ];

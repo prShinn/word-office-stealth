@@ -979,5 +979,32 @@ window.EN_DATA = (function () {
     }
   ];
 
+  // Tăng độ khó Ghép Từ: nâng mỗi phiên lên tối thiểu 9 mảnh bẫy (decoys) an toàn (không trùng mảnh thật, không ghép thành từ có trong DICT)
+  (function enrichMergeDecoys() {
+    const allPieces = Array.from(
+      new Set(MERGE_LEVELS.flatMap((l) => l.pairs.flatMap(([a, b]) => [a, b])))
+    );
+    MERGE_LEVELS.forEach((lvl) => {
+      const targetDecoyCount = lvl.tier === "Nâng cao" ? 10 : 8;
+      const ownPieces = new Set(lvl.pairs.flatMap(([a, b]) => [a, b]));
+      const existing = new Set(lvl.decoys || []);
+      const candidates = shuffleArray(allPieces);
+      for (const cand of candidates) {
+        if (existing.size >= targetDecoyCount) break;
+        if (ownPieces.has(cand) || existing.has(cand)) continue;
+        // Đảm bảo mảnh bẫy không vô tình ghép với mảnh thật nào thành từ hợp lệ trong DICT
+        let createsValid = false;
+        for (const p of ownPieces) {
+          if (DICT[p + cand] || DICT[cand + p]) {
+            createsValid = true;
+            break;
+          }
+        }
+        if (!createsValid) existing.add(cand);
+      }
+      lvl.decoys = Array.from(existing);
+    });
+  })();
+
   return { DICT, CONNECT_LEVELS, MERGE_LEVELS, reshuffleLevel };
 })();

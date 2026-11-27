@@ -1228,6 +1228,34 @@ window.VI_DATA = (function () {
     });
   });
 
+  // Tăng độ khó Ghép Từ Tiếng Việt: nâng mỗi phiên lên 8–10 mảnh bẫy (decoys) không tạo thành từ hợp lệ với mảnh thật
+  (function enrichMergeDecoys() {
+    const allPieces = Array.from(
+      new Set(MERGE_LEVELS.flatMap((l) => l.pairs.flatMap(([a, b]) => [a, b])))
+    );
+    MERGE_LEVELS.forEach((lvl) => {
+      const targetDecoyCount = lvl.tier === "Nâng cao" ? 10 : 8;
+      const ownPieces = new Set(lvl.pairs.flatMap(([a, b]) => [a, b]));
+      const existing = new Set(lvl.decoys || []);
+      const candidates = shuffleArray(allPieces);
+      for (const cand of candidates) {
+        if (existing.size >= targetDecoyCount) break;
+        if (ownPieces.has(cand) || existing.has(cand)) continue;
+        const candNorm = stripTones(cand);
+        let createsValid = false;
+        for (const p of ownPieces) {
+          const pNorm = stripTones(p);
+          if (DICT[pNorm + candNorm] || DICT[candNorm + pNorm]) {
+            createsValid = true;
+            break;
+          }
+        }
+        if (!createsValid) existing.add(cand);
+      }
+      lvl.decoys = Array.from(existing);
+    });
+  })();
+
   function shuffleArray(arr) {
     const copy = arr.slice();
     for (let i = copy.length - 1; i > 0; i--) {

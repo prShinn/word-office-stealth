@@ -17,8 +17,8 @@
     { id: "first_batch", title: "Khởi động suôn sẻ", desc: "Hoàn thành Phiên đầu tiên" },
     { id: "clean_sheet", title: "Clean Sheet", desc: "Hoàn thành 1 Phiên với 0 lỗi sai" },
     { id: "combo_5", title: "Chuỗi Đỉnh Cao", desc: "Đạt Combo x5 liên tiếp" },
-    { id: "deadline_win", title: "Chiến thần Deadline", desc: "Hoàn thành Phiên khi bật Deadline 90s" },
-    { id: "conn_master", title: "Thánh Phân Loại", desc: "Giải xong 1 Phiên Phân Nhóm 4x4" },
+    { id: "deadline_win", title: "Vượt mốc Deadline", desc: "Hoàn thành Phiên khi bật Deadline 90s" },
+    { id: "conn_master", title: "Phân loại thành thạo", desc: "Giải xong 1 Phiên Phân Nhóm 4x4" },
     { id: "extra_ref", title: "Mắt Diều Hâu", desc: "Tìm 3 Extra Refs trong cùng 1 Phiên" }
   ];
 
@@ -1061,7 +1061,7 @@
     state.connSelected = [];
     state.connSolvedLevels = [];
     state.mistakes = 0;
-    state.maxMistakes = state.mode === "connections" ? 4 : 5;
+    state.maxMistakes = state.mode === "connections" ? 3 : state.mode === "merge" ? 4 : 5;
     state.batchFailed = false;
     state.usedHintInBatch = false;
     els.keyboardInput.value = "";
@@ -1077,7 +1077,7 @@
     restoreBoard(lvl);
     if (isBatchDone()) {
       showRetryButtons();
-      setStatus('Phiên đã hoàn tất · "Làm lại Phiên" để chơi lại', "ok");
+      setStatus('Phiên đã hoàn tất · "Làm lại Phiên" để luyện lại', "ok");
     }
 
     if (state.mode === "connections") {
