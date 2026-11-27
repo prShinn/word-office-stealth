@@ -1374,57 +1374,61 @@ body.theme-docs .connections-view {
 
 /* Status Footer */
 .status-footer {
-  height: 28px;
+  height: 40px;
   background: var(--bg-subtle);
-  border-top: 1px solid var(--border);
+  border-top: 2px solid var(--accent-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 10px;
+  padding: 0 12px;
   flex-shrink: 0;
   overflow-x: auto;
+  gap: 12px;
 }
 
 .sheet-tabs {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   height: 100%;
 }
 
 .sheet-tab {
   height: 100%;
-  border: none;
-  border-right: 1px solid var(--accent-border);
+  border: 1px solid var(--accent-border);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
   background: var(--accent-light);
-  padding: 0 13px;
-  font-size: 12px;
+  padding: 0 16px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--accent);
   cursor: pointer;
   white-space: nowrap;
+  transition: background-color 0.15s ease;
 }
 
 .sheet-tab:hover {
-  background: #d3eae6;
+  background: #c8e6e0;
 }
 
 body.theme-docs .sheet-tab:hover {
-  background: #e2ddf0;
+  background: #ddd5ee;
 }
 
 .sheet-tab.active {
   background: #fff;
   color: var(--accent);
-  font-weight: 700;
+  font-weight: 800;
   border-top: 3px solid var(--accent);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
 .status-stats {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   white-space: nowrap;
 }
