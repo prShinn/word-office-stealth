@@ -1,4 +1,4 @@
-// Kho dữ liệu Phân Nhóm 4x4 (Connections style) cho Tiếng Anh & Tiếng Việt
+// Kho dữ liệu Phân Nhóm 4x4 cho Tiếng Anh & Tiếng Việt
 // Mỗi Phiên gồm 16 từ (4 nhóm x 4 từ) với từ bẫy giao thoa giữa các nhóm
 window.CONN_DATA = (function () {
   const EN_LEVELS = [
@@ -38,12 +38,12 @@ window.CONN_DATA = (function () {
     {
       id: "EN-C04",
       tier: "Trung bình",
-      topic: "Bảng tính Excel & Dữ liệu",
+      topic: "Bảng tính & Dữ liệu",
       groups: [
-        { level: 1, title: "Hàm tính toán trong Excel", words: ["SUM", "AVERAGE", "COUNT", "MIN"] },
+        { level: 1, title: "Hàm tính toán trong bảng tính", words: ["SUM", "AVERAGE", "COUNT", "MIN"] },
         { level: 2, title: "Thành phần của bảng dữ liệu", words: ["ROW", "COLUMN", "CELL", "SHEET"] },
         { level: 3, title: "Thao tác xử lý danh sách", words: ["SORT", "FILTER", "MERGE", "SPLIT"] },
-        { level: 4, title: "Mã lỗi Excel quen thuộc (#___)", words: ["VALUE", "REF", "NAME", "DIV"] }
+        { level: 4, title: "Mã lỗi bảng tính quen thuộc (#___)", words: ["VALUE", "REF", "NAME", "DIV"] }
       ]
     },
     {
@@ -164,8 +164,8 @@ window.CONN_DATA = (function () {
       tier: "Trung bình",
       topic: "Công nghệ & Lập trình",
       groups: [
-        { level: 1, title: "Ngôn ngữ lập trình", words: ["Java", "Python", "TypeScript", "SQL"] },
-        { level: 2, title: "Công cụ giao tiếp nhóm", words: ["Slack", "Teams", "Zoom", "Gmail"] },
+        { level: 1, title: "Kiểu dữ liệu trong lập trình", words: ["String", "Boolean", "Integer", "Array"] },
+        { level: 2, title: "Cách liên lạc công sở", words: ["Email", "Họp video", "Nhắn tin", "Gọi điện"] },
         { level: 3, title: "Thao tác trên Git", words: ["Commit", "Merge", "Branch", "Push"] },
         { level: 4, title: "Từ đi với MÃ (Mã ___)", words: ["Nguồn", "Hóa", "Lỗi", "Vạch"] }
       ]

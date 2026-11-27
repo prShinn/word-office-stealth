@@ -3,26 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title id="page-title">Bao_Cao_Kinh_Doanh_Q4.xlsx - Excel</title>
-  <link id="page-favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='3' fill='%23217346'/%3E%3Ctext x='5' y='17' font-family='Segoe UI,Arial' font-size='14' font-weight='bold' fill='white'%3EX%3C/text%3E%3C/svg%3E" />
+  <title id="page-title">Bao_Cao_Kinh_Doanh_Q4 - Bảng Chữ</title>
+  <link id="page-favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%230f766e'/%3E%3Crect x='5' y='5' width='6' height='6' rx='1.5' fill='white'/%3E%3Crect x='13' y='5' width='6' height='6' rx='1.5' fill='white' opacity='.55'/%3E%3Crect x='5' y='13' width='6' height='6' rx='1.5' fill='white' opacity='.55'/%3E%3Ccircle cx='16' cy='16' r='3' fill='white'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body class="theme-excel">
   <!-- Thanh tiêu đề ứng dụng văn phòng -->
   <header class="app-titlebar">
     <div class="titlebar-left">
-      <span class="app-badge" id="app-badge">X</span>
-      <span class="doc-name" id="doc-name">Bao_Cao_Kinh_Doanh_Q4.xlsx</span>
-      <span class="save-state">Saved to OneDrive</span>
+      <span class="app-badge" id="app-badge" title="Bảng Chữ"><img id="app-mark" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%230f766e'/%3E%3Crect x='5' y='5' width='6' height='6' rx='1.5' fill='white'/%3E%3Crect x='13' y='5' width='6' height='6' rx='1.5' fill='white' opacity='.55'/%3E%3Crect x='5' y='13' width='6' height='6' rx='1.5' fill='white' opacity='.55'/%3E%3Ccircle cx='16' cy='16' r='3' fill='white'/%3E%3C/svg%3E" alt="Bảng Chữ" width="22" height="22" /></span>
+      <span class="doc-name" id="doc-name">Bao_Cao_Kinh_Doanh_Q4</span>
+      <span class="save-state">Đã lưu trên máy</span>
     </div>
     <div class="titlebar-search fake-ui" aria-hidden="true">
       <span class="search-icon">⌕</span>
-      <span class="search-placeholder">Search (Alt + Q)</span>
+      <span class="search-placeholder">Tìm kiếm</span>
     </div>
     <div class="titlebar-right">
       <div class="stealth-controls" title="Chuyển vỏ bọc giao diện">
-        <button class="mini-pill active" id="btn-theme-excel" data-theme="excel">Excel</button>
-        <button class="mini-pill" id="btn-theme-docs" data-theme="docs">Docs</button>
+        <button class="mini-pill active" id="btn-theme-excel" data-theme="excel">Bảng tính</button>
+        <button class="mini-pill" id="btn-theme-docs" data-theme="docs">Văn bản</button>
       </div>
       <button class="panic-btn" id="btn-panic" title="Nhấn Esc để ẩn/hiện tức thì">
         Xem Báo Cáo (Esc)
@@ -103,7 +103,7 @@
     </div>
   </div>
 
-  <!-- Thanh công thức Excel / Search Docs -->
+  <!-- Thanh công thức -->
   <div class="formula-bar" id="formula-bar">
     <div class="cell-ref" id="cell-ref">B4</div>
     <div class="fx-sign" id="fx-sign">fx</div>
@@ -122,7 +122,7 @@
 
   <!-- Khung làm việc chính -->
   <main class="workspace" id="main-workspace">
-    <!-- Thanh tiêu đề cột kiểu Excel -->
+    <!-- Thanh tiêu đề cột kiểu bảng tính -->
     <div class="excel-col-headers" id="excel-col-headers">
       <div class="corner-cell"></div>
       <div class="col-h">A</div>
@@ -148,7 +148,7 @@
             <span class="panel-sub" id="mode-hint">Kéo nối hoặc gõ phím + Enter</span>
           </div>
 
-          <!-- Vùng chơi Nối Chữ Cái (Word Connect) -->
+          <!-- Vùng chơi Nối Chữ Cái (nối chữ) -->
           <div class="connect-stage" id="connect-stage">
             <div class="draft-preview-bar">
               <span class="draft-label">Chuỗi đang chọn:</span>
@@ -167,7 +167,7 @@
             </div>
           </div>
 
-          <!-- Vùng chơi Ghép Từ (Word Merge có mảnh bẫy) -->
+          <!-- Vùng chơi Ghép Từ (có mảnh bẫy) -->
           <div class="merge-stage hidden" id="merge-stage">
             <div class="draft-preview-bar">
               <span class="draft-label">Ghép cặp (cẩn thận mảnh nhiễu!):</span>
@@ -233,7 +233,7 @@
         </section>
       </div>
 
-      <!-- Layout riêng cho Phân Nhóm 4x4 (Connections) -->
+      <!-- Layout riêng cho Phân Nhóm 4x4  -->
       <div class="connections-view hidden" id="connections-view">
         <div class="conn-header-bar">
           <div>

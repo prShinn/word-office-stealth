@@ -38,7 +38,7 @@
     selectedTileId: null,
     solvedPairs: new Set(),
 
-    // Connections 4x4 state
+    // Phân nhóm 4x4
     connTiles: [],        // [{ word, level, groupTitle }]
     connSelected: [],     // indices in connTiles
     connSolvedLevels: [], // [level]
@@ -338,15 +338,13 @@
     $("btn-theme-docs").classList.toggle("active", theme === "docs");
 
     if (theme === "excel") {
-      els.appBadge.textContent = "X";
-      els.docName.textContent = "Bao_Cao_Kinh_Doanh_Q4.xlsx";
-      els.pageTitle.textContent = "Bao_Cao_Kinh_Doanh_Q4.xlsx - Excel";
+      els.docName.textContent = "Bao_Cao_Kinh_Doanh_Q4";
+      els.pageTitle.textContent = "Bao_Cao_Kinh_Doanh_Q4 - Bảng Chữ";
       els.bossExcelContent.classList.remove("hidden");
       els.bossDocsContent.classList.add("hidden");
     } else {
-      els.appBadge.textContent = "W";
-      els.docName.textContent = "Tai_Lieu_Ra_Soat_Du_Lieu.docx";
-      els.pageTitle.textContent = "Tai_Lieu_Ra_Soat_Du_Lieu.docx - Word";
+      els.docName.textContent = "Tai_Lieu_Ra_Soat_Du_Lieu";
+      els.pageTitle.textContent = "Tai_Lieu_Ra_Soat_Du_Lieu - Bảng Chữ";
       els.bossExcelContent.classList.add("hidden");
       els.bossDocsContent.classList.remove("hidden");
     }
@@ -866,7 +864,7 @@
   function redrawConnectLines(pointerPt) {
     const total = state.letters.length;
     const pts = state.selectedIndices.map((idx) => getNodePosition(idx, total));
-    const accentColor = state.theme === "excel" ? "#217346" : "#2b579a";
+    const accentColor = state.theme === "excel" ? "#0f766e" : "#5b4a8b";
 
     els.nodesLayer.querySelectorAll(".letter-node").forEach((el) => {
       const idx = Number(el.dataset.index);
@@ -1156,7 +1154,7 @@
     registerMistake(`Không khớp "${cleaned}"`);
   }
 
-  // ================= CONNECTIONS 4x4 MODE =================
+  // ================= PHÂN NHÓM 4x4 =================
   function renderConnections() {
     const lvl = getCurrentLevel();
     els.connSolvedList.innerHTML = "";

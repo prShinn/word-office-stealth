@@ -1,8 +1,8 @@
-/* Giao diện ngụy trang Excel / Docs tối giản chuẩn văn phòng */
+/* Giao diện bảng tính / văn bản tối giản chuẩn văn phòng */
 :root {
-  --accent: #217346;
-  --accent-light: #e6f2ec;
-  --accent-border: #b7d7c6;
+  --accent: #0f766e;
+  --accent-light: #e3f1ef;
+  --accent-border: #b2d8d2;
   --bg-app: #f3f2f1;
   --bg-surface: #ffffff;
   --bg-subtle: #faf9f8;
@@ -18,9 +18,9 @@
 }
 
 body.theme-docs {
-  --accent: #2b579a;
-  --accent-light: #ebf1fa;
-  --accent-border: #b9cde5;
+  --accent: #5b4a8b;
+  --accent-light: #eeebf6;
+  --accent-border: #cbc3e0;
   --bg-app: #eaecef;
 }
 
@@ -70,6 +70,10 @@ html, body {
   gap: 10px;
   min-width: 0;
   overflow: hidden;
+}
+
+#app-mark {
+  display: block;
 }
 
 .app-badge {
@@ -727,7 +731,7 @@ body.theme-docs .connections-view {
 }
 
 .office-btn.ghost:hover {
-  background: #dceee4;
+  background: #d3eae6;
 }
 
 /* Merge Stage */
@@ -989,7 +993,7 @@ body.theme-docs .connections-view {
   flex-shrink: 0;
 }
 
-/* Connections 4x4 View */
+/* Phân nhóm 4x4 */
 .connections-view {
   flex: 1;
   padding: 16px 24px;
@@ -1033,10 +1037,10 @@ body.theme-docs .connections-view {
   text-align: center;
 }
 
-.conn-group-banner.lvl-1 { background: #fff4ce; border-color: #e6d08a; color: #5c4800; }
-.conn-group-banner.lvl-2 { background: #e6f2ec; border-color: #b7d7c6; color: #164e30; }
-.conn-group-banner.lvl-3 { background: #ebf1fa; border-color: #b9cde5; color: #1e4273; }
-.conn-group-banner.lvl-4 { background: #f2ecf9; border-color: #cfc0e6; color: #432874; }
+.conn-group-banner.lvl-1 { background: #e3f1ef; border-color: #b2d8d2; color: #0b4f4a; }
+.conn-group-banner.lvl-2 { background: #fbeaf0; border-color: #ecc3d2; color: #7a2845; }
+.conn-group-banner.lvl-3 { background: #eceff3; border-color: #c5ccd8; color: #33415c; }
+.conn-group-banner.lvl-4 { background: #fdeee2; border-color: #efccae; color: #7c3f12; }
 
 .conn-group-title {
   font-weight: 700;
@@ -1327,11 +1331,11 @@ body.theme-docs .connections-view {
 }
 
 .sheet-tab:hover {
-  background: #dceee4;
+  background: #d3eae6;
 }
 
 body.theme-docs .sheet-tab:hover {
-  background: #dbe6f7;
+  background: #e2ddf0;
 }
 
 .sheet-tab.active {
