@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "dev": "node dev-server.mjs",
+    "test": "node --test test/"
+  }
+}

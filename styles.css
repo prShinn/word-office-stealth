@@ -1135,6 +1135,81 @@ body.theme-docs .connections-view {
   overflow-y: auto;
 }
 
+.bxh-modal .modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bxh-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bxh-row .office-btn {
+  flex: 1;
+}
+
+.bxh-input {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font: inherit;
+  user-select: text;
+}
+
+.bxh-code {
+  font-family: Consolas, monospace;
+  font-size: 16px;
+  text-align: center;
+}
+
+.bxh-note {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.bxh-msg {
+  min-height: 18px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.bxh-board {
+  max-height: 230px;
+  overflow-y: auto;
+  font-size: 12px;
+}
+
+.bxh-modal .merge-tiles-grid {
+  overflow: visible;
+}
+
+.ad-modal {
+  max-width: 420px;
+}
+
+.ad-placeholder {
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--border);
+  color: var(--text-light);
+  margin-bottom: 12px;
+}
+
+.ad-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .engage-panel {
   margin-bottom: 14px;
 }

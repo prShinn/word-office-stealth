@@ -202,5 +202,5 @@ window.Engagement = (function () {
 
   ensureToday();
 
-  return { track, getRankName, checkPromotion, getSummary, renderPanel };
+  return { toDayNumber, track, getRankName, checkPromotion, getSummary, renderPanel };
 })();

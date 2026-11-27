@@ -1,6 +1,6 @@
 (function () {
   const STORAGE_KEY = "word_office_stealth_v3";
-  const HINT_COST_KPI = 30;
+  const DAILY_HINT_GRANT = 1;
   const INITIAL_HINT_QUOTA = 3;
   const DEADLINE_SECONDS = 90;
 
@@ -56,6 +56,7 @@
     // Economy & Persistence
     usedHintInBatch: false,
     hintQuota: INITIAL_HINT_QUOTA,
+    hintDay: null,        // ngày gần nhất đã xét quà gợi ý
     score: 0,
     streak: 0,
     completedBatches: new Set(),
@@ -133,6 +134,7 @@
       if (typeof saved.score === "number") state.score = saved.score;
       if (typeof saved.streak === "number") state.streak = saved.streak;
       if (typeof saved.hintQuota === "number") state.hintQuota = saved.hintQuota;
+      if (Number.isInteger(saved.hintDay)) state.hintDay = saved.hintDay;
       if (typeof saved.maxComboEver === "number") state.maxComboEver = saved.maxComboEver;
       if (Array.isArray(saved.completedBatches)) state.completedBatches = new Set(saved.completedBatches);
       if (Array.isArray(saved.unlockedAch)) state.unlockedAch = new Set(saved.unlockedAch);
@@ -152,6 +154,7 @@
           score: state.score,
           streak: state.streak,
           hintQuota: state.hintQuota,
+          hintDay: state.hintDay,
           maxComboEver: state.maxComboEver,
           completedBatches: Array.from(state.completedBatches),
           unlockedAch: Array.from(state.unlockedAch),
@@ -396,18 +399,35 @@
         state.mode === "connections" ? "Không hỗ trợ ở 4x4" : "Đã thất bại Phiên";
       return;
     }
+    els.btnHint.disabled = false;
     if (state.hintQuota > 0) {
-      els.btnHint.disabled = false;
       els.btnHintText.textContent = `Gợi ý: ${state.hintQuota} (F2)`;
-      els.btnHint.title = `Còn ${state.hintQuota} lượt gợi ý miễn phí (F2)`;
-    } else if (state.score >= HINT_COST_KPI) {
-      els.btnHint.disabled = false;
-      els.btnHintText.textContent = `Gợi ý (-${HINT_COST_KPI} KPI)`;
-      els.btnHint.title = `Đã hết lượt miễn phí — tốn ${HINT_COST_KPI} KPI cho 1 lần gợi ý`;
+      els.btnHint.title = `Còn ${state.hintQuota} lượt gợi ý (F2) · Mỗi ngày thêm ${DAILY_HINT_GRANT} lượt`;
     } else {
-      els.btnHint.disabled = true;
-      els.btnHintText.textContent = `Hết gợi ý (cần ${HINT_COST_KPI} KPI)`;
+      els.btnHintText.textContent = "Xem quảng cáo +1 gợi ý";
+      els.btnHint.title = "Hết lượt gợi ý. Chỉ mở quảng cáo khi bạn bấm nút này";
     }
+  }
+
+  // Mỗi ngày mở game được thêm lượt; không cộng bù ngày vắng, chỉnh lùi đồng hồ không được thêm
+  function grantDailyHint() {
+    const today = window.Engagement.toDayNumber(new Date());
+    if (state.hintDay === null) {
+      state.hintDay = today; // ngày đầu đã có sẵn lượt mặc định
+    } else if (today > state.hintDay) {
+      state.hintDay = today;
+      state.hintQuota += DAILY_HINT_GRANT;
+      state.notices.push(`Quà mỗi ngày: +${DAILY_HINT_GRANT} Gợi ý`);
+    }
+  }
+
+  async function requestHintByAd() {
+    if (window.RewardedAd.isOpen()) return;
+    const rewarded = await window.RewardedAd.show();
+    if (!rewarded) return;
+    state.hintQuota += 1;
+    setStatus("Đã nhận +1 Gợi ý", "ok");
+    updateStatsUI();
   }
 
   function populateLevelDropdown() {
@@ -454,7 +474,7 @@
     if (!state.deadlineMode || state.batchFailed) return;
 
     state.timerId = setInterval(() => {
-      if (state.bossMode || state.batchFailed || isBatchDone()) return;
+      if (state.bossMode || state.batchFailed || isBatchDone() || window.RewardedAd.isOpen()) return;
       state.timeLeft -= 1;
       updateHudUI();
       if (state.timeLeft <= 0) {
@@ -1371,6 +1391,7 @@
           : state.connSolvedLevels.length;
 
     els.kpiFooter.textContent = `Valid Rows: ${done}/${total} | Batch hoàn thành: ${state.completedBatches.size}`;
+    grantDailyHint();
     flushNotices();
     els.statRank.textContent = `Cấp bậc: ${window.Engagement.getRankName(state.score)}`;
     els.statStreak.textContent = `Chuỗi hoàn thành: ${state.streak}`;
@@ -1381,17 +1402,14 @@
     saveProgress();
   }
 
-  function consumeHintCost() {
+  function consumeHint() {
     if (state.hintQuota > 0) {
       state.hintQuota -= 1;
-      return "free";
+      return true;
     }
-    if (state.score >= HINT_COST_KPI) {
-      state.score -= HINT_COST_KPI;
-      return "kpi";
-    }
-    setStatus(`Hết lượt gợi ý! Cần ${HINT_COST_KPI} KPI hoặc tìm 3 Extra Refs`, "err");
-    return null;
+    // F2 không tự mở quảng cáo, tránh bật nhầm
+    setStatus('Hết lượt gợi ý · Bấm nút "Xem quảng cáo" nếu muốn thêm', "warn");
+    return false;
   }
 
   function triggerHint() {
@@ -1405,12 +1423,11 @@
           : lvl.targets.find((w) => !state.solvedTargets.has(w));
       if (!targetWord) return;
 
-      const costType = consumeHintCost();
-      if (!costType) return;
+      if (!consumeHint()) return;
       state.usedHintInBatch = true;
 
       const cur = state.revealedHints[targetWord] || 0;
-      const costNote = costType === "kpi" ? ` (-${HINT_COST_KPI} KPI)` : ` (còn ${state.hintQuota} lượt)`;
+      const costNote = ` (còn ${state.hintQuota} lượt)`;
 
       if (cur + 1 >= targetWord.length) {
         state.solvedTargets.add(targetWord);
@@ -1428,13 +1445,12 @@
     } else if (state.mode === "merge") {
       const idx = lvl.pairs.findIndex((_, i) => !state.solvedPairs.has(i));
       if (idx === -1) return;
-      const costType = consumeHintCost();
-      if (!costType) return;
+      if (!consumeHint()) return;
       state.usedHintInBatch = true;
 
       state.selectedTileId = null;
       markPairSolved(idx, lvl, true);
-      const costNote = costType === "kpi" ? ` (-${HINT_COST_KPI} KPI)` : ` (còn ${state.hintQuota} lượt)`;
+      const costNote = ` (còn ${state.hintQuota} lượt)`;
       // Giữ thông báo hoàn tất Phiên nếu đây là cặp cuối
       if (!isBatchDone()) setStatus(`Gợi ý ghép "${lvl.pairs[idx][2]}"${costNote}`, "warn");
       updateStatsUI();
@@ -1582,7 +1598,10 @@
       }
     });
 
-    $("btn-hint").addEventListener("click", triggerHint);
+    $("btn-hint").addEventListener("click", () => {
+      if (state.hintQuota > 0) triggerHint();
+      else requestHintByAd();
+    });
 
     els.btnDeadlineMode.addEventListener("click", () => {
       state.deadlineMode = !state.deadlineMode;
@@ -1617,6 +1636,7 @@
       renderConnections();
     });
 
+    $("btn-leaderboard").addEventListener("click", () => window.Leaderboard.open());
     $("btn-achievements").addEventListener("click", () => {
       renderAchievementsModal();
       els.achModal.classList.remove("hidden");
@@ -1639,6 +1659,24 @@
     });
 
     document.addEventListener("keydown", (e) => {
+      // Đang mở BXH: Esc đóng và ẩn màn hình; phím khác để ô nhập/nút trong bảng tự xử lý
+      if (window.Leaderboard.isOpen()) {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          window.Leaderboard.close();
+          toggleBossMode(true);
+        }
+        return;
+      }
+      // Đang mở quảng cáo: Esc đóng ngay và ẩn màn hình, phím khác không tác động vào game
+      if (window.RewardedAd.isOpen()) {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          window.RewardedAd.cancel();
+          toggleBossMode(true);
+        }
+        return;
+      }
       if (e.key === "Escape") {
         e.preventDefault();
         if (!els.achModal.classList.contains("hidden")) {
@@ -1698,6 +1736,9 @@
   // Nhắc giữ chuỗi khi mở game mà hôm nay chưa chơi
   const daily = window.Engagement.getSummary();
   if (daily.streak > 0 && !daily.checkedIn) {
-    setStatus(`Giải 1 mục hôm nay để giữ chuỗi ${daily.streak} ngày`, "warn");
+    // Không đè thông báo quà gợi ý vừa hiện lúc mở game
+    const shown = els.formulaStatus.textContent;
+    const reminder = `Giải 1 mục hôm nay để giữ chuỗi ${daily.streak} ngày`;
+    setStatus(shown.includes("Quà mỗi ngày") ? `${shown} · ${reminder}` : reminder, "warn");
   }
 })();
