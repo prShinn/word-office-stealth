@@ -6,12 +6,14 @@ export const PENALTY_MS = 5000;
 export const MAX_MISTAKES = 10;
 const BOARD_LIMIT = 50;
 const BODY_LIMIT = 2048;
+const PROFILE_BODY_LIMIT = 16384;
 const SESSION_MS = 180 * 86400000;
 const DAY_OFFSET_MS = 7 * 3600000; // ngày thi tính theo giờ Việt Nam
 const CODE_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
 const LIMITS = {
   register: { max: 10, windowMs: 3600000 },
-  recover: { max: 10, windowMs: 900000 }
+  recover: { max: 10, windowMs: 900000 },
+  profileWrite: { max: 60, windowMs: 60000 }
 };
 
 class HttpError extends Error {
@@ -82,12 +84,14 @@ export async function buildPuzzle(seed, day, lang) {
   return { topic: pool.topic, pairs, decoys };
 }
 
-async function readBody(request) {
+async function readBody(request, maxBytes = BODY_LIMIT) {
   if (!(request.headers.get("content-type") || "").startsWith("application/json")) {
     throw new HttpError(415, "BAD_CONTENT_TYPE", "Yêu cầu phải là JSON");
   }
   const text = await request.text();
-  if (text.length > BODY_LIMIT) throw new HttpError(413, "BODY_TOO_LARGE", "Dữ liệu quá lớn");
+  if (new TextEncoder().encode(text).byteLength > maxBytes) {
+    throw new HttpError(413, "BODY_TOO_LARGE", "Dữ liệu quá lớn");
+  }
   let body;
   try {
     body = JSON.parse(text);
@@ -114,16 +118,23 @@ function parseLang(value) {
   return value;
 }
 
-async function rateLimit(env, request, action) {
+async function rateLimit(env, request, action, subject) {
   const { max, windowMs } = LIMITS[action];
-  const ip = request.headers.get("cf-connecting-ip") || "unknown";
-  const bucket = await sha256(`${env.RATE_SALT}|${action}|${ip}`); // không lưu IP thô
-  const windowStart = Math.floor(now(env) / windowMs) * windowMs;
+  const actor = subject || request.headers.get("cf-connecting-ip") || "unknown";
+  const bucket = await sha256(`${env.RATE_SALT}|${action}|${actor}`); // không lưu IP/ID thô
+  const currentMs = now(env);
+  const windowStart = Math.floor(currentMs / windowMs) * windowMs;
   const row = await env.DB.prepare(
     `INSERT INTO rate_limits (bucket, window_start, hits) VALUES (?1, ?2, 1)
      ON CONFLICT (bucket, window_start) DO UPDATE SET hits = hits + 1
      RETURNING hits`
   ).bind(bucket, windowStart).first();
+  // Dọn ngẫu nhiên các bucket hết hạn > 24h (5% cơ hội) để tránh phình bảng
+  if (secureRandom() < 0.05) {
+    await env.DB.prepare("DELETE FROM rate_limits WHERE window_start < ?1")
+      .bind(currentMs - 86400000)
+      .run();
+  }
   if (row.hits > max) throw new HttpError(429, "RATE_LIMITED", "Thử quá nhiều lần, vui lòng chờ");
 }
 
@@ -305,6 +316,59 @@ async function leaderboard(env, request, url) {
   return json(200, { day, entries, me });
 }
 
+async function getProfile(env, request) {
+  const session = await requireSession(env, request);
+  const row = await env.DB.prepare(
+    "SELECT state_json AS stateJson, engage_json AS engageJson, version, updated_at AS updatedAt FROM user_profiles WHERE user_id = ?1"
+  ).bind(session.userId).first();
+  if (!row) {
+    return json(200, { state: {}, engage: {}, version: 0, updatedAt: null });
+  }
+  let state = {};
+  let engage = {};
+  try { state = JSON.parse(row.stateJson || "{}"); } catch {}
+  try { engage = JSON.parse(row.engageJson || "{}"); } catch {}
+  return json(200, { state, engage, version: row.version, updatedAt: row.updatedAt });
+}
+
+async function putProfile(env, request) {
+  const session = await requireSession(env, request);
+  await rateLimit(env, request, "profileWrite", session.userId);
+  const body = await readBody(request, PROFILE_BODY_LIMIT);
+  const stateObj = body.state && typeof body.state === "object" && !Array.isArray(body.state) ? body.state : null;
+  const engageObj = body.engage && typeof body.engage === "object" && !Array.isArray(body.engage) ? body.engage : null;
+  if (!stateObj || !engageObj) {
+    throw new HttpError(400, "INVALID_PROFILE", "Dữ liệu hồ sơ không hợp lệ");
+  }
+  if (!Number.isInteger(body.expectedVersion) || body.expectedVersion < 0) {
+    throw new HttpError(400, "INVALID_VERSION", "Phiên bản hồ sơ không hợp lệ");
+  }
+  const expectedVersion = body.expectedVersion;
+  const stateJson = JSON.stringify(stateObj);
+  const engageJson = JSON.stringify(engageObj);
+  const ts = now(env);
+
+  if (expectedVersion === 0) {
+    const inserted = await env.DB.prepare(
+      `INSERT INTO user_profiles (user_id, state_json, engage_json, version, updated_at)
+       VALUES (?1, ?2, ?3, 1, ?4)
+       ON CONFLICT (user_id) DO NOTHING
+       RETURNING version`
+    ).bind(session.userId, stateJson, engageJson, ts).first();
+    if (!inserted) throw new HttpError(409, "VERSION_CONFLICT", "Hồ sơ đã được cập nhật ở thiết bị khác");
+    return json(200, { version: inserted.version, updatedAt: ts });
+  }
+
+  const updated = await env.DB.prepare(
+    `UPDATE user_profiles
+     SET state_json = ?2, engage_json = ?3, version = version + 1, updated_at = ?4
+     WHERE user_id = ?1 AND version = ?5
+     RETURNING version`
+  ).bind(session.userId, stateJson, engageJson, ts, expectedVersion).first();
+  if (!updated) throw new HttpError(409, "VERSION_CONFLICT", "Hồ sơ đã được cập nhật ở thiết bị khác");
+  return json(200, { version: updated.version, updatedAt: ts });
+}
+
 async function route(env, request) {
   const url = new URL(request.url);
   switch (`${request.method} ${url.pathname}`) {
@@ -336,6 +400,10 @@ async function route(env, request) {
       return guess(env, request);
     case "GET /api/leaderboard":
       return leaderboard(env, request, url);
+    case "GET /api/profile":
+      return getProfile(env, request);
+    case "PUT /api/profile":
+      return putProfile(env, request);
     default:
       throw new HttpError(404, "NOT_FOUND", "Không tìm thấy");
   }

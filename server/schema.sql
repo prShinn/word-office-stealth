@@ -37,3 +37,11 @@ CREATE TABLE IF NOT EXISTS rate_limits (
   hits         INTEGER NOT NULL,
   PRIMARY KEY (bucket, window_start)
 );
+
+CREATE TABLE IF NOT EXISTS user_profiles (
+  user_id     TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  state_json  TEXT NOT NULL DEFAULT '{}',
+  engage_json TEXT NOT NULL DEFAULT '{}',
+  version     INTEGER NOT NULL DEFAULT 1,
+  updated_at  INTEGER NOT NULL
+);

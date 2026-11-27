@@ -1,8 +1,30 @@
 // Cơ chế giữ chân: chuỗi ngày chơi, nhiệm vụ ngày, tiến trình cấp bậc (chạy offline)
 window.Engagement = (function () {
   const KEY = "word_office_stealth_engage_v1";
+  const AUTH_KEY = "word_office_current_user";
   const MAX_FREEZE = 2;
   const ALL_QUESTS_HINT = 1;
+
+  function getAuthUser() {
+    try {
+      const u = (localStorage.getItem(AUTH_KEY) || "").trim();
+      return u || null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function createDefaultData() {
+    return {
+      lastDay: null,
+      dayStreak: 0,
+      bestStreak: 0,
+      freezes: 0,
+      questDay: null,
+      quests: [],
+      topRank: null
+    };
+  }
 
   const RANKS = [
     { name: "Intern", min: 0 },
@@ -32,34 +54,35 @@ window.Engagement = (function () {
     return ["answers", rest[day % rest.length], rest[(day + 2) % rest.length]];
   }
 
-  const data = {
-    lastDay: null,      // ngày gần nhất có giải đúng
-    dayStreak: 0,
-    bestStreak: 0,
-    freezes: 0,         // phép nghỉ: giữ chuỗi khi lỡ 1 ngày
-    questDay: null,
-    quests: [],         // [{ id, progress, done }]
-    topRank: null       // cấp cao nhất đã thông báo
-  };
+  let data = createDefaultData();
 
-  try {
-    const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
-    if (Number.isInteger(saved.lastDay)) data.lastDay = saved.lastDay;
-    ["dayStreak", "bestStreak", "freezes"].forEach((k) => {
-      if (Number.isInteger(saved[k]) && saved[k] >= 0) data[k] = saved[k];
-    });
-    if (Number.isInteger(saved.topRank)) data.topRank = saved.topRank;
-    if (Number.isInteger(saved.questDay) && Array.isArray(saved.quests)) {
-      data.questDay = saved.questDay;
-      data.quests = saved.quests.filter((q) => q && QUEST_POOL[q.id]);
-    }
-  } catch (_) {}
-
-  function save() {
+  function loadFromStorage() {
+    data = createDefaultData();
+    const user = getAuthUser();
+    if (!user) return;
     try {
-      localStorage.setItem(KEY, JSON.stringify(data));
+      const saved = JSON.parse(localStorage.getItem(`${KEY}_${user}`) || "{}");
+      if (Number.isInteger(saved.lastDay)) data.lastDay = saved.lastDay;
+      ["dayStreak", "bestStreak", "freezes"].forEach((k) => {
+        if (Number.isInteger(saved[k]) && saved[k] >= 0) data[k] = saved[k];
+      });
+      if (Number.isInteger(saved.topRank)) data.topRank = saved.topRank;
+      if (Number.isInteger(saved.questDay) && Array.isArray(saved.quests)) {
+        data.questDay = saved.questDay;
+        data.quests = saved.quests.filter((q) => q && QUEST_POOL[q.id]);
+      }
     } catch (_) {}
   }
+
+  function save() {
+    const user = getAuthUser();
+    if (!user) return;
+    try {
+      localStorage.setItem(`${KEY}_${user}`, JSON.stringify(data));
+    } catch (_) {}
+  }
+
+  loadFromStorage();
 
   function ensureToday() {
     const today = toDayNumber(new Date());
@@ -200,7 +223,12 @@ window.Engagement = (function () {
     `;
   }
 
+  function reloadAuth() {
+    loadFromStorage();
+    ensureToday();
+  }
+
   ensureToday();
 
-  return { toDayNumber, track, getRankName, checkPromotion, getSummary, renderPanel };
+  return { toDayNumber, track, getRankName, checkPromotion, getSummary, renderPanel, reloadAuth };
 })();

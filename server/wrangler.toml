@@ -1,0 +1,14 @@
+name = "word-office-stealth"
+main = "worker.js"
+compatibility_date = "2026-11-01"
+
+# Tạo D1 database: wrangler d1 create word_office_stealth
+# Chạy schema: wrangler d1 execute word_office_stealth --file=./schema.sql
+[[d1_databases]]
+binding = "DB"
+database_name = "word_office_stealth"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+# Thiết lập secret trước khi deploy:
+#   wrangler secret put PUZZLE_SEED
+#   wrangler secret put RATE_SALT

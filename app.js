@@ -1,5 +1,6 @@
 (function () {
   const STORAGE_KEY = "word_office_stealth_v3";
+  const AUTH_KEY = "word_office_current_user";
   const DAILY_HINT_GRANT = 1;
   const INITIAL_HINT_QUOTA = 3;
   const DEADLINE_SECONDS = 90;
@@ -128,9 +129,103 @@
     rowHeaders: $("excel-row-headers")
   };
 
-  function loadProgress() {
+  function getAuthUser() {
     try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      const u = (localStorage.getItem(AUTH_KEY) || "").trim();
+      return u || null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function updateAuthUI() {
+    const user = getAuthUser();
+    const btnAuth = $("btn-auth");
+    const saveStateEl = $("save-state");
+    const btnLogout = $("btn-logout");
+    const inputUser = $("auth-username");
+    if (btnAuth) {
+      btnAuth.textContent = user ? `👤 ${user}` : "Đăng nhập";
+      btnAuth.classList.toggle("active", Boolean(user));
+    }
+    if (saveStateEl) {
+      saveStateEl.textContent = user ? `Đã lưu (${user})` : "Chế độ Khách (Chưa lưu)";
+    }
+    if (btnLogout) {
+      btnLogout.classList.toggle("hidden", !user);
+    }
+    if (inputUser) {
+      inputUser.value = user || "";
+    }
+  }
+
+  // Đồng bộ nhẹ hồ sơ với Worker (/api/profile) nếu người chơi đã có phiên BXH (bangchu_bxh_v1)
+  let profileVersion = 0;
+  let profileSyncTimer = null;
+
+  function getBxhToken() {
+    try {
+      const saved = JSON.parse(localStorage.getItem("bangchu_bxh_v1") || "null");
+      return saved && typeof saved.token === "string" ? saved.token : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  async function pullProfileFromServer() {
+    const token = getBxhToken();
+    if (!token || !getAuthUser()) return;
+    try {
+      const res = await fetch("/api/profile", { headers: { authorization: `Bearer ${token}` } });
+      if (!res.ok) return;
+      const remote = await res.json();
+      if (Number.isInteger(remote.version)) profileVersion = remote.version;
+    } catch (_) {}
+  }
+
+  function scheduleProfileSync(payload) {
+    const token = getBxhToken();
+    if (!token || !getAuthUser()) return;
+    clearTimeout(profileSyncTimer);
+    profileSyncTimer = setTimeout(async () => {
+      try {
+        const engage = window.Engagement?.getSummary?.() || {};
+        const res = await fetch("/api/profile", {
+          method: "PUT",
+          headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+          body: JSON.stringify({ state: payload, engage, expectedVersion: profileVersion })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (Number.isInteger(data.version)) profileVersion = data.version;
+        } else if (res.status === 409) {
+          await pullProfileFromServer();
+        }
+      } catch (_) {}
+    }, 1200);
+  }
+
+  function resetUserProgressState() {
+    state.score = 0;
+    state.streak = 0;
+    state.hintQuota = INITIAL_HINT_QUOTA;
+    state.hintDay = null;
+    state.maxComboEver = 0;
+    state.completedBatches = new Set();
+    state.unlockedAch = new Set();
+    state.levelIndex = 0;
+    state.progress = {};
+  }
+
+  function loadProgress() {
+    resetUserProgressState();
+    const user = getAuthUser();
+    if (!user) {
+      updateAuthUI();
+      return;
+    }
+    try {
+      const saved = JSON.parse(localStorage.getItem(`${STORAGE_KEY}_${user}`) || "{}");
       if (typeof saved.score === "number") state.score = saved.score;
       if (typeof saved.streak === "number") state.streak = saved.streak;
       if (typeof saved.hintQuota === "number") state.hintQuota = saved.hintQuota;
@@ -144,27 +239,29 @@
       if (Number.isInteger(saved.levelIndex) && saved.levelIndex >= 0) state.levelIndex = saved.levelIndex;
       if (saved.progress && typeof saved.progress === "object") state.progress = saved.progress;
     } catch (_) {}
+    updateAuthUI();
   }
 
   function saveProgress() {
+    const user = getAuthUser();
+    if (!user) return; // Chỉ lưu tiến độ khi đã đăng nhập
     try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({
-          score: state.score,
-          streak: state.streak,
-          hintQuota: state.hintQuota,
-          hintDay: state.hintDay,
-          maxComboEver: state.maxComboEver,
-          completedBatches: Array.from(state.completedBatches),
-          unlockedAch: Array.from(state.unlockedAch),
-          theme: state.theme,
-          lang: state.lang,
-          mode: state.mode,
-          levelIndex: state.levelIndex,
-          progress: state.progress
-        })
-      );
+      const payload = {
+        score: state.score,
+        streak: state.streak,
+        hintQuota: state.hintQuota,
+        hintDay: state.hintDay,
+        maxComboEver: state.maxComboEver,
+        completedBatches: Array.from(state.completedBatches),
+        unlockedAch: Array.from(state.unlockedAch),
+        theme: state.theme,
+        lang: state.lang,
+        mode: state.mode,
+        levelIndex: state.levelIndex,
+        progress: state.progress
+      };
+      localStorage.setItem(`${STORAGE_KEY}_${user}`, JSON.stringify(payload));
+      scheduleProfileSync(payload);
     } catch (_) {}
   }
 
@@ -424,8 +521,12 @@
   async function requestHintByAd() {
     if (window.RewardedAd.isOpen()) return;
     const rewarded = await window.RewardedAd.show();
-    if (!rewarded) return;
+    if (!rewarded) {
+      setStatus("Chưa hoàn tất xem quảng cáo để nhận gợi ý", "warn");
+      return;
+    }
     state.hintQuota += 1;
+    saveProgress();
     setStatus("Đã nhận +1 Gợi ý", "ok");
     updateStatsUI();
   }
@@ -726,6 +827,12 @@
   function loadLevel(index, fresh) {
     const levels = getLevels();
     state.levelIndex = (index + levels.length) % levels.length;
+    if (fresh && state.mode === "connect") {
+      const dataPack = state.lang === "en" ? window.EN_DATA : window.VI_DATA;
+      if (dataPack && typeof dataPack.reshuffleLevel === "function") {
+        dataPack.reshuffleLevel(levels[state.levelIndex].id);
+      }
+    }
     const lvl = getCurrentLevel();
 
     els.batchLabel.textContent = lvl.id;
@@ -837,7 +944,7 @@
       const col = idx % cols;
       const row = Math.floor(idx / cols);
       const stepX = 68;
-      const stepY = 68;
+      const stepY = total > 12 ? 55 : 68;
       return {
         x: Math.round(cx - ((cols - 1) * stepX) / 2 + col * stepX),
         y: Math.round(cy - ((rows - 1) * stepY) / 2 + row * stepY)
@@ -1260,6 +1367,43 @@
   }
 
   // ================= TABLES & STATS =================
+  function escapeHtml(str) {
+    return String(str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function normalizeForClueCheck(str) {
+    return (str || "")
+      .toLowerCase()
+      .replace(/đ/g, "d")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]/g, "");
+  }
+
+  function sanitizeClueMeaning(meaningText, wordKey, topic) {
+    const targetNorm = normalizeForClueCheck(wordKey);
+    if (!meaningText || !targetNorm) return topic ? `Chủ đề: ${topic}` : "";
+    const parts = meaningText.split(/(\s+|\/|,|;|\(|\))/);
+    const masked = parts
+      .map((part) => {
+        const norm = normalizeForClueCheck(part);
+        return norm && norm === targetNorm ? "___" : part;
+      })
+      .join("")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+    const remainingNorm = normalizeForClueCheck(masked);
+    if (!remainingNorm || remainingNorm.length < 3 || (targetNorm.length >= 4 && remainingNorm.includes(targetNorm))) {
+      return `Chủ đề: ${topic}`;
+    }
+    return masked;
+  }
+
   function renderTargetsTable() {
     const lvl = getCurrentLevel();
     els.targetsTbody.innerHTML = "";
@@ -1295,7 +1439,7 @@
           const meaningText = state.lang === "en" ? entry : entry.meaning;
           wordCellHtml = `<span class="solved-word">${displayWord}</span>`;
           statusHtml = `<span class="badge-status badge-ok">Verified</span>`;
-          meaningHtml = meaningText;
+          meaningHtml = escapeHtml(meaningText);
         } else {
           // Hiển thị các ô đã lộ từ gợi ý HOẶC từ giao điểm Crossword đã mở!
           const coords = placement?.coords || [];
@@ -1315,11 +1459,12 @@
             })
             .join(" ");
           wordCellHtml = `<span class="masked-word">${chars}</span>`;
-          // Ở mức Cơ bản cho gợi ý nghĩa nhẹ để làm quen; Trung bình/Nâng cao ẩn nghĩa tăng độ thử thách!
+          // Ở mức Cơ bản cho gợi ý nghĩa đã che từ trùng đáp án; Trung bình/Nâng cao ẩn nghĩa tăng độ thử thách!
           const meaningText = state.lang === "en" ? entry : entry.meaning;
+          const safeClue = escapeHtml(sanitizeClueMeaning(meaningText, wordKey, lvl.topic));
           meaningHtml =
             lvl.tier === "Cơ bản"
-              ? `<span class="masked-word">${dirLabel} · ${wordKey.length} chữ (${meaningText})</span>`
+              ? `<span class="masked-word">${dirLabel} · ${wordKey.length} chữ (${safeClue})</span>`
               : `<span class="masked-word">${dirLabel} · ${wordKey.length} ký tự</span>`;
         }
 
@@ -1644,6 +1789,71 @@
     $("btn-close-modal").addEventListener("click", () => {
       els.achModal.classList.add("hidden");
     });
+
+    const legalModal = $("legal-modal");
+    $("btn-open-legal")?.addEventListener("click", () => {
+      els.achModal.classList.add("hidden");
+      legalModal?.classList.remove("hidden");
+    });
+    $("btn-close-legal")?.addEventListener("click", () => {
+      legalModal?.classList.add("hidden");
+    });
+    $("btn-share-kpi")?.addEventListener("click", async () => {
+      const lvl = getCurrentLevel();
+      const dailyInfo = window.Engagement?.getSummary?.() || { streak: 0 };
+      const text = [
+        `📊 Bảng Chữ KPI · ${lvl.id} (${lvl.topic})`,
+        `✅ Tổng KPI: ${state.score} | Chuỗi ngày: ${dailyInfo.streak} | Max Combo: x${state.maxComboEver}`,
+        `🏆 Đã hoàn tất: ${state.completedBatches.size} phiên`
+      ].join("\n");
+      try {
+        await navigator.clipboard.writeText(text);
+        setStatus("Đã copy Báo Cáo KPI vào clipboard!", "ok");
+      } catch (_) {
+        setStatus("Không thể truy cập clipboard trên trình duyệt này", "warn");
+      }
+    });
+
+    const authModal = $("auth-modal");
+    const authForm = $("auth-form");
+    const authInput = $("auth-username");
+    const btnLogout = $("btn-logout");
+
+    $("btn-auth")?.addEventListener("click", () => {
+      updateAuthUI();
+      authModal?.classList.remove("hidden");
+      authInput?.focus();
+    });
+    $("btn-close-auth")?.addEventListener("click", () => {
+      authModal?.classList.add("hidden");
+    });
+    authForm?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const rawName = (authInput?.value || "").trim().replace(/[^a-zA-Z0-9_-]/g, "");
+      if (rawName.length < 2) {
+        setStatus("Tên tài khoản tối thiểu 2 ký tự (chữ/số)", "err");
+        return;
+      }
+      try {
+        localStorage.setItem(AUTH_KEY, rawName.toLowerCase());
+      } catch (_) {}
+      window.Engagement?.reloadAuth?.();
+      loadProgress();
+      applyTheme(state.theme);
+      loadLevel(state.levelIndex);
+      authModal?.classList.add("hidden");
+      setStatus(`Đã đăng nhập: ${rawName.toLowerCase()} · Tiến độ sẽ được lưu`, "ok");
+    });
+    btnLogout?.addEventListener("click", () => {
+      try {
+        localStorage.removeItem(AUTH_KEY);
+      } catch (_) {}
+      window.Engagement?.reloadAuth?.();
+      loadProgress();
+      loadLevel(0, true);
+      authModal?.classList.add("hidden");
+      setStatus("Đã chuyển sang chế độ Khách (không lưu tiến độ)", "warn");
+    });
     els.achModal.addEventListener("click", (e) => {
       if (e.target === els.achModal) els.achModal.classList.add("hidden");
     });
@@ -1677,21 +1887,33 @@
         }
         return;
       }
+      const authModalEl = $("auth-modal");
+      const legalModalEl = $("legal-modal");
+      const anyModalOpen =
+        !els.achModal.classList.contains("hidden") ||
+        (authModalEl && !authModalEl.classList.contains("hidden")) ||
+        (legalModalEl && !legalModalEl.classList.contains("hidden"));
+
       if (e.key === "Escape") {
         e.preventDefault();
         if (!els.achModal.classList.contains("hidden")) {
           els.achModal.classList.add("hidden");
+        } else if (authModalEl && !authModalEl.classList.contains("hidden")) {
+          authModalEl.classList.add("hidden");
+        } else if (legalModalEl && !legalModalEl.classList.contains("hidden")) {
+          legalModalEl.classList.add("hidden");
         } else {
           toggleBossMode();
         }
         return;
       }
 
-      if (state.bossMode || !els.achModal.classList.contains("hidden")) return;
+      if (state.bossMode || anyModalOpen) return;
 
       if (e.key === "F2") {
         e.preventDefault();
-        triggerHint();
+        if (state.hintQuota > 0) triggerHint();
+        else requestHintByAd();
         return;
       }
 

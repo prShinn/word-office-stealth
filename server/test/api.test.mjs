@@ -211,3 +211,52 @@ test("thiếu secret thì dừng, không lộ chi tiết lỗi", async () => {
   assert.equal(res.status, 500);
   assert.ok(!(await res.text()).includes("PUZZLE_SEED"));
 });
+
+test("đồng bộ hồ sơ /api/profile kiểm tra auth, version conflict và xóa cascade", async () => {
+  const { env, call, signUp } = setup();
+  assert.equal((await call("GET", "/api/profile")).status, 401);
+
+  const user = await signUp("profile user");
+  const init = await call("GET", "/api/profile", { token: user.token });
+  assert.equal(init.status, 200);
+  assert.equal(init.body.version, 0);
+
+  const v1 = await call("PUT", "/api/profile", {
+    token: user.token,
+    body: { state: { score: 120 }, engage: { dayStreak: 2 }, expectedVersion: 0 }
+  });
+  assert.equal(v1.status, 200);
+  assert.equal(v1.body.version, 1);
+
+  // Xung đột version cũ
+  const conflict = await call("PUT", "/api/profile", {
+    token: user.token,
+    body: { state: { score: 999 }, engage: { dayStreak: 2 }, expectedVersion: 0 }
+  });
+  assert.equal(conflict.status, 409);
+
+  // Cập nhật đúng version
+  const v2 = await call("PUT", "/api/profile", {
+    token: user.token,
+    body: { state: { score: 250 }, engage: { dayStreak: 3 }, expectedVersion: 1 }
+  });
+  assert.equal(v2.status, 200);
+  assert.equal(v2.body.version, 2);
+
+  // Kiểm tra validation expectedVersion & payload limit 16KB UTF-8
+  const badVer = await call("PUT", "/api/profile", {
+    token: user.token,
+    body: { state: {}, engage: {}, expectedVersion: -1 }
+  });
+  assert.equal(badVer.status, 400);
+  const bigStr = "ă".repeat(6000); // > 16KB UTF-8 dù < 16384 ký tự UTF-16
+  const tooBig = await call("PUT", "/api/profile", {
+    token: user.token,
+    body: { state: { note: bigStr }, engage: {}, expectedVersion: 2 }
+  });
+  assert.equal(tooBig.status, 413);
+
+  // Xóa tài khoản xóa luôn user_profiles
+  assert.equal((await call("DELETE", "/api/me", { token: user.token })).status, 200);
+  assert.equal((await env.DB.prepare("SELECT COUNT(*) AS n FROM user_profiles").first()).n, 0);
+});

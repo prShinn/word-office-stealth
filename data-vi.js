@@ -33,7 +33,7 @@ window.VI_DATA = (function () {
     ["canh", "canh / cánh / cảnh", "món canh / phong cảnh"],
     ["cao", "cao / cáo", "báo cáo / chiều cao"],
     ["cat", "cắt / cát", "chia cắt / bãi cát"],
-    ["cau", "cầu / câu", "cầu lông / câu chữ"],
+    ["cau", "cấu / câu / cầu", "cấu trúc dữ liệu / câu lệnh / cầu lông"],
     ["cay", "cây / cay", "cây xanh / vị cay"],
     ["cha", "cha / chả", "người cha / món chả"],
     ["chao", "chào / cháo", "chào hỏi / món cháo"],
@@ -43,7 +43,7 @@ window.VI_DATA = (function () {
     ["chi", "chi / chỉ / chị", "chi tiêu / chỉ dẫn"],
     ["cho", "cho / chờ / chợ", "chợ búa / chờ đợi"],
     ["choi", "chơi", "vui chơi"],
-    ["chong", "chồng / chống", "người chồng / phòng chống"],
+    ["chong", "chống / chồng", "phòng chống tấn công / người chồng"],
     ["chu", "chú / chữ / chủ", "chú bác / chữ viết / chủ trì"],
     ["chung", "chung / chứng", "dùng chung / chứng từ"],
     ["co", "có / cô / cỏ", "cô giáo / cỏ cây"],
@@ -72,7 +72,7 @@ window.VI_DATA = (function () {
     ["doi", "đổi / đời / đôi", "trao đổi"],
     ["don", "đơn / đón / dọn", "hóa đơn / đón xe"],
     ["dong", "đồng / đóng", "hợp đồng / đóng gói"],
-    ["du", "đủ / du", "du lịch / đầy đủ"],
+    ["du", "dữ / dự / đủ", "dữ liệu / dự án / đầy đủ"],
     ["dung", "dùng / đúng / dụng", "tuyển dụng / sử dụng"],
     ["duong", "đường", "con đường"],
     ["em", "em", "em út / em trai / em gái"],
@@ -91,7 +91,7 @@ window.VI_DATA = (function () {
     ["gui", "gửi", "gửi đi"],
     ["ha", "hà / hạ", "mùa hạ"],
     ["hai", "hai / hài", "số 2"],
-    ["ham", "hầm / hãm", "món hầm"],
+    ["ham", "hàm / hầm", "hàm xử lý (function) / món hầm"],
     ["han", "hạn / hàn", "thời hạn"],
     ["hang", "hàng / hãng", "hàng hóa"],
     ["hat", "hát / hạt", "ca hát / hạt giống"],
@@ -350,7 +350,7 @@ window.VI_DATA = (function () {
     ["cam", "cầm / cảm / cam", "cầm nắm / cảm ơn / quả cam"],
     ["cap", "cấp / cặp", "cấp bậc / cặp sách"],
     ["cham", "chậm / chăm", "chậm trễ / chăm chỉ"],
-    ["chan", "chân / chán / chắn", "bàn chân / chán nản"],
+    ["chan", "chặn / chắn / chân", "tường lửa chặn truy cập / bàn chân"],
     ["chat", "chất / chặt", "chất lượng / chặt chẽ"],
     ["cheo", "chèo / chéo", "chèo thuyền / gạch chéo"],
     ["chia", "chia / chìa", "chia sẻ / chìa khóa"],
@@ -712,7 +712,112 @@ window.VI_DATA = (function () {
     ["xuat", "xuất", "xuất báo cáo / năng suất"],
     ["xung", "xứng", "xứng đáng"],
     ["xuyen", "xuyên", "thường xuyên"],
-    ["y", "ý", "ý tưởng / lưu ý"]
+    ["y", "ý", "ý tưởng / lưu ý"],
+    // Bổ sung từ ghép IT & âm tiết Tiếng Việt phổ biến tránh báo sai từ điển
+    ["lac", "lạc / lắc", "thất lạc / lắc đều"],
+    ["cam", "cấm / cắm / cảm", "cấm truy cập / cắm cáp"],
+    ["coi", "còi / coi", "coi như / còi báo"],
+    ["con", "con / còn", "nhánh con / còn lại"],
+    ["man", "màn / mặn", "màn hình"],
+    ["min", "mịn / mìn", "mịn màng"],
+    ["muc", "mục / mức", "danh mục / mức độ"],
+    ["nut", "nút", "nút bấm giao diện"],
+    ["sai", "sai / sài", "sai cú pháp"],
+    ["set", "sét / sếp", "thiết lập"],
+    ["tha", "thả / tha", "kéo thả"],
+    ["tuc", "tức / tục", "liên tục / lập tức"],
+    ["va", "vá / và", "bản vá lỗi / và"],
+    ["vui", "vui", "vui vẻ"],
+    ["xam", "xám / xâm", "màu xám / xâm nhập"],
+    ["xanh", "xanh", "màu xanh"],
+    ["xau", "xấu / xâu", "xâu ký tự (string)"],
+    ["xu", "xu / xử", "xử lý / đồng xu"],
+    ["yen", "yên", "bình yên"],
+    ["yeu", "yêu / yếu", "yếu tố / điểm yếu"],
+    ["manguon", "mã nguồn", "mã lệnh gốc của phần mềm"],
+    ["hamso", "hàm số", "khối hàm xử lý đầu vào/ra"],
+    ["goloi", "gỡ lỗi", "tìm và sửa lỗi (debug)"],
+    ["giaima", "giải mã", "chuyển dữ liệu mã hóa về dạng đọc được"],
+    ["baomat", "bảo mật", "bảo vệ an toàn hệ thống"],
+    ["dulieu", "dữ liệu", "thông tin lưu trữ và xử lý"],
+    ["hethong", "hệ thống", "tổng thể hạ tầng phần mềm"],
+    ["chiso", "chỉ số", "chỉ mục / thông số đo (index)"],
+    ["mangluoi", "mạng lưới", "kết nối các nút mạng"],
+    // Từ ghép bổ sung cho 28 phiên thuần từ ghép
+    ["congno", "công nợ", "khoản phải thu/trả đối tác"],
+    ["chotdon", "chốt đơn", "xác nhận đơn hàng thành công"],
+    ["datmua", "đặt mua", "tạo đơn đặt hàng trực tuyến"],
+    ["giaohang", "giao hàng", "vận chuyển hàng đến tay khách"],
+    ["hoantien", "hoàn tiền", "trả lại tiền khi hủy/lỗi đơn"],
+    ["tradao", "trà đào", "thức uống giải nhiệt văn phòng"],
+    ["cacao", "ca cao", "đồ uống sô-cô-la nóng/đá"],
+    ["hoplop", "họp lớp", "buổi gặp mặt bạn học cũ"],
+    ["homnay", "hôm nay", "ngày hiện tại đang làm việc"],
+    ["ngaymai", "ngày mai", "ngày kế tiếp theo lịch"],
+    ["tuanqua", "tuần qua", "khoảng thời gian 7 ngày trước"],
+    ["ontap", "ôn tập", "hệ thống lại kiến thức đã học"],
+    ["thicu", "thi cử", "kỳ kiểm tra đánh giá năng lực"],
+    ["amnhac", "âm nhạc", "nghệ thuật giai điệu và âm thanh"],
+    ["cahat", "ca hát", "trình bày bài hát"],
+    ["vetranh", "vẽ tranh", "sáng tác hội họa"],
+    ["dienanh", "điện ảnh", "nghệ thuật phim và rạp chiếu"],
+    ["xemay", "xe máy", "phương tiện di chuyển hai bánh"],
+    ["taudien", "tàu điện", "phương tiện công cộng đường ray"],
+    ["duongbo", "đường bộ", "giao thông trên mặt đất"],
+    ["duongsat", "đường sắt", "tuyến đường ray tàu hỏa"],
+    ["xacthuc", "xác thực", "kiểm tra danh tính hợp lệ"],
+    ["tuonglua", "tường lửa", "hệ thống lọc và chặn truy cập mạng"],
+    ["suckhoe", "sức khỏe", "trạng thái thể chất và tinh thần"],
+    ["caidat", "cài đặt", "thiết lập phần mềm vào hệ thống"],
+    ["danhgia", "đánh giá", "xem xét chất lượng / năng lực"],
+    ["nhantin", "nhắn tin", "trao đổi văn bản nhanh"],
+    ["kiemtra", "kiểm tra", "rà soát tính đúng đắn"],
+    ["luutru", "lưu trữ", "ghi và giữ dữ liệu lâu dài"],
+    ["dangnhap", "đăng nhập", "xác thực vào hệ thống"],
+    ["dangky", "đăng ký", "tạo tài khoản mới"],
+    ["timkiem", "tìm kiếm", "tra cứu thông tin"],
+    ["xuly", "xử lý", "thực hiện thao tác trên dữ liệu"],
+    ["thuctap", "thực tập", "giai đoạn làm quen môi trường nghề"],
+    ["luongcao", "lương cao", "thu nhập hấp dẫn"],
+    ["khachhang", "khách hàng", "người sử dụng sản phẩm dịch vụ"],
+    ["vetau", "vé tàu", "chứng từ đi lại bằng tàu"],
+    ["dulich", "du lịch", "chuyến đi tham quan nghỉ ngơi"],
+    ["datve", "đặt vé", "giữ chỗ trước cho chuyến đi"],
+    ["thuephong", "thuê phòng", "đặt chỗ lưu trú ngắn hạn"],
+    ["nhadat", "nhà đất", "bất động sản ở và kinh doanh"],
+    ["maytinh", "máy tính", "thiết bị làm việc văn phòng"],
+    ["banphim", "bàn phím", "thiết bị gõ ký tự"],
+    ["manhinh", "màn hình", "thiết bị hiển thị giao diện"],
+    ["comtam", "cơm tấm", "món cơm trưa quen thuộc"],
+    ["baihoc", "bài học", "nội dung kiến thức cần nắm"],
+    ["muaxuan", "mùa xuân", "mùa khởi đầu năm mới"],
+    ["muaha", "mùa hạ", "mùa nắng nóng giữa năm"],
+    ["muathu", "mùa thu", "mùa lá rụng dịu mát"],
+    ["muadong", "mùa đông", "mùa lạnh cuối năm"],
+    ["xacnhan", "xác nhận", "duyệt thông tin chính xác"],
+    ["tuchoi", "từ chối", "không chấp nhận yêu cầu"],
+    ["giuong", "giường ngủ", "nội thất nghỉ ngơi"],
+    ["tivi", "ti vi", "thiết bị giải trí phòng khách"],
+    ["tulanh", "tủ lạnh", "thiết bị bảo quản thực phẩm"],
+    ["maygiat", "máy giặt", "thiết bị giặt giũ tự động"],
+    ["bepga", "bếp ga", "thiết bị nấu nướng"],
+    ["denban", "đèn bàn", "đèn chiếu sáng góc làm việc"],
+    ["tainghe", "tai nghe", "phụ kiện nghe âm thanh cá nhân"],
+    ["chuotmay", "chuột máy", "thiết bị điều khiển con trỏ"],
+    ["ocung", "ổ cứng", "thiết bị lưu trữ dữ liệu"],
+    ["baohanh", "bảo hành", "dịch vụ sửa chữa theo cam kết"],
+    ["baotri", "bảo trì", "duy trì hệ thống hoạt động ổn định"],
+    ["nangcap", "nâng cấp", "cải thiện phiên bản tốt hơn"],
+    ["luongthang", "lương tháng", "thu nhập định kỳ hằng tháng"],
+    ["thuongtet", "thưởng tết", "khoản thưởng dịp cuối năm"],
+    ["phucap", "phụ cấp", "khoản hỗ trợ thêm ngoài lương"],
+    ["banhbao", "bánh bao", "món ăn sáng nóng hổi"],
+    ["giamgia", "giảm giá", "ưu đãi giảm tiền mua sắm"],
+    ["tudo", "tủ đồ", "nội thất cất giữ quần áo"],
+    ["bama", "ba má", "đấng sinh thành trong gia đình"],
+    ["anhhai", "anh hai", "người anh cả trong nhà"],
+    ["maiam", "mái ấm", "gia đình sum vầy hạnh phúc"],
+    ["mayman", "may mắn", "điều tốt lành thuận lợi"]
   ];
 
   const DICT = {};
@@ -737,63 +842,47 @@ window.VI_DATA = (function () {
     return arr;
   }
 
-  // 20 Phiên Nối Chữ Tiếng Việt theo cấp độ Cơ bản -> Trung bình -> Nâng cao
-  // Bao gồm cả từ đơn và từ ghép viết liền theo đúng chủ đề Phiên
+  // 32 Phiên Nối Chữ Tiếng Việt thuần TỪ GHÉP (pool 9–14 từ/phiên, xáo trộn chọn 6–8 từ <= 16 chữ cái mỗi lần load)
   const RAW_CONNECT = [
-    { id: "VI-01", tier: "Cơ bản", topic: "Công việc Văn phòng", targets: ["ca", "goi", "ban", "cong", "giao", "gui", "xong"] },
-    { id: "VI-02", tier: "Cơ bản", topic: "Báo cáo & Sổ sách", targets: ["in", "so", "ghi", "bao", "cao", "ban", "sach"] },
-    { id: "VI-03", tier: "Cơ bản", topic: "Ẩm thực & Bữa ăn", targets: ["an", "ca", "mi", "bun", "com", "man", "banh", "canh", "chao", "banhmi"] },
-    { id: "VI-04", tier: "Cơ bản", topic: "Đồ uống Văn phòng", targets: ["ca", "da", "tra", "che", "pha", "phe", "sua", "caphe", "trasua"] },
-    { id: "VI-05", tier: "Cơ bản", topic: "Gia đình & Người thân", targets: ["ba", "co", "vo", "nha", "cha", "con", "anh", "bac", "chu", "ong", "chong"] },
-    { id: "VI-06", tier: "Cơ bản", topic: "Tài chính & Tiền bạc", targets: ["no", "thu", "gui", "tien", "thue", "luong", "thuong"] },
+    { id: "VI-01", tier: "Cơ bản", topic: "Công việc Văn phòng", targets: ["baocao", "banhang", "congno", "donhang", "hoadon", "phancong", "bangiao", "hopdong", "kehoach", "ghichu", "congviec", "hophanh"] },
+    { id: "VI-02", tier: "Cơ bản", topic: "Báo cáo & Sổ sách", targets: ["baocao", "hoso", "bienban", "ghichu", "ngansach", "congno", "bangiao", "kiemtoan", "chungtu", "tongket"] },
+    { id: "VI-03", tier: "Cơ bản", topic: "Ẩm thực & Bữa ăn", targets: ["banhmi", "comtam", "anvat", "datmon", "comtrua", "banhbao", "bundau", "nuocep", "trasua", "caphe"] },
+    { id: "VI-04", tier: "Cơ bản", topic: "Đồ uống Văn phòng", targets: ["caphe", "trasua", "tradao", "cacao", "nuocep", "anvat", "datmon", "banhmi", "banhbao", "comtrua"] },
+    { id: "VI-05", tier: "Cơ bản", topic: "Gia đình & Cuộc sống", targets: ["giadinh", "binhan", "sumvay", "bama", "maiam", "mayman", "amap", "hanhphuc", "yeuthuong", "chame"] },
+    { id: "VI-06", tier: "Cơ bản", topic: "Tài chính & Hóa đơn", targets: ["tienmat", "thunhap", "chiphi", "hoadon", "cophan", "doitac", "ngansach", "thanhtoan", "quyettoan", "chuyenkhoan"] },
 
-    { id: "VI-07", tier: "Trung bình", topic: "Kinh doanh & Mua bán", targets: ["gia", "loi", "lai", "gui", "mua", "ban", "mon", "hang", "giao", "muaban"] },
-    { id: "VI-08", tier: "Trung bình", topic: "Tin học & Máy tính", targets: ["in", "may", "tai", "tim", "xoa", "tinh", "phim", "nhap", "maytinh", "banphim"] },
-    { id: "VI-09", tier: "Trung bình", topic: "Thiên nhiên & Thời tiết", targets: ["ao", "ho", "da", "la", "hoa", "dat", "may", "cay", "mua"] },
-    { id: "VI-10", tier: "Trung bình", topic: "Đường phố & Xe cộ", targets: ["xe", "di", "ga", "den", "don", "ngo", "lai", "tau", "duong"] },
-    { id: "VI-11", tier: "Trung bình", topic: "Sức khỏe & Nghỉ ngơi", targets: ["an", "om", "met", "ngu", "nghi", "khoe", "khoi", "kham", "uong"] },
-    { id: "VI-12", tier: "Trung bình", topic: "Họp hành & Giao tiếp", targets: ["hop", "hoi", "noi", "goi", "gop", "tin", "hen", "doi", "chao", "nghe"] },
-    { id: "VI-13", tier: "Trung bình", topic: "Thời gian & Lịch trình", targets: ["gio", "nay", "mai", "nam", "hom", "som", "ngay", "tuan", "muon", "phut", "thang"] },
+    { id: "VI-07", tier: "Trung bình", topic: "Kinh doanh & Mua bán", targets: ["muaban", "banhang", "donhang", "chotdon", "hoadon", "datmua", "congno", "giamgia", "khachhang", "doitac"] },
+    { id: "VI-08", tier: "Trung bình", topic: "Tin học & Thiết bị", targets: ["maytinh", "banphim", "manhinh", "timkiem", "phanmem", "nhatky", "chuotmay", "ocung", "tainghe", "caidat"] },
+    { id: "VI-09", tier: "Trung bình", topic: "Thiên nhiên & Bốn mùa", targets: ["muaxuan", "muaha", "muathu", "muadong", "datmua", "hatang", "phongcanh", "baibien", "dulich", "nghiduong"] },
+    { id: "VI-10", tier: "Trung bình", topic: "Đường phố & Giao thông", targets: ["xemay", "duongbo", "duongsat", "taudien", "tiendo", "tudong", "maybay", "vetau", "datve", "giaothong"] },
+    { id: "VI-11", tier: "Trung bình", topic: "Sức khỏe & Nghỉ ngơi", targets: ["suckhoe", "giacngu", "thugian", "theduc", "tudong", "chiso", "dinhduong", "chaybo", "boiloi", "caulong"] },
+    { id: "VI-12", tier: "Trung bình", topic: "Họp hành & Giao tiếp", targets: ["hoplop", "hophanh", "traodoi", "phanhoi", "phoihop", "thoihan", "nhantin", "xacnhan", "tuchoi", "thongbao"] },
+    { id: "VI-13", tier: "Trung bình", topic: "Thời gian & Lịch trình", targets: ["homnay", "ngaymai", "thoihan", "tuanqua", "muaha", "muathu", "tiendo", "lichtrinh", "kehoach", "tongket"] },
+    { id: "VI-14", tier: "Trung bình", topic: "Kế hoạch & Tiến độ", targets: ["kehoach", "tiendo", "thoihan", "danhgia", "tongket", "bangiao", "phancong", "giamsat", "trienkhai", "muctieu"] },
 
-    { id: "VI-14", tier: "Nâng cao", topic: "Pháp lý & Quy định", targets: ["ky", "ly", "tu", "hop", "phe", "quy", "luat"] },
-    { id: "VI-15", tier: "Nâng cao", topic: "Nhân sự & Đào tạo", targets: ["ca", "hoc", "dao", "tao", "dung", "nghi", "luong", "thuong"] },
-    { id: "VI-16", tier: "Nâng cao", topic: "Du lịch & Nghỉ dưỡng", targets: ["du", "di", "ve", "dao", "tau", "lich", "choi", "tham", "dulich"] },
-    { id: "VI-17", tier: "Nâng cao", topic: "Học tập & Trường lớp", targets: ["on", "vo", "hoc", "doc", "ten", "thi", "sinh", "sach", "viet", "hocsinh"] },
-    { id: "VI-18", tier: "Nâng cao", topic: "Nghệ thuật & Âm nhạc", targets: ["ca", "ve", "hat", "dan", "mau", "mua", "anh", "tho", "net", "nhac", "tranh"] },
-    { id: "VI-19", tier: "Nâng cao", topic: "Thể thao & Vận động", targets: ["da", "cau", "cup", "san", "tap", "chay", "nhay", "thua", "thang"] },
-    { id: "VI-20", tier: "Nâng cao", topic: "Hệ thống & Bảo mật", targets: ["an", "ma", "bao", "kin", "mat", "gui", "khoa", "khau", "mang", "toan", "matkhau"] },
-    { id: "VI-21", tier: "Trung bình", topic: "Khởi nghiệp & Gọi vốn", targets: ["von", "lai", "hoa", "khoi", "doanh", "thu", "chi", "loi"] },
-    { id: "VI-22", tier: "Trung bình", topic: "Thương mại Điện tử", targets: ["don", "hang", "gio", "dat", "giao", "mua", "ban", "giam", "gia"] },
-    { id: "VI-23", tier: "Nâng cao", topic: "Marketing & Truyền thông", targets: ["tin", "kenh", "bai", "anh", "chi", "ban", "bao", "cao", "che"] },
-    { id: "VI-24", tier: "Trung bình", topic: "Bất động sản & Nội thất", targets: ["nha", "dat", "ban", "ghe", "bep", "phong", "thue", "coc"] },
-    { id: "VI-25", tier: "Nâng cao", topic: "AI & Dữ liệu Số", targets: ["ai", "ma", "so", "hoc", "du", "lieu", "hoa", "chia", "cho", "di", "do"] },
-    { id: "VI-26", tier: "Nâng cao", topic: "[IT] Lập trình & Thuật toán", targets: ["ma", "cau", "gui", "ham", "loc", "loi", "noi", "mang", "tinh", "chinh", "chi"] },
-    { id: "VI-27", tier: "Nâng cao", topic: "[IT] Hạ tầng Mạng & Bảo mật", targets: ["an", "ma", "bao", "mat", "mang", "khoa", "khau", "cong", "chan", "chong", "thong", "toan"] },
-    { id: "VI-28", tier: "Nâng cao", topic: "[IT] Vận hành Sản phẩm Số", targets: ["so", "du", "lieu", "loi", "tinh", "chi", "tiet", "tin", "lien", "noi", "doi", "len"] }
+    { id: "VI-15", tier: "Nâng cao", topic: "Pháp lý & Quy định", targets: ["quydinh", "quytrinh", "kyket", "hoso", "tiendo", "hoiquy", "pheduyet", "hopdong", "thutuc", "bienban"] },
+    { id: "VI-16", tier: "Nâng cao", topic: "Nhân sự & Đào tạo", targets: ["nhansu", "daotao", "thuctap", "danhgia", "phancong", "hopdong", "tuyendung", "thuviec", "khenthuong", "phucloi"] },
+    { id: "VI-17", tier: "Nâng cao", topic: "Lương thưởng & Phúc lợi", targets: ["luongcao", "phucap", "nghiphep", "phucloi", "cophan", "thunhap", "luongthang", "thuongtet", "khenthuong", "nhansu"] },
+    { id: "VI-18", tier: "Nâng cao", topic: "Du lịch & Nghỉ dưỡng", targets: ["dulich", "datve", "vetau", "maybay", "muaha", "caidat", "khachsan", "hanhly", "baibien", "datphong"] },
+    { id: "VI-19", tier: "Nâng cao", topic: "Học tập & Trường lớp", targets: ["hocsinh", "baihoc", "ontap", "thicu", "thoihan", "tichhop", "daotao", "danhgia", "hoplop", "ghichu"] },
+    { id: "VI-20", tier: "Nâng cao", topic: "Nghệ thuật & Giải trí", targets: ["amnhac", "cahat", "vetranh", "dienanh", "datve", "nhadat", "thugian", "hanhphuc", "sumvay", "tivi"] },
+    { id: "VI-21", tier: "Nâng cao", topic: "Thể thao & Vận động", targets: ["bongda", "caulong", "boiloi", "chaybo", "dulich", "baihoc", "theduc", "suckhoe", "thugian", "dinhduong"] },
+
+    { id: "VI-22", tier: "Trung bình", topic: "Khởi nghiệp & Gọi vốn", targets: ["goivon", "hoavon", "dautu", "doanhthu", "loinhuan", "thoihan", "khoinghiep", "tangtruong", "cophan", "ngansach"] },
+    { id: "VI-23", tier: "Trung bình", topic: "Thương mại Điện tử", targets: ["donhang", "datmua", "giaohang", "giamgia", "hoantien", "danhgia", "chotdon", "khuyenmai", "muaban", "banhang"] },
+    { id: "VI-24", tier: "Nâng cao", topic: "Marketing & Truyền thông", targets: ["quangcao", "tiepthi", "thitruong", "tuongtac", "capnhat", "noithat", "thuonghieu", "khuyenmai", "chuyendoi", "canhtranh"] },
+    { id: "VI-25", tier: "Trung bình", topic: "Bất động sản & Nhà ở", targets: ["nhadat", "canho", "datcoc", "chothue", "cacao", "theduc", "matbang", "vitri", "hatang", "sodo"] },
+    { id: "VI-26", tier: "Trung bình", topic: "Nội thất & Tiện nghi", targets: ["noithat", "tulanh", "bepga", "denban", "tudo", "canho", "maygiat", "giuong", "tivi", "matbang"] },
+
+    { id: "VI-27", tier: "Nâng cao", topic: "AI & Tự động hóa", targets: ["tritue", "nhantao", "tudong", "toiuu", "dautu", "danhgia", "thuattoan", "mohinh", "tichhop", "phantich"] },
+    { id: "VI-28", tier: "Nâng cao", topic: "[IT] Mã nguồn & Hàm xử lý", targets: ["manguon", "hamso", "goloi", "giaima", "mahoa", "mangluoi", "kientruc", "trunggian", "dongbo", "phanhoi"] },
+    { id: "VI-29", tier: "Nâng cao", topic: "[IT] Mạng lưới & An toàn", targets: ["mangluoi", "baomat", "matkhau", "tuonglua", "mahoa", "hatang", "xacthuc", "phanquyen", "lohong", "tancong"] },
+    { id: "VI-30", tier: "Nâng cao", topic: "[IT] Hệ thống & Sao lưu", targets: ["baomat", "matkhau", "hethong", "saoluu", "hatang", "mahoa", "khoiphuc", "duphong", "nhatky", "giamsat"] },
+    { id: "VI-31", tier: "Nâng cao", topic: "[IT] Dữ liệu & Kiểm thử", targets: ["dulieu", "chiso", "xuly", "luutru", "thicu", "toiuu", "truyvan", "kiemthu", "bodem", "tacnghen"] },
+    { id: "VI-32", tier: "Nâng cao", topic: "[IT] Bảo trì & Nâng cấp", targets: ["baohanh", "baotri", "nangcap", "capnhat", "caidat", "xacnhan", "goloi", "hoiquy", "trienkhai", "bangiao"] }
   ];
 
-  const CONNECT_LEVELS = RAW_CONNECT.map((lvl) => {
-    const validTargets = lvl.targets
-      .filter((w) => DICT[w])
-      .sort((a, b) => a.length - b.length || a.localeCompare(b));
-    const baseLetters = buildUnionLetters(validTargets);
-    if (lvl.tier === "Nâng cao") {
-      const fillers = ["K", "P", "S", "B", "R", "V"];
-      for (const f of fillers) {
-        if (baseLetters.length >= 11) break;
-        if (!baseLetters.includes(f)) baseLetters.push(f);
-      }
-    }
-    return {
-      id: lvl.id,
-      tier: lvl.tier,
-      topic: lvl.topic,
-      letters: baseLetters,
-      targets: validTargets
-    };
-  });
-
-  // 12 Phiên Ghép Từ Tiếng Việt (8–10 cặp/phiên + mảnh bẫy nhiễu để tăng độ thử thách)
+  // 20 Phiên Ghép Từ Tiếng Việt (8–10 cặp/phiên + mảnh bẫy nhiễu để tăng độ thử thách)
   const MERGE_LEVELS = [
     {
       id: "VI-M01",
@@ -1129,5 +1218,73 @@ window.VI_DATA = (function () {
     }
   ];
 
-  return { DICT, CONNECT_LEVELS, MERGE_LEVELS, stripTones };
+  // Đồng bộ toàn bộ từ ghép từ MERGE_LEVELS vào DICT để hỗ trợ cả Nối chữ & từ thưởng
+  MERGE_LEVELS.forEach((lvl) => {
+    lvl.pairs.forEach(([, , combined, meaning]) => {
+      const k = stripTones(combined);
+      if (k && !DICT[k]) {
+        DICT[k] = { word: combined, meaning };
+      }
+    });
+  });
+
+  function shuffleArray(arr) {
+    const copy = arr.slice();
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function buildConnectLevel(lvl) {
+    const pool = lvl.targets.filter((w) => DICT[w]);
+    let best = [];
+    for (let attempt = 0; attempt < 6; attempt++) {
+      const shuffled = shuffleArray(pool);
+      const picked = [];
+      for (const w of shuffled) {
+        if (picked.length >= 7) break;
+        const candidate = [...picked, w];
+        if (buildUnionLetters(candidate).length <= 16) {
+          picked.push(w);
+        }
+      }
+      if (picked.length > best.length) best = picked;
+      if (best.length >= 6) break;
+    }
+    // Fallback an toàn nếu random chưa đủ 5 từ
+    if (best.length < 5) {
+      for (const w of pool) {
+        if (!best.includes(w) && buildUnionLetters([...best, w]).length <= 16) {
+          best.push(w);
+        }
+        if (best.length >= 6) break;
+      }
+    }
+    const validTargets = best.sort((a, b) => a.length - b.length || a.localeCompare(b));
+    const baseLetters = buildUnionLetters(validTargets);
+    if (lvl.tier === "Nâng cao" && baseLetters.length < 16) {
+      const filler = ["K", "P", "S", "B", "R", "V"].find((c) => !baseLetters.includes(c));
+      if (filler) baseLetters.push(filler);
+    }
+    return {
+      id: lvl.id,
+      tier: lvl.tier,
+      topic: lvl.topic,
+      letters: baseLetters,
+      targets: validTargets
+    };
+  }
+
+  const CONNECT_LEVELS = RAW_CONNECT.map(buildConnectLevel);
+
+  function reshuffleLevel(id) {
+    const rawIdx = RAW_CONNECT.findIndex((l) => l.id === id);
+    if (rawIdx === -1) return null;
+    CONNECT_LEVELS[rawIdx] = buildConnectLevel(RAW_CONNECT[rawIdx]);
+    return CONNECT_LEVELS[rawIdx];
+  }
+
+  return { DICT, CONNECT_LEVELS, MERGE_LEVELS, stripTones, reshuffleLevel };
 })();

@@ -590,9 +590,26 @@ window.EN_DATA = (function () {
     { id: "EN-30", tier: "Nâng cao", topic: "[IT] Clean Code & Debug", targets: ["bug", "code", "set", "run", "agent", "debug", "guard", "route", "stage", "store", "trace"] }
   ];
 
-  const CONNECT_LEVELS = RAW_CONNECT.map((lvl) => {
-    const validTargets = lvl.targets
-      .filter((w) => DICT[w])
+  function shuffleArray(arr) {
+    const copy = arr.slice();
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function buildConnectLevel(lvl) {
+    const pool = shuffleArray(lvl.targets.filter((w) => DICT[w]));
+    const picked = [];
+    for (const w of pool) {
+      if (picked.length >= 10) break;
+      if (buildUnionLetters([...picked, w]).length <= 12) {
+        picked.push(w);
+      }
+    }
+    const validTargets = (picked.length >= 5 ? picked : lvl.targets.filter((w) => DICT[w]))
+      .slice()
       .sort((a, b) => a.length - b.length || a.localeCompare(b));
     // Mức Nâng cao lấp đầy lên tối thiểu 11 chữ cái (tối đa 12) để tăng độ thử thách, tránh đoán mò
     const baseLetters = buildUnionLetters(validTargets);
@@ -607,10 +624,19 @@ window.EN_DATA = (function () {
       id: lvl.id,
       tier: lvl.tier,
       topic: lvl.topic,
-      letters: baseLetters,
+      letters: shuffleArray(baseLetters),
       targets: validTargets
     };
-  });
+  }
+
+  const CONNECT_LEVELS = RAW_CONNECT.map(buildConnectLevel);
+
+  function reshuffleLevel(id) {
+    const rawIdx = RAW_CONNECT.findIndex((l) => l.id === id);
+    if (rawIdx === -1) return null;
+    CONNECT_LEVELS[rawIdx] = buildConnectLevel(RAW_CONNECT[rawIdx]);
+    return CONNECT_LEVELS[rawIdx];
+  }
 
   // 12 Phiên Ghép Mảnh Từ Tiếng Anh (8–10 cặp/phiên + mảnh bẫy nhiễu để tránh ghép mò)
   const MERGE_LEVELS = [
@@ -948,5 +974,5 @@ window.EN_DATA = (function () {
     }
   ];
 
-  return { DICT, CONNECT_LEVELS, MERGE_LEVELS };
+  return { DICT, CONNECT_LEVELS, MERGE_LEVELS, reshuffleLevel };
 })();
