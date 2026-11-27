@@ -1,7 +1,7 @@
 (function () {
   const STORAGE_KEY = "word_office_stealth_v3";
   const AUTH_KEY = "word_office_current_user";
-  const APP_VERSION = "20261127-01";
+  const APP_VERSION = "20261127-02";
   const DAILY_HINT_GRANT = 0;
 
   function trackEvent(name, params) {
@@ -1272,7 +1272,25 @@
     }
 
     const dict = state.lang === "en" ? window.EN_DATA.DICT : window.VI_DATA.DICT;
-    const entry = dict[wordKey];
+    let entry = dict[wordKey];
+
+    // Với Tiếng Việt: nếu chưa có sẵn trong DICT nhưng tách được thành 2 âm tiết chuẩn (VD: hoa + hong -> hoa hồng)
+    // thì chấp nhận thành Extra Ref mở rộng (không phạt sai từ điển oan!)
+    if (!entry && state.lang === "vi" && wordKey.length >= 4) {
+      for (let split = 2; split <= wordKey.length - 2; split++) {
+        const left = wordKey.slice(0, split);
+        const right = wordKey.slice(split);
+        const leftOk = dict[left] && !dict[left].word.split("/")[0].trim().includes(" ");
+        const rightOk = dict[right] && !dict[right].word.split("/")[0].trim().includes(" ");
+        if (leftOk && rightOk) {
+          const leftLabel = dict[left].word.split("/")[0].trim();
+          const rightLabel = dict[right].word.split("/")[0].trim();
+          entry = { word: `${leftLabel} ${rightLabel}`, meaning: "từ ghép mở rộng Tiếng Việt" };
+          dict[wordKey] = entry;
+          break;
+        }
+      }
+    }
 
     if (!entry) {
       registerMistake(`"${wordKey.toUpperCase()}" sai từ điển`);

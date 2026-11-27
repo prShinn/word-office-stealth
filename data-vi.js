@@ -817,7 +817,32 @@ window.VI_DATA = (function () {
     ["bama", "ba má", "đấng sinh thành trong gia đình"],
     ["anhhai", "anh hai", "người anh cả trong nhà"],
     ["maiam", "mái ấm", "gia đình sum vầy hạnh phúc"],
-    ["mayman", "may mắn", "điều tốt lành thuận lợi"]
+    ["mayman", "may mắn", "điều tốt lành thuận lợi"],
+    ["hong", "hồng / hóng", "màu hồng / hoa hồng"],
+    ["hoahong", "hoa hồng", "loài hoa hoặc tiền thưởng doanh số"],
+    ["dongho", "đồng hồ", "thiết bị xem giờ"],
+    ["phonghop", "phòng họp", "không gian trao đổi công việc"],
+    ["congan", "công an", "lực lượng bảo vệ an ninh"],
+    ["chucnang", "chức năng", "tính năng hoạt động"],
+    ["hoanthanh", "hoàn thành", "làm xong nhiệm vụ"],
+    ["hoanhao", "hoàn hảo", "đạt mức xuất sắc trọn vẹn"],
+    ["conghoa", "cộng hòa", "thể chế nhà nước"],
+    ["hoptac", "hợp tác", "cùng phối hợp thực hiện"],
+    ["phattrien", "phát triển", "mở rộng và đi lên"],
+    ["quocgia", "quốc gia", "đất nước"],
+    ["vanhoa", "văn hóa", "giá trị tinh thần và ứng xử"],
+    ["khoahoc", "khoa học", "tri thức nghiên cứu tự nhiên xã hội"],
+    ["congnghe", "công nghệ", "kỹ thuật và ứng dụng hiện đại"],
+    ["kythuat", "kỹ thuật", "tay nghề và phương pháp chuyên môn"],
+    ["kinhte", "kinh tế", "hoạt động sản xuất thương mại"],
+    ["xahoi", "xã hội", "cộng đồng dân cư"],
+    ["banbe", "bạn bè", "những người thân thiết quen biết"],
+    ["doanhnghiep", "doanh nghiệp", "tổ chức kinh doanh"],
+    ["chuyengia", "chuyên gia", "người am hiểu sâu lĩnh vực"],
+    ["giangvien", "giảng viên", "người giảng dạy đại học"],
+    ["nhahang", "nhà hàng", "nơi phục vụ ăn uống"],
+    ["benhvien", "bệnh viện", "cơ sở khám chữa bệnh"],
+    ["truonghoc", "trường học", "nơi học tập rèn luyện"]
   ];
 
   const DICT = {};
