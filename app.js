@@ -1818,9 +1818,47 @@
     els.kpiOverviewCards.innerHTML = `
       <div class="kpi-card"><div class="kpi-card-label">Tổng KPI</div><div class="kpi-card-val">${state.score}</div></div>
       <div class="kpi-card"><div class="kpi-card-label">Cấp bậc</div><div class="kpi-card-val">${window.Engagement.getRankName(state.score)}</div></div>
-      <div class="kpi-card"><div class="kpi-card-label">Batch xong</div><div class="kpi-card-val">${state.completedBatches.size}</div></div>
+      <div class="kpi-card"><div class="kpi-card-label">Phiên xong</div><div class="kpi-card-val">${state.completedBatches.size}</div></div>
       <div class="kpi-card"><div class="kpi-card-label">Max Combo</div><div class="kpi-card-val">x${state.maxComboEver}</div></div>
     `;
+
+    const breakdownEl = $("kpi-mode-breakdown");
+    if (breakdownEl) {
+      const enConn = window.EN_DATA?.CONNECT_LEVELS || [];
+      const viConn = window.VI_DATA?.CONNECT_LEVELS || [];
+      const enMerge = window.EN_DATA?.MERGE_LEVELS || [];
+      const viMerge = window.VI_DATA?.MERGE_LEVELS || [];
+      const enGrp = window.CONN_DATA?.EN_LEVELS || [];
+      const viGrp = window.CONN_DATA?.VI_LEVELS || [];
+
+      const countDone = (list) => list.filter((l) => state.completedBatches.has(l.id)).length;
+      const rows = [
+        { label: "Nối chữ (EN + VI)", done: countDone(enConn) + countDone(viConn), total: enConn.length + viConn.length },
+        { label: "Ghép từ (EN + VI)", done: countDone(enMerge) + countDone(viMerge), total: enMerge.length + viMerge.length },
+        { label: "Phân nhóm 4x4 (EN + VI)", done: countDone(enGrp) + countDone(viGrp), total: enGrp.length + viGrp.length }
+      ];
+      const viCol = (state.collectedWords?.vi || []).length;
+      const enCol = (state.collectedWords?.en || []).length;
+
+      breakdownEl.innerHTML = `
+        <h4 class="modal-subtitle">Tiến độ theo học phần &amp; Kho từ sưu tầm</h4>
+        ${rows
+          .map((r) => {
+            const pct = r.total ? Math.round((r.done / r.total) * 100) : 0;
+            return `
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin:4px 0 2px;">
+                <span>${r.label}</span>
+                <strong>${r.done}/${r.total} (${pct}%)</strong>
+              </div>
+              <div class="excel-databar-track"><div class="excel-databar-fill" style="width:${pct}%"></div></div>
+            `;
+          })
+          .join("")}
+        <div style="font-size:12px;color:var(--text-muted);margin-top:6px;">
+          Từ sưu tầm (Extra Refs): <strong>VI: ${viCol} từ</strong> · <strong>EN: ${enCol} từ</strong> (đủ 6 từ/ngôn ngữ mở Phiên Sưu Tầm mới)
+        </div>
+      `;
+    }
     els.engagePanel.innerHTML = window.Engagement.renderPanel(state.score);
     els.achGrid.innerHTML = ACHIEVEMENTS.map((a) => {
       const ok = state.unlockedAch.has(a.id);

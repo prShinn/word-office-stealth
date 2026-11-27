@@ -294,6 +294,7 @@
       </div>
       <div class="modal-body">
         <div class="kpi-overview-cards" id="kpi-overview-cards"></div>
+        <div id="kpi-mode-breakdown" style="margin: 8px 0 12px;"></div>
         <div style="display: flex; gap: 8px; margin: 8px 0 12px; flex-wrap: wrap;">
           <button class="game-btn" id="btn-share-kpi" type="button">📋 Copy Báo Cáo KPI</button>
           <button class="game-btn" id="btn-open-legal" type="button">📜 Chính sách &amp; Ủng hộ</button>
@@ -335,12 +336,22 @@
         <button class="modal-close" id="btn-close-legal">✕</button>
       </div>
       <div class="modal-body" style="font-size: 13px; line-height: 1.55;">
-        <h4 class="modal-subtitle" style="margin-top: 0;">1. Quyền riêng tư &amp; Cookie quảng cáo</h4>
-        <p style="margin: 0 0 8px;">Chế độ Khách không lưu dữ liệu cá nhân. Khi đăng nhập, tiến độ ôn luyện và điểm KPI được lưu theo tài khoản để phục hồi trạng thái học tập. Trang web có thể sử dụng cookie của bên thứ ba (như Google AdSense) để hiển thị quảng cáo phù hợp.</p>
-        <h4 class="modal-subtitle">2. Điều khoản sử dụng</h4>
-        <p style="margin: 0 0 8px;">Bảng Chữ là công cụ ôn luyện từ vựng Tiếng Việt, Tiếng Anh và thuật ngữ IT phục vụ mục đích học tập, tra cứu và rèn luyện tư duy ngôn ngữ. Điểm KPI và lượt gợi ý chỉ phục vụ theo dõi tiến độ cá nhân, không có giá trị quy đổi tiền mặt hoặc hiện vật.</p>
-        <h4 class="modal-subtitle">3. Duy trì miễn phí</h4>
-        <p style="margin: 0;">Toàn bộ kho từ vựng được cung cấp miễn phí. Người dùng có thể chia sẻ Báo Cáo KPI hoặc chủ động chọn xem quảng cáo ngắn khi cần nhận thêm lượt gợi ý.</p>
+        <h4 class="modal-subtitle" style="margin-top: 0;">1. Mục đích &amp; Tính minh bạch</h4>
+        <p style="margin: 0 0 8px;">Bảng Chữ là công cụ ôn luyện từ vựng Tiếng Việt, Tiếng Anh và Thuật ngữ IT miễn phí. Điểm KPI, cấp bậc và lượt gợi ý chỉ dùng để theo dõi tiến độ học tập cá nhân, <strong>không có giá trị quy đổi tiền mặt hay hiện vật</strong>.</p>
+        <h4 class="modal-subtitle">2. Quyền riêng tư &amp; Lưu trữ</h4>
+        <p style="margin: 0 0 8px;">Chế độ Khách không lưu dữ liệu. Khi đăng nhập bằng tên tài khoản, tiến độ được lưu cục bộ trên trình duyệt của bạn (giới hạn 128KB/tài khoản, tự động xóa sau 30 ngày không hoạt động). Hệ thống không thu thập SĐT, email hay CCCD. Trang web sử dụng Google Analytics để thống kê lượt truy cập và có thể sử dụng cookie bên thứ ba (như Google AdSense) để hiển thị quảng cáo.</p>
+        <h4 class="modal-subtitle">3. Ủng hộ tự nguyện (Không bắt buộc)</h4>
+        <div style="display: flex; gap: 14px; align-items: center; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 6px; padding: 10px; flex-wrap: wrap;">
+          <img src="qr-donate-placeholder.svg" alt="Mã QR ủng hộ mẫu" width="132" height="150" style="border-radius: 6px; flex-shrink: 0; background: #fff;" />
+          <div style="flex: 1; min-width: 200px;">
+            <p style="margin: 0 0 6px;">Mọi tính năng và kho từ vựng đều <strong>miễn phí 100%</strong>. Khoản ủng hộ là hoàn toàn tự nguyện nhằm hỗ trợ chi phí duy trì tên miền và phát triển nội dung mới (không phải giao dịch mua bán hay đổi thưởng).</p>
+            <div style="font-size: 12px; color: var(--text-muted);">
+              <div>• Ngân hàng: <em>(Đang cập nhật)</em></div>
+              <div>• Chủ tài khoản: <em>(Đang cập nhật)</em></div>
+              <div>• Trạng thái: <strong>QR mẫu minh họa — chưa nhận chuyển khoản</strong></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

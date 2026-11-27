@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 250" width="220" height="250">
+  <rect width="220" height="250" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <rect x="0" y="0" width="220" height="32" rx="10" fill="#0f766e"/>
+  <rect x="0" y="20" width="220" height="12" fill="#0f766e"/>
+  <text x="110" y="21" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="12" font-weight="700" fill="#ffffff">VIETQR MẪU (DEMO)</text>
+
+  <!-- Khung QR giả lập -->
+  <g transform="translate(30,44)">
+    <rect width="160" height="160" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5"/>
+    <!-- 3 góc định vị QR -->
+    <rect x="10" y="10" width="36" height="36" fill="none" stroke="#0f172a" stroke-width="6"/>
+    <rect x="20" y="20" width="16" height="16" fill="#0f766e"/>
+    <rect x="114" y="10" width="36" height="36" fill="none" stroke="#0f172a" stroke-width="6"/>
+    <rect x="124" y="20" width="16" height="16" fill="#0f766e"/>
+    <rect x="10" y="114" width="36" height="36" fill="none" stroke="#0f172a" stroke-width="6"/>
+    <rect x="20" y="124" width="16" height="16" fill="#0f766e"/>
+
+    <!-- Ma trận điểm trang trí -->
+    <g fill="#0f172a">
+      <rect x="58" y="12" width="8" height="8"/><rect x="74" y="12" width="16" height="8"/><rect x="98" y="12" width="8" height="8"/>
+      <rect x="58" y="28" width="16" height="8"/><rect x="82" y="28" width="8" height="8"/><rect x="98" y="28" width="8" height="8"/>
+      <rect x="12" y="58" width="8" height="16"/><rect x="28" y="58" width="16" height="8"/><rect x="58" y="58" width="44" height="44" rx="4" fill="#e2e8f0"/>
+      <rect x="66" y="66" width="28" height="28" rx="3" fill="#0f766e"/>
+      <text x="80" y="84" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="800" fill="#ffffff">QR</text>
+      <rect x="114" y="58" width="16" height="8"/><rect x="138" y="58" width="12" height="16"/>
+      <rect x="12" y="86" width="16" height="8"/><rect x="36" y="86" width="8" height="16"/><rect x="114" y="86" width="8" height="16"/><rect x="130" y="86" width="20" height="8"/>
+      <rect x="58" y="114" width="12" height="12"/><rect x="78" y="114" width="16" height="8"/><rect x="102" y="114" width="16" height="16"/><rect x="126" y="114" width="24" height="8"/>
+      <rect x="58" y="134" width="24" height="12"/><rect x="90" y="134" width="12" height="16"/><rect x="114" y="134" width="16" height="12"/><rect x="138" y="134" width="12" height="16"/>
+    </g>
+  </g>
+
+  <text x="110" y="223" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="700" fill="#b45309">ẢNH MẪU — CHƯA GẮN STK</text>
+  <text x="110" y="239" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#64748b">Thay bằng QR ngân hàng thật khi mở nhận ủng hộ</text>
+</svg>
