@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="page-title">Bao_Cao_Kinh_Doanh_Q4.xlsx - Excel</title>
+  <link id="page-favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='3' fill='%23217346'/%3E%3Ctext x='5' y='17' font-family='Segoe UI,Arial' font-size='14' font-weight='bold' fill='white'%3EX%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="theme-excel">
+  <!-- Thanh tiêu đề ứng dụng văn phòng -->
+  <header class="app-titlebar">
+    <div class="titlebar-left">
+      <span class="app-badge" id="app-badge">X</span>
+      <span class="doc-name" id="doc-name">Bao_Cao_Kinh_Doanh_Q4.xlsx</span>
+      <span class="save-state">Saved to OneDrive</span>
+    </div>
+    <div class="titlebar-search fake-ui" aria-hidden="true">
+      <span class="search-icon">⌕</span>
+      <span class="search-placeholder">Search (Alt + Q)</span>
+    </div>
+    <div class="titlebar-right">
+      <div class="stealth-controls" title="Chuyển vỏ bọc giao diện">
+        <button class="mini-pill active" id="btn-theme-excel" data-theme="excel">Excel</button>
+        <button class="mini-pill" id="btn-theme-docs" data-theme="docs">Docs</button>
+      </div>
+      <button class="panic-btn" id="btn-panic" title="Nhấn Esc để ẩn/hiện tức thì">
+        Xem Báo Cáo (Esc)
+      </button>
+    </div>
+  </header>
+
+  <!-- Thanh Ribbon Menu (giả trang trí, không cho click) -->
+  <nav class="ribbon-tabs fake-ui" aria-hidden="true">
+    <div class="ribbon-tab">File</div>
+    <div class="ribbon-tab active">Home</div>
+    <div class="ribbon-tab">Insert</div>
+    <div class="ribbon-tab">Data</div>
+    <div class="ribbon-tab">Review</div>
+    <div class="ribbon-tab">View</div>
+    <div class="ribbon-spacer"></div>
+    <div class="ribbon-meta">
+      <span id="daily-tag" class="daily-tag hidden">★ DAILY x2 KPI</span>
+      Batch: <strong id="batch-label">EN-01</strong>
+    </div>
+  </nav>
+
+  <!-- Thanh công cụ Ribbon -->
+  <div class="ribbon-toolbar">
+    <div class="tool-group fake-ui" aria-hidden="true">
+      <span class="fake-tool">Paste</span>
+      <span class="fake-tool"><b>B</b></span>
+      <span class="fake-tool"><i>I</i></span>
+      <span class="fake-tool"><u>U</u></span>
+      <span class="fake-tool">$</span>
+      <span class="fake-tool">%</span>
+    </div>
+
+    <div class="tool-sep"></div>
+
+    <div class="tool-group">
+      <button class="game-btn" id="btn-shuffle" title="Sắp xếp lại vị trí (Space)">
+        <span class="tool-ico">⇅</span>
+        <span>Trộn (Space)</span>
+      </button>
+      <button class="game-btn game-btn-hint" id="btn-hint" title="Gợi ý có giới hạn (F2)">
+        <span class="tool-ico">fx</span>
+        <span id="btn-hint-text">Gợi ý: 3 (F2)</span>
+      </button>
+      <button class="game-btn game-btn-timer" id="btn-deadline-mode" title="Bật/tắt thử thách đếm ngược 90 giây để nhận x1.5 KPI">
+        <span>⏱ Deadline 90s</span>
+      </button>
+    </div>
+
+    <div class="tool-sep"></div>
+
+    <div class="tool-group">
+      <button class="game-btn" id="btn-prev-level" title="Phiên trước">
+        <span>◀ Trước</span>
+      </button>
+      <button class="game-btn" id="btn-next-level" title="Phiên tiếp theo">
+        <span>Tiếp ▶</span>
+      </button>
+    </div>
+
+    <div class="tool-sep"></div>
+
+    <div class="tool-group batch-select-wrap">
+      <label for="level-select" class="tool-label"><strong>Phiên:</strong></label>
+      <select id="level-select" class="office-select"></select>
+    </div>
+
+    <div class="ribbon-spacer"></div>
+
+    <!-- Chỉ số Combo, Lỗi & Hồ sơ KPI -->
+    <div class="tool-group">
+      <span class="hud-pill" id="hud-combo" title="Chuỗi trả lời đúng liên tiếp không sai">Combo x1</span>
+      <span class="hud-pill hud-err" id="hud-mistakes" title="Quá giới hạn lỗi sẽ thất bại Phiên hiện tại">Lỗi: 0/5</span>
+      <span class="hud-pill hud-timer hidden" id="hud-timer">⏱ 01:30</span>
+      <button class="game-btn" id="btn-achievements" title="Xem Hồ sơ KPI & Thành tích">
+        <span>Hồ sơ KPI</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Thanh công thức Excel / Search Docs -->
+  <div class="formula-bar" id="formula-bar">
+    <div class="cell-ref" id="cell-ref">B4</div>
+    <div class="fx-sign" id="fx-sign">fx</div>
+    <div class="formula-input-wrap">
+      <input
+        id="keyboard-input"
+        class="formula-input"
+        type="text"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder='=VALIDATE_TERM("Gõ chữ hoặc kéo nối trên sơ đồ, Enter để xác nhận...")'
+      />
+      <span class="formula-status" id="formula-status">Ready</span>
+    </div>
+  </div>
+
+  <!-- Khung làm việc chính -->
+  <main class="workspace" id="main-workspace">
+    <!-- Thanh tiêu đề cột kiểu Excel -->
+    <div class="excel-col-headers" id="excel-col-headers">
+      <div class="corner-cell"></div>
+      <div class="col-h">A</div>
+      <div class="col-h">B</div>
+      <div class="col-h">C</div>
+      <div class="col-h">D</div>
+      <div class="col-h wide">E (Bảng đối chiếu / Ô chữ)</div>
+      <div class="col-h">F (Trạng thái)</div>
+      <div class="col-h wide2">G (Diễn giải / Tham chiếu)</div>
+    </div>
+
+    <div class="sheet-body" id="sheet-body">
+      <div class="excel-row-headers" id="excel-row-headers"></div>
+
+      <!-- Layout 2 cột cho Connect & Merge -->
+      <div class="content-grid" id="standard-grid">
+        <section class="panel input-panel">
+          <div class="panel-header">
+            <span class="panel-title" id="topic-title">Chủ đề: Bàn làm việc & Ghi chú</span>
+            <span class="tier-badge" id="tier-badge">Cơ bản</span>
+          </div>
+          <div class="sub-hint-row">
+            <span class="panel-sub" id="mode-hint">Kéo nối hoặc gõ phím + Enter</span>
+          </div>
+
+          <!-- Vùng chơi Nối Chữ Cái (Word Connect) -->
+          <div class="connect-stage" id="connect-stage">
+            <div class="draft-preview-bar">
+              <span class="draft-label">Chuỗi đang chọn:</span>
+              <span class="draft-word" id="draft-word">—</span>
+            </div>
+
+            <div class="wheel-wrap" id="wheel-wrap">
+              <svg class="connect-svg" id="connect-svg"></svg>
+              <div class="nodes-layer" id="nodes-layer"></div>
+            </div>
+
+            <div class="connect-actions">
+              <button class="office-btn" id="btn-submit-word">Xác nhận (Enter)</button>
+              <button class="office-btn ghost" id="btn-reset-pick">Bỏ chọn</button>
+              <button class="office-btn ghost hidden" id="btn-retry-batch">Làm lại Phiên</button>
+            </div>
+          </div>
+
+          <!-- Vùng chơi Ghép Từ (Word Merge có mảnh bẫy) -->
+          <div class="merge-stage hidden" id="merge-stage">
+            <div class="draft-preview-bar">
+              <span class="draft-label">Ghép cặp (cẩn thận mảnh nhiễu!):</span>
+              <span class="draft-word" id="merge-preview">Chọn 2 ô hoặc gõ từ hoàn chỉnh</span>
+            </div>
+            <div class="merge-tiles-grid" id="merge-tiles-grid"></div>
+            <div class="connect-actions">
+              <button class="office-btn ghost hidden" id="btn-retry-merge">Làm lại Phiên</button>
+            </div>
+          </div>
+
+          <div class="footnote-box">
+            <strong>Phím tắt:</strong> Gõ chữ → <code>Enter</code> kiểm tra ·
+            <code>Space</code> trộn · <code>F2</code> gợi ý · <code>Esc</code> ẩn màn hình.
+          </div>
+        </section>
+
+        <!-- Cột phải: Ô chữ giao nhau (Crossword) + Danh sách Clues -->
+        <section class="panel output-panel">
+          <div class="panel-header">
+            <span class="panel-title" id="output-panel-title">Bảng Ô Chữ & Đối Soát Dữ Liệu</span>
+            <span class="panel-sub" id="progress-summary">0 / 0 mục</span>
+          </div>
+          <div class="excel-databar-track" title="Tiến độ hoàn thành Phiên">
+            <div class="excel-databar-fill" id="progress-bar-fill" style="width: 0%"></div>
+          </div>
+
+          <!-- Lưới Ô chữ giao nhau (chỉ hiện ở Connect mode) -->
+          <div class="crossword-wrap" id="crossword-wrap">
+            <div class="crossword-grid" id="crossword-grid"></div>
+          </div>
+
+          <!-- Bảng manh mối / đối soát -->
+          <div class="table-scroll">
+            <table class="office-table" id="targets-table">
+              <thead>
+                <tr>
+                  <th style="width: 44px">#</th>
+                  <th style="width: 155px">Từ khóa / Manh mối</th>
+                  <th style="width: 86px">Trạng thái</th>
+                  <th>Diễn giải tham chiếu</th>
+                </tr>
+              </thead>
+              <tbody id="targets-tbody"></tbody>
+            </table>
+          </div>
+
+          <!-- Bảng từ mở rộng -->
+          <div class="bonus-section" id="bonus-section">
+            <div class="bonus-header">
+              <span>Tham chiếu bổ sung (Extra Refs)</span>
+              <span id="bonus-count">0 mục</span>
+            </div>
+            <div class="bonus-list" id="bonus-list">
+              <span class="bonus-empty">Tìm từ hợp lệ ngoài danh sách (3 Extra Refs = +1 Gợi ý).</span>
+            </div>
+          </div>
+
+          <div class="summary-footer">
+            <span>=COUNTA(E4:E20)</span>
+            <span id="kpi-footer">Valid Rows: 0 | Batch hoàn thành: 0</span>
+          </div>
+        </section>
+      </div>
+
+      <!-- Layout riêng cho Phân Nhóm 4x4 (Connections) -->
+      <div class="connections-view hidden" id="connections-view">
+        <div class="conn-header-bar">
+          <div>
+            <span class="panel-title" id="conn-topic-title">Chủ đề: Đời sống Công sở</span>
+            <span class="tier-badge" id="conn-tier-badge">Cơ bản</span>
+          </div>
+          <div class="conn-sub">Chọn đúng <strong>4 ô có chung quy luật ẩn</strong> (cẩn thận từ bẫy — tối đa 4 lần sai!)</div>
+        </div>
+
+        <div class="excel-databar-track">
+          <div class="excel-databar-fill" id="conn-progress-fill" style="width: 0%"></div>
+        </div>
+
+        <!-- Các nhóm đã giải gộp thành dải hàng -->
+        <div class="conn-solved-list" id="conn-solved-list"></div>
+
+        <!-- Lưới 4x4 -->
+        <div class="conn-grid" id="conn-grid"></div>
+
+        <div class="conn-actions">
+          <button class="office-btn" id="btn-conn-submit">Xác nhận nhóm (0/4)</button>
+          <button class="office-btn ghost" id="btn-conn-deselect">Bỏ chọn hết</button>
+          <button class="office-btn ghost hidden" id="btn-conn-retry">Làm lại Phiên</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal Hồ sơ KPI & Thành tích -->
+  <div class="modal-backdrop hidden" id="achievements-modal">
+    <div class="office-modal">
+      <div class="modal-head">
+        <strong>HỒ SƠ ĐÁNH GIÁ HIỆU SUẤT (KPI REVIEW)</strong>
+        <button class="modal-close" id="btn-close-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="kpi-overview-cards" id="kpi-overview-cards"></div>
+        <div class="engage-panel" id="engage-panel"></div>
+        <h4 class="modal-subtitle">Danh hiệu & Thành tựu Công sở</h4>
+        <div class="ach-grid" id="ach-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Màn hình Boss Mode (Esc) -->
+  <section class="boss-screen hidden" id="boss-screen">
+    <div id="boss-excel-content" class="boss-excel-view">
+      <div class="boss-banner">
+        <strong>BÁO CÁO TỔNG HỢP DOANH THU & CHI PHÍ VẬN HÀNH - QUÝ IV/2026</strong>
+        <span>Đơn vị: Triệu VNĐ | Trạng thái: Đã rà soát số liệu</span>
+      </div>
+      <table class="boss-table">
+        <thead>
+          <tr>
+            <th>STT</th>
+            <th>Mã Bộ Phận</th>
+            <th>Hạng mục triển khai</th>
+            <th>Kế hoạch Q4</th>
+            <th>Thực hiện lũy kế</th>
+            <th>Tỷ lệ đạt</th>
+            <th>Ghi chú kiểm toán</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>OPS-01</td><td>Vận hành hạ tầng hệ thống nội bộ</td><td>1,250.0</td><td>1,198.4</td><td>95.9%</td><td>Đúng tiến độ cam kết</td></tr>
+          <tr><td>2</td><td>OPS-02</td><td>Tối ưu chi phí lưu trữ đám mây</td><td>480.0</td><td>492.5</td><td>102.6%</td><td>Vượt chỉ tiêu tiết kiệm</td></tr>
+          <tr><td>3</td><td>BIZ-01</td><td>Triển khai hợp đồng khối doanh nghiệp</td><td>3,400.0</td><td>3,210.0</td><td>94.4%</td><td>Đang nghiệm thu đợt cuối</td></tr>
+          <tr><td>4</td><td>BIZ-02</td><td>Gia hạn dịch vụ bảo trì định kỳ</td><td>1,820.0</td><td>1,845.2</td><td>101.4%</td><td>Hoàn tất 100% hồ sơ</td></tr>
+          <tr><td>5</td><td>TECH-01</td><td>Nâng cấp module báo cáo tự động</td><td>960.0</td><td>912.0</td><td>95.0%</td><td>Đang kiểm thử UAT</td></tr>
+          <tr><td>6</td><td>TECH-02</td><td>Chuẩn hóa quy trình đối soát dữ liệu</td><td>640.0</td><td>640.0</td><td>100.0%</td><td>Đã ban hành tài liệu</td></tr>
+          <tr><td>7</td><td>FIN-01</td><td>Thanh quyết toán nhà cung cấp T10-T11</td><td>2,150.0</td><td>2,088.6</td><td>97.1%</td><td>Chờ ký duyệt đợt 2</td></tr>
+          <tr><td>8</td><td>HR-01</td><td>Chi phí đào tạo & nâng cao nghiệp vụ</td><td>390.0</td><td>365.0</td><td>93.6%</td><td>Còn 1 khóa tháng 12</td></tr>
+          <tr class="boss-total-row">
+            <td colspan="3"><strong>TỔNG CỘNG (=SUM(D2:D9))</strong></td>
+            <td><strong>11,090.0</strong></td>
+            <td><strong>10,751.7</strong></td>
+            <td><strong>97.0%</strong></td>
+            <td><strong>Nhấn Esc để quay lại xử lý</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div id="boss-docs-content" class="boss-docs-view hidden">
+      <div class="boss-doc-paper">
+        <h2>BIÊN BẢN RÀ SOÁT TIẾN ĐỘ CÔNG VIỆC TUẦN</h2>
+        <p class="doc-meta">Mã tài liệu: BB-2026-Q4/11 · Người lập: Bộ phận Điều phối · Trạng thái: Bản thảo lần 2</p>
+        <hr />
+        <h3>I. Nội dung đã hoàn thành trong tuần</h3>
+        <ul>
+          <li>Hoàn thiện rà soát toàn bộ biểu mẫu đối chiếu số liệu từ các đơn vị trực thuộc.</li>
+          <li>Cập nhật danh mục thuật ngữ chuẩn hóa phục vụ công tác đồng bộ dữ liệu liên phòng ban.</li>
+          <li>Kiểm tra tính toàn vẹn các bảng thống kê doanh thu và chi phí vận hành tháng 11.</li>
+        </ul>
+        <h3>II. Kế hoạch trọng tâm tuần tới</h3>
+        <ul>
+          <li>Phối hợp với bộ phận kỹ thuật xử lý các trường hợp dữ liệu còn sai lệch định dạng.</li>
+          <li>Tổng hợp báo cáo gửi Ban Giám đốc trước 16h00 thứ Sáu hàng tuần.</li>
+          <li>Rà soát tài liệu hướng dẫn quy trình nội bộ phiên bản mới.</li>
+        </ul>
+        <h3>III. Ghi chú cuộc họp</h3>
+        <p>Các bộ phận chủ động cập nhật tiến độ trực tiếp vào bảng tính chung trước cuối ngày làm việc. Nhấn <strong>Esc</strong> để tiếp tục thao tác chỉnh sửa.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Thanh Sheet Tabs & Status Bar đáy màn hình -->
+  <footer class="status-footer">
+    <div class="sheet-tabs">
+      <button class="sheet-tab active" data-lang="en" data-mode="connect">Sheet1: O_Chu_EN</button>
+      <button class="sheet-tab" data-lang="vi" data-mode="connect">Sheet2: O_Chu_VI</button>
+      <button class="sheet-tab" data-lang="en" data-mode="merge">Sheet3: Ghep_Tu_EN</button>
+      <button class="sheet-tab" data-lang="vi" data-mode="merge">Sheet4: Ghep_Tu_VI</button>
+      <button class="sheet-tab" data-lang="en" data-mode="connections">Sheet5: Phan_Nhom_EN</button>
+      <button class="sheet-tab" data-lang="vi" data-mode="connections">Sheet6: Phan_Nhom_VI</button>
+    </div>
+    <div class="status-stats">
+      <span id="stat-daily">Chuyên cần: 0 ngày</span>
+      <span>|</span>
+      <span id="stat-rank">Cấp bậc: Intern</span>
+      <span>|</span>
+      <span id="stat-streak">Chuỗi hoàn thành: 0</span>
+      <span>|</span>
+      <span id="stat-score">Tổng KPI: 0</span>
+    </div>
+  </footer>
+
+  <script src="data-en.js"></script>
+  <script src="data-vi.js"></script>
+  <script src="data-connections.js"></script>
+  <script src="engagement.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
