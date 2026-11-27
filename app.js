@@ -1935,19 +1935,19 @@
       tab.addEventListener("click", () => {
         state.lang = tab.dataset.lang;
         state.mode = tab.dataset.mode;
-        loadLevel(0);
+        loadLevel(0, true);
       });
     });
 
     $("btn-lang-vi")?.addEventListener("click", () => {
       if (state.lang === "vi") return;
       state.lang = "vi";
-      loadLevel(0);
+      loadLevel(0, true);
     });
     $("btn-lang-en")?.addEventListener("click", () => {
       if (state.lang === "en") return;
       state.lang = "en";
-      loadLevel(0);
+      loadLevel(0, true);
     });
 
     $("btn-shuffle").addEventListener("click", () => {
@@ -1982,11 +1982,11 @@
       loadLevel(state.levelIndex);
     });
 
-    $("btn-prev-level").addEventListener("click", () => loadLevel(state.levelIndex - 1));
-    $("btn-next-level").addEventListener("click", () => loadLevel(state.levelIndex + 1));
+    $("btn-prev-level").addEventListener("click", () => loadLevel(state.levelIndex - 1, true));
+    $("btn-next-level").addEventListener("click", () => loadLevel(state.levelIndex + 1, true));
 
     els.levelSelect.addEventListener("change", (e) => {
-      loadLevel(Number(e.target.value));
+      loadLevel(Number(e.target.value), true);
     });
 
     $("btn-submit-word").addEventListener("click", () => {
