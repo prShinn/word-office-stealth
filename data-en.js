@@ -390,7 +390,7 @@ window.EN_DATA = (function () {
     skill: "kỹ năng", skirt: "chân váy", slack: "chùng / lỏng", sleep: "giấc ngủ",
     slice: "lát cắt", slide: "trang trình chiếu", slope: "độ dốc", small: "nhỏ",
     smart: "thông minh", smile: "mỉm cười", smoke: "khói", snack: "đồ ăn vặt",
-    snail: "ốc sên", snake: "con rắn", snow: "tuyết", solar: "thuộc mặt trời",
+    marker: "bút dạ", eraser: "cục tẩy", niece: "cháu gái", family: "gia đình", script: "tập lệnh", column: "cột", spam: "thư rác", sender: "người gửi", attach: "đính kèm", market: "thị trường", intern: "thực tập sinh", career: "sự nghiệp", manager: "quản lý", guitar: "đàn ghi ta", wifi: "mạng không dây", router: "bộ định tuyến", minute: "biên bản / phút", energy: "năng lượng", color: "màu sắc", button: "nút bấm", comet: "sao chổi", venus: "sao kim", planet: "hành tinh", galaxy: "thiên hà", lunar: "thuộc mặt trăng", nova: "sao mới", bot: "chương trình tự động", refund: "hoàn tiền", coupon: "phiếu giảm giá", seller: "người bán", parcel: "bưu kiện", promo: "khuyến mãi", banner: "biểu ngữ", backup: "sao lưu", attack: "tấn công", clone: "sao chép kho", branch: "nhánh", commit: "lưu thay đổi", diff: "phần khác biệt", stash: "cất tạm", rebase: "đổi gốc nhánh", auth: "xác thực", deploy: "triển khai", volume: "ổ dữ liệu", linux: "hệ điều hành", assert: "khẳng định", ai: "trí tuệ nhân tạo", ad: "quảng cáo", seo: "tối ưu công cụ tìm kiếm", snail: "ốc sên", snake: "con rắn", snow: "tuyết", solar: "thuộc mặt trời",
     solid: "vững chắc", solve: "giải quyết", sorry: "xin lỗi", sound: "âm thanh",
     source: "mã nguồn", south: "phương nam", space: "không gian vũ trụ", spare: "dự phòng",
     spark: "tia lửa", speak: "nói", speed: "tốc độ", spell: "đánh vần",
@@ -605,38 +605,38 @@ window.EN_DATA = (function () {
   // 20 Phiên Nối Chữ Tiếng Anh phân theo cấp độ Cơ bản -> Trung bình -> Nâng cao
   // Toàn bộ từ vựng trong mỗi Phiên đều thuộc đúng chủ đề Phiên đó!
   const RAW_CONNECT = [
-    { id: "EN-01", tier: "Cơ bản", topic: "Bàn làm việc & Ghi chú", targets: ["pen", "pad", "desk", "note", "post", "send", "done", "open"] },
-    { id: "EN-02", tier: "Cơ bản", topic: "Soạn thảo & Tài liệu", targets: ["doc", "docs", "edit", "line", "list", "note"] },
-    { id: "EN-03", tier: "Cơ bản", topic: "Ẩm thực & Bữa trưa", targets: ["tea", "eat", "ham", "diet", "meal", "meat", "salt", "dish"] },
-    { id: "EN-04", tier: "Cơ bản", topic: "Nhà cửa & Nội thất", targets: ["bed", "home", "room", "door", "roof"] },
-    { id: "EN-05", tier: "Cơ bản", topic: "Thiên nhiên & Thời tiết", targets: ["sun", "rain", "wind", "sand", "snow"] },
-    { id: "EN-06", tier: "Cơ bản", topic: "Gia đình & Gắn kết", targets: ["mom", "son", "boy", "born", "bond"] },
+    { id: "EN-01", tier: "Cơ bản", topic: "Bàn làm việc & Ghi chú", targets: ["pen", "pad", "desk", "note", "memo", "file", "clip", "tape", "lamp", "task", "plan", "list", "ink", "cup", "chair", "ruler", "paper", "folder", "stamp", "board", "marker", "eraser", "glue"] },
+    { id: "EN-02", tier: "Cơ bản", topic: "Soạn thảo & Tài liệu", targets: ["doc", "docs", "edit", "line", "list", "note", "text", "font", "page", "word", "bold", "copy", "paste", "draft", "title", "table", "print"] },
+    { id: "EN-03", tier: "Cơ bản", topic: "Ẩm thực & Bữa trưa", targets: ["tea", "eat", "ham", "diet", "meal", "meat", "salt", "dish", "rice", "soup", "bread", "egg", "fish", "pork", "beef", "cake", "milk", "fruit", "lunch"] },
+    { id: "EN-04", tier: "Cơ bản", topic: "Nhà cửa & Nội thất", targets: ["bed", "home", "room", "door", "roof", "wall", "lamp", "sofa", "desk", "bath", "yard", "stair", "table", "chair", "shelf", "window"] },
+    { id: "EN-05", tier: "Cơ bản", topic: "Thiên nhiên & Thời tiết", targets: ["sun", "rain", "wind", "sand", "snow", "storm", "cloud", "fog", "ice", "lake", "river", "tree", "leaf", "hill", "sea", "sky"] },
+    { id: "EN-06", tier: "Cơ bản", topic: "Gia đình & Gắn kết", targets: ["mom", "son", "boy", "born", "bond", "dad", "kid", "baby", "aunt", "uncle", "niece", "wife", "home", "love", "care", "family"] },
 
-    { id: "EN-07", tier: "Trung bình", topic: "Lập trình & Phần mềm", targets: ["git", "bug", "log", "code", "node", "build", "debug"] },
-    { id: "EN-08", tier: "Trung bình", topic: "Bảng tính & Thống kê", targets: ["row", "rows", "tab", "tabs", "sort", "rate", "stat", "plot", "table"] },
-    { id: "EN-09", tier: "Trung bình", topic: "Email & Soạn thư", targets: ["mail", "name", "line", "dear", "read", "send", "sent", "draft"] },
-    { id: "EN-10", tier: "Trung bình", topic: "Tài chính & Kiểm toán", targets: ["tax", "pay", "paid", "debt", "rate", "audit"] },
-    { id: "EN-11", tier: "Trung bình", topic: "Kinh doanh & Giao dịch", targets: ["pay", "paid", "tag", "list", "sale", "sell", "deal"] },
-    { id: "EN-12", tier: "Trung bình", topic: "Nhân sự & Quyền lợi", targets: ["job", "role", "user", "boss", "bonus"] },
-    { id: "EN-13", tier: "Trung bình", topic: "Du lịch & Di chuyển", targets: ["car", "cab", "map", "trip", "rail", "camp", "mile", "plane", "train"] },
-    { id: "EN-14", tier: "Trung bình", topic: "Âm nhạc & Sân khấu", targets: ["act", "game", "song", "sing", "sung", "tune", "note", "tone", "stage"] },
+    { id: "EN-07", tier: "Trung bình", topic: "Lập trình & Phần mềm", targets: ["git", "bug", "log", "code", "node", "build", "debug", "app", "api", "test", "fix", "loop", "array", "class", "file", "stack", "merge", "script"] },
+    { id: "EN-08", tier: "Trung bình", topic: "Bảng tính & Thống kê", targets: ["row", "rows", "tab", "tabs", "sort", "rate", "stat", "plot", "table", "sum", "cell", "data", "chart", "sheet", "graph", "count", "total", "filter", "column", "value"] },
+    { id: "EN-09", tier: "Trung bình", topic: "Email & Soạn thư", targets: ["mail", "name", "line", "dear", "read", "send", "sent", "draft", "inbox", "spam", "reply", "title", "note", "file", "copy", "email", "sender", "attach", "letter"] },
+    { id: "EN-10", tier: "Trung bình", topic: "Tài chính & Kiểm toán", targets: ["tax", "pay", "paid", "debt", "rate", "audit", "bank", "cash", "loan", "fee", "bill", "cost", "fund", "asset", "money", "budget", "profit"] },
+    { id: "EN-11", tier: "Trung bình", topic: "Kinh doanh & Giao dịch", targets: ["pay", "paid", "tag", "list", "sale", "sell", "deal", "buy", "price", "shop", "order", "offer", "trade", "stock", "client", "market", "brand"] },
+    { id: "EN-12", tier: "Trung bình", topic: "Nhân sự & Quyền lợi", targets: ["job", "role", "user", "boss", "bonus", "staff", "team", "hire", "wage", "leave", "skill", "intern", "salary", "career", "manager"] },
+    { id: "EN-13", tier: "Trung bình", topic: "Du lịch & Di chuyển", targets: ["car", "cab", "map", "trip", "rail", "camp", "mile", "plane", "train", "bus", "taxi", "road", "ship", "bike", "tour", "hotel", "visa", "ticket", "beach"] },
+    { id: "EN-14", tier: "Trung bình", topic: "Âm nhạc & Sân khấu", targets: ["act", "song", "sing", "sung", "tune", "note", "tone", "stage", "drum", "band", "beat", "piano", "guitar", "voice", "dance", "music", "opera"] },
 
-    { id: "EN-15", tier: "Nâng cao", topic: "Mạng & Bảo mật Hệ thống", targets: ["net", "key", "site", "host", "node", "sync", "code", "lock", "link", "token"] },
-    { id: "EN-16", tier: "Nâng cao", topic: "Cuộc họp & Kế hoạch", targets: ["plan", "goal", "team", "time", "date", "late", "note", "lead", "agenda"] },
-    { id: "EN-17", tier: "Nâng cao", topic: "Sức khỏe & Vận động", targets: ["run", "rest", "heal", "care", "lean", "pace", "heart", "pulse", "sleep"] },
-    { id: "EN-18", tier: "Nâng cao", topic: "Thiết kế UI & Đồ họa", targets: ["grid", "icon", "crop", "font", "tint", "form"] },
-    { id: "EN-19", tier: "Nâng cao", topic: "Vũ trụ & Thiên văn", targets: ["sky", "ion", "ray", "rays", "star", "mars", "atom", "moon", "solar"] },
-    { id: "EN-20", tier: "Nâng cao", topic: "Doanh nghiệp & Điều hành", targets: ["ceo", "work", "deal", "sale", "cost", "team", "clerk"] },
-    { id: "EN-21", tier: "Nâng cao", topic: "AI & Khoa học Dữ liệu", targets: ["ai", "data", "mode", "model", "idea", "lead", "deal", "load", "mail", "date"] },
-    { id: "EN-22", tier: "Trung bình", topic: "Thương mại Điện tử", targets: ["pay", "sale", "cart", "cost", "rate", "case", "seal", "store", "order"] },
-    { id: "EN-23", tier: "Trung bình", topic: "Marketing & Tăng trưởng", targets: ["ad", "seo", "lead", "deal", "sale", "goal", "page", "edge", "load"] },
-    { id: "EN-24", tier: "Nâng cao", topic: "An ninh Mạng & Đám mây", targets: ["key", "lock", "code", "node", "link", "sync", "disk", "site", "icon"] },
-    { id: "EN-25", tier: "Trung bình", topic: "Làm việc Từ xa & Năng suất", targets: ["plan", "task", "team", "time", "meet", "note", "mail", "list", "step", "item"] },
-    { id: "EN-26", tier: "Nâng cao", topic: "[IT] Git & Mã nguồn", targets: ["git", "tag", "log", "get", "set", "edit", "mode", "merge", "model", "stage", "store", "alert"] },
-    { id: "EN-27", tier: "Nâng cao", topic: "[IT] Web & REST API", targets: ["api", "code", "cors", "head", "host", "node", "path", "port", "post", "rest", "site", "trace"] },
-    { id: "EN-28", tier: "Nâng cao", topic: "[IT] Database & SQL", targets: ["sql", "row", "data", "load", "read", "sort", "alter", "store", "table", "rate", "date", "lead"] },
-    { id: "EN-29", tier: "Nâng cao", topic: "[IT] DevOps, Docker & Linux", targets: ["cd", "ls", "sh", "code", "curl", "disk", "lock", "node", "sudo", "cloud", "docker", "core"] },
-    { id: "EN-30", tier: "Nâng cao", topic: "[IT] Clean Code & Debug", targets: ["bug", "code", "set", "run", "agent", "debug", "guard", "route", "stage", "store", "trace"] }
+    { id: "EN-15", tier: "Nâng cao", topic: "Mạng & Bảo mật Hệ thống", targets: ["net", "key", "site", "host", "node", "sync", "code", "lock", "link", "token", "port", "web", "wifi", "user", "login", "virus", "proxy", "router", "server", "secure"] },
+    { id: "EN-16", tier: "Nâng cao", topic: "Cuộc họp & Kế hoạch", targets: ["plan", "goal", "team", "time", "date", "late", "note", "lead", "agenda", "meet", "topic", "room", "talk", "vote", "idea", "task", "chair", "minute", "report"] },
+    { id: "EN-17", tier: "Nâng cao", topic: "Sức khỏe & Vận động", targets: ["run", "rest", "heal", "care", "lean", "pace", "heart", "pulse", "sleep", "gym", "yoga", "walk", "swim", "diet", "body", "sport", "health", "energy"] },
+    { id: "EN-18", tier: "Nâng cao", topic: "Thiết kế UI & Đồ họa", targets: ["grid", "icon", "crop", "font", "tint", "form", "color", "shape", "layer", "image", "frame", "style", "theme", "pixel", "button", "layout"] },
+    { id: "EN-19", tier: "Nâng cao", topic: "Vũ trụ & Thiên văn", targets: ["sky", "ion", "ray", "rays", "star", "mars", "atom", "moon", "solar", "sun", "orbit", "comet", "earth", "venus", "space", "planet", "galaxy", "lunar", "nova"] },
+    { id: "EN-20", tier: "Nâng cao", topic: "Doanh nghiệp & Điều hành", targets: ["ceo", "work", "deal", "sale", "cost", "team", "clerk", "firm", "boss", "lead", "plan", "goal", "staff", "office", "manager", "profit", "growth", "brand"] },
+    { id: "EN-21", tier: "Nâng cao", topic: "AI & Khoa học Dữ liệu", targets: ["ai", "data", "mode", "model", "load", "learn", "train", "test", "node", "code", "agent", "bot", "label", "token", "vector", "graph", "score", "input", "output", "neural"] },
+    { id: "EN-22", tier: "Trung bình", topic: "Thương mại Điện tử", targets: ["pay", "sale", "cart", "cost", "rate", "store", "order", "buy", "shop", "price", "item", "stock", "ship", "refund", "coupon", "review", "seller", "parcel"] },
+    { id: "EN-23", tier: "Trung bình", topic: "Marketing & Tăng trưởng", targets: ["ad", "seo", "lead", "deal", "sale", "goal", "page", "brand", "click", "promo", "viral", "email", "banner", "market", "growth", "funnel", "target"] },
+    { id: "EN-24", tier: "Nâng cao", topic: "An ninh Mạng & Đám mây", targets: ["key", "lock", "code", "node", "link", "sync", "disk", "site", "cloud", "virus", "hack", "scan", "proxy", "token", "login", "server", "backup", "attack"] },
+    { id: "EN-25", tier: "Trung bình", topic: "Làm việc Từ xa & Năng suất", targets: ["plan", "task", "team", "time", "meet", "note", "mail", "list", "step", "item", "call", "chat", "focus", "board", "goal", "home", "online", "remote", "shift", "report"] },
+    { id: "EN-26", tier: "Nâng cao", topic: "[IT] Git & Mã nguồn", targets: ["git", "tag", "log", "get", "set", "edit", "merge", "stage", "store", "add", "push", "pull", "fork", "clone", "branch", "commit", "diff", "reset", "stash", "rebase"] },
+    { id: "EN-27", tier: "Nâng cao", topic: "[IT] Web & REST API", targets: ["api", "code", "cors", "head", "host", "node", "path", "port", "post", "rest", "site", "trace", "put", "get", "url", "json", "http", "auth", "route", "patch", "query", "token"] },
+    { id: "EN-28", tier: "Nâng cao", topic: "[IT] Database & SQL", targets: ["sql", "row", "data", "load", "read", "sort", "alter", "store", "table", "key", "join", "view", "drop", "index", "query", "group", "count", "where", "column", "insert"] },
+    { id: "EN-29", tier: "Nâng cao", topic: "[IT] DevOps, Docker & Linux", targets: ["cd", "ls", "sh", "code", "curl", "disk", "lock", "node", "sudo", "cloud", "docker", "core", "log", "ssh", "pod", "git", "image", "build", "deploy", "shell", "server", "volume", "linux"] },
+    { id: "EN-30", tier: "Nâng cao", topic: "[IT] Clean Code & Debug", targets: ["bug", "code", "set", "run", "debug", "trace", "log", "test", "fix", "step", "clean", "error", "lint", "type", "name", "scope", "crash", "patch", "review", "assert", "method"] }
   ];
 
   function shuffleArray(arr) {
@@ -664,12 +664,8 @@ window.EN_DATA = (function () {
   const DICT_POOL_KEYS = Object.keys(DICT).filter((w) => w.length >= 3 && w.length <= 6);
 
   function buildConnectLevel(lvl, avoidWords) {
-    const baseValid = lvl.targets.filter((w) => DICT[w]);
-    const baseUnion = buildUnionLetters(baseValid);
-    const extraFromDict = shuffleArray(
-      DICT_POOL_KEYS.filter((w) => !baseValid.includes(w) && canBuildFromLetters(w, baseUnion))
-    ).slice(0, 14);
-    const allValid = [...baseValid, ...extraFromDict];
+    // Chỉ lấy từ trong kho của Phiên để đúng chủ đề. Muốn thêm từ thì bổ sung vào targets ở RAW_CONNECT
+    const allValid = lvl.targets.filter((w) => DICT[w]);
 
     const avoidSet = new Set(Array.isArray(avoidWords) ? avoidWords : []);
     const pool = [
