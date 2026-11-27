@@ -599,8 +599,13 @@ window.EN_DATA = (function () {
     return copy;
   }
 
-  function buildConnectLevel(lvl) {
-    const pool = shuffleArray(lvl.targets.filter((w) => DICT[w]));
+  function buildConnectLevel(lvl, avoidWords = []) {
+    const allValid = lvl.targets.filter((w) => DICT[w]);
+    const avoidSet = new Set(avoidWords);
+    const pool = [
+      ...shuffleArray(allValid.filter((w) => !avoidSet.has(w))),
+      ...shuffleArray(allValid.filter((w) => avoidSet.has(w)))
+    ];
     const picked = [];
     for (const w of pool) {
       if (picked.length >= 10) break;
@@ -631,10 +636,10 @@ window.EN_DATA = (function () {
 
   const CONNECT_LEVELS = RAW_CONNECT.map(buildConnectLevel);
 
-  function reshuffleLevel(id) {
+  function reshuffleLevel(id, avoidWords = []) {
     const rawIdx = RAW_CONNECT.findIndex((l) => l.id === id);
     if (rawIdx === -1) return null;
-    CONNECT_LEVELS[rawIdx] = buildConnectLevel(RAW_CONNECT[rawIdx]);
+    CONNECT_LEVELS[rawIdx] = buildConnectLevel(RAW_CONNECT[rawIdx], avoidWords);
     return CONNECT_LEVELS[rawIdx];
   }
 

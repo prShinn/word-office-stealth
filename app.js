@@ -1026,15 +1026,20 @@
   function loadLevel(index, fresh) {
     const levels = getLevels();
     state.levelIndex = (index + levels.length) % levels.length;
-    if (fresh && state.mode === "connect") {
-      const cur = levels[state.levelIndex];
-      if (cur && cur.isCustom) {
-        getCustomConnectLevels(state.lang, true);
-      } else {
-        const dataPack = state.lang === "en" ? window.EN_DATA : window.VI_DATA;
-        if (dataPack && typeof dataPack.reshuffleLevel === "function") {
-          dataPack.reshuffleLevel(cur.id);
+    if (fresh) {
+      if (state.mode === "connect") {
+        const cur = levels[state.levelIndex];
+        if (cur && cur.isCustom) {
+          getCustomConnectLevels(state.lang, true);
+        } else {
+          const dataPack = state.lang === "en" ? window.EN_DATA : window.VI_DATA;
+          if (dataPack && typeof dataPack.reshuffleLevel === "function") {
+            dataPack.reshuffleLevel(cur.id, cur.targets || []);
+          }
         }
+      } else if (state.batchFailed && levels.length > 1) {
+        // Khi thất bại ở chế độ Ghép từ / Phân nhóm, chuyển sang phiên khác tránh làm bài dò lại đề cũ
+        state.levelIndex = (state.levelIndex + 1) % levels.length;
       }
     }
     const lvl = getCurrentLevel();

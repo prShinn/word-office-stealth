@@ -1237,13 +1237,17 @@ window.VI_DATA = (function () {
     return copy;
   }
 
-  function buildConnectLevel(lvl) {
-    const pool = lvl.targets.filter((w) => DICT[w]);
+  function buildConnectLevel(lvl, avoidWords = []) {
+    const allValid = lvl.targets.filter((w) => DICT[w]);
+    const avoidSet = new Set(avoidWords);
+    const freshWords = shuffleArray(allValid.filter((w) => !avoidSet.has(w)));
+    const oldWords = shuffleArray(allValid.filter((w) => avoidSet.has(w)));
+    const pool = [...freshWords, ...oldWords];
     let best = [];
     for (let attempt = 0; attempt < 6; attempt++) {
-      const shuffled = shuffleArray(pool);
+      const candidatePool = attempt === 0 ? pool : [...shuffleArray(freshWords), ...shuffleArray(oldWords)];
       const picked = [];
-      for (const w of shuffled) {
+      for (const w of candidatePool) {
         if (picked.length >= 7) break;
         const candidate = [...picked, w];
         if (buildUnionLetters(candidate).length <= 16) {
@@ -1279,10 +1283,10 @@ window.VI_DATA = (function () {
 
   const CONNECT_LEVELS = RAW_CONNECT.map(buildConnectLevel);
 
-  function reshuffleLevel(id) {
+  function reshuffleLevel(id, avoidWords = []) {
     const rawIdx = RAW_CONNECT.findIndex((l) => l.id === id);
     if (rawIdx === -1) return null;
-    CONNECT_LEVELS[rawIdx] = buildConnectLevel(RAW_CONNECT[rawIdx]);
+    CONNECT_LEVELS[rawIdx] = buildConnectLevel(RAW_CONNECT[rawIdx], avoidWords);
     return CONNECT_LEVELS[rawIdx];
   }
 
