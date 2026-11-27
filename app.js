@@ -2195,25 +2195,33 @@
     setStatus(shown.includes("Quà mỗi ngày") ? `${shown} · ${reminder}` : reminder, "warn");
   }
 
-  // Tự động kiểm tra bản cập nhật mới từ version.json khi mở/quay lại tab và reload ngầm phá cache
+  // Tự động kiểm tra bản build mới từ GitHub Pages (qua ETag / Last-Modified) khi người dùng quay lại tab, không chạy định kỳ
+  let initialBuildTag = null;
   let lastVersionCheckAt = 0;
+
+  async function fetchBuildTag() {
+    const res = await fetch("./index.html", { method: "HEAD", cache: "no-store" });
+    if (!res.ok) return "";
+    return res.headers.get("etag") || res.headers.get("last-modified") || "";
+  }
+
   async function checkAppVersionUpdate() {
     const now = Date.now();
-    if (now - lastVersionCheckAt < 60000) return;
+    if (now - lastVersionCheckAt < 30000) return;
     lastVersionCheckAt = now;
     try {
-      const res = await fetch(`./version.json?t=${now}`, { cache: "no-store" });
-      if (!res.ok) return;
-      const data = await res.json();
-      const remoteVer = data && typeof data.version === "string" ? data.version.trim() : "";
-      if (!remoteVer || remoteVer === APP_VERSION) return;
-
-      const url = new URL(window.location.href);
-      if (url.searchParams.get("_v") === remoteVer) return; // Tránh reload lặp nếu URL đã mang bản mới
+      const remoteTag = await fetchBuildTag();
+      if (!remoteTag) return;
+      if (initialBuildTag === null) {
+        initialBuildTag = remoteTag;
+        return;
+      }
+      if (remoteTag === initialBuildTag) return;
       if (window.RewardedAd?.isOpen?.()) return; // Không cắt ngang lúc đang xem quảng cáo
 
       saveProgress();
-      url.searchParams.set("_v", remoteVer);
+      const url = new URL(window.location.href);
+      url.searchParams.set("_v", String(now));
       window.location.replace(url.toString());
     } catch (_) {}
   }
@@ -2223,6 +2231,5 @@
       checkAppVersionUpdate();
     }
   });
-  setInterval(checkAppVersionUpdate, 5 * 60 * 1000);
-  setTimeout(checkAppVersionUpdate, 4000);
+  setTimeout(checkAppVersionUpdate, 2000);
 })();
