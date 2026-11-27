@@ -199,7 +199,7 @@ window.Leaderboard = (function () {
         if (id !== renderId) return;
         boardBox.textContent =
           error.code === "OFFLINE"
-            ? "BXH cần máy chủ. Chơi thử trên máy: chạy server/dev-server.mjs bằng Node 24 rồi mở http://localhost:8787"
+            ? "BXH cần máy chủ. Chạy thử trên máy: chạy server/dev-server.mjs bằng Node 24 rồi mở http://localhost:8787"
             : error.message;
       });
   }
