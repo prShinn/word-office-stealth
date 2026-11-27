@@ -1237,9 +1237,9 @@ window.VI_DATA = (function () {
     return copy;
   }
 
-  function buildConnectLevel(lvl, avoidWords = []) {
+  function buildConnectLevel(lvl, avoidWords) {
     const allValid = lvl.targets.filter((w) => DICT[w]);
-    const avoidSet = new Set(avoidWords);
+    const avoidSet = new Set(Array.isArray(avoidWords) ? avoidWords : []);
     const freshWords = shuffleArray(allValid.filter((w) => !avoidSet.has(w)));
     const oldWords = shuffleArray(allValid.filter((w) => avoidSet.has(w)));
     const pool = [...freshWords, ...oldWords];
@@ -1281,7 +1281,7 @@ window.VI_DATA = (function () {
     };
   }
 
-  const CONNECT_LEVELS = RAW_CONNECT.map(buildConnectLevel);
+  const CONNECT_LEVELS = RAW_CONNECT.map((lvl) => buildConnectLevel(lvl));
 
   function reshuffleLevel(id, avoidWords = []) {
     const rawIdx = RAW_CONNECT.findIndex((l) => l.id === id);
