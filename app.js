@@ -1618,12 +1618,21 @@
     return masked;
   }
 
+  // Mỗi lượt vào Phiên chỉ gợi ý đúng 1 dòng, chọn theo mã Phiên.
+  // Giải xong dòng đó thì không chuyển gợi ý sang dòng nào nữa.
+  function getClueIndex(lvl, count) {
+    let hash = 0;
+    for (const ch of String(lvl.id)) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+    return count > 0 ? hash % count : -1;
+  }
+
   function renderTargetsTable() {
     const lvl = getCurrentLevel();
     els.targetsTbody.innerHTML = "";
 
     if (state.mode === "connect") {
       const dict = state.lang === "en" ? window.EN_DATA.DICT : window.VI_DATA.DICT;
+      const clueIdx = getClueIndex(lvl, lvl.targets.length);
       lvl.targets.forEach((wordKey, idx) => {
         const solved = state.solvedTargets.has(wordKey);
         const hintCount = state.revealedHints[wordKey] || 0;
@@ -1673,11 +1682,14 @@
             })
             .join(" ");
           wordCellHtml = `<span class="masked-word">${chars}</span>`;
-          // Hiển thị gợi ý nghĩa cho cả 2 ngôn ngữ, mọi tier; che bớt từ trùng đáp án qua sanitizeClueMeaning
-          const meaningText = state.lang === "en" ? entry : entry.meaning;
-          const safeClue = escapeHtml(sanitizeClueMeaning(meaningText, wordKey, lvl.topic));
           const lenUnit = state.lang === "en" ? "ký tự" : "chữ";
-          meaningHtml = `<span class="masked-word">${dirLabel} · ${wordKey.length} ${lenUnit} (${safeClue})</span>`;
+          let clueText = "";
+          if (idx === clueIdx) {
+            const meaningText = state.lang === "en" ? entry : entry.meaning;
+            // Che bớt từ trùng đáp án qua sanitizeClueMeaning
+            clueText = ` · Gợi ý: ${escapeHtml(sanitizeClueMeaning(meaningText, wordKey, lvl.topic))}`;
+          }
+          meaningHtml = `<span class="masked-word">${dirLabel} · ${wordKey.length} ${lenUnit}${clueText}</span>`;
         }
 
         tr.innerHTML = `
@@ -1699,11 +1711,13 @@
 
         const wordCellHtml = solved
           ? `<span class="solved-word">${pair[2]}</span>`
-          : `<span class="masked-word">[ ${pair[0]} ] + [ ? ]</span>`;
+          : `<span class="masked-word">[ ? ] + [ ? ]</span>`;
         const statusHtml = solved
           ? `<span class="badge-status badge-ok">Matched</span>`
           : `<span class="badge-status badge-pending">Pending</span>`;
-        const meaningHtml = solved ? pair[3] : `<span class="masked-word">Theo chủ đề: ${lvl.topic}</span>`;
+        const meaningHtml = solved
+          ? pair[3]
+          : `<span class="masked-word">—</span>`;
 
         tr.innerHTML = `
           <td>${idx + 1}</td>
