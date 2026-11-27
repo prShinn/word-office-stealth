@@ -70,6 +70,7 @@
     streak: 0,
     completedBatches: new Set(),
     unlockedAch: new Set(),
+    collectedWords: { vi: [], en: [] },
     notices: []           // thông báo thưởng chờ hiển thị
   };
 
@@ -221,8 +222,10 @@
     state.maxComboEver = 0;
     state.completedBatches = new Set();
     state.unlockedAch = new Set();
+    state.collectedWords = { vi: [], en: [] };
     state.levelIndex = 0;
     state.progress = {};
+    customLevelsCache = { vi: [], en: [] };
   }
 
   function loadProgress() {
@@ -241,6 +244,12 @@
       if (typeof saved.maxComboEver === "number") state.maxComboEver = saved.maxComboEver;
       if (Array.isArray(saved.completedBatches)) state.completedBatches = new Set(saved.completedBatches);
       if (Array.isArray(saved.unlockedAch)) state.unlockedAch = new Set(saved.unlockedAch);
+      if (saved.collectedWords && typeof saved.collectedWords === "object") {
+        state.collectedWords = {
+          vi: Array.isArray(saved.collectedWords.vi) ? saved.collectedWords.vi : [],
+          en: Array.isArray(saved.collectedWords.en) ? saved.collectedWords.en : []
+        };
+      }
       if (saved.theme === "docs" || saved.theme === "excel") state.theme = saved.theme;
       if (saved.lang === "vi" || saved.lang === "en") state.lang = saved.lang;
       if (["connect", "merge", "connections"].includes(saved.mode)) state.mode = saved.mode;
@@ -262,6 +271,7 @@
         maxComboEver: state.maxComboEver,
         completedBatches: Array.from(state.completedBatches),
         unlockedAch: Array.from(state.unlockedAch),
+        collectedWords: state.collectedWords,
         theme: state.theme,
         lang: state.lang,
         mode: state.mode,
@@ -412,12 +422,108 @@
     els.rowHeaders.innerHTML = html;
   }
 
+  // ================= KHO TỪ SƯU TẦM -> PHIÊN MỚI =================
+  const COLLECT_THRESHOLD = 6;
+  let customLevelsCache = { vi: [], en: [] };
+
+  function buildUnionLettersLocal(words) {
+    const maxCount = {};
+    words.forEach((w) => {
+      const c = {};
+      for (const ch of w) c[ch] = (c[ch] || 0) + 1;
+      Object.entries(c).forEach(([k, v]) => {
+        maxCount[k] = Math.max(maxCount[k] || 0, v);
+      });
+    });
+    const arr = [];
+    Object.entries(maxCount).forEach(([ch, cnt]) => {
+      for (let i = 0; i < cnt; i++) arr.push(ch.toUpperCase());
+    });
+    return arr;
+  }
+
+  function shuffleLocal(arr) {
+    const copy = arr.slice();
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function buildCustomLevelsForLang(lang) {
+    const data = lang === "en" ? window.EN_DATA : window.VI_DATA;
+    const dict = data?.DICT || {};
+    const maxLetters = lang === "vi" ? 16 : 12;
+    const rawPool = (state.collectedWords[lang] || []).filter((w) => dict[w]);
+    if (rawPool.length < COLLECT_THRESHOLD) return [];
+
+    const shuffled = shuffleLocal(rawPool);
+    const levels = [];
+    let remaining = shuffled.slice();
+    let idx = 1;
+
+    while (remaining.length >= COLLECT_THRESHOLD) {
+      const picked = [];
+      const nextRemaining = [];
+      for (const w of remaining) {
+        if (picked.length < 8 && buildUnionLettersLocal([...picked, w]).length <= maxLetters) {
+          picked.push(w);
+        } else {
+          nextRemaining.push(w);
+        }
+      }
+      if (picked.length < 5) break;
+      const validTargets = picked.sort((a, b) => a.length - b.length || a.localeCompare(b));
+      levels.push({
+        id: `${lang.toUpperCase()}-U${String(idx).padStart(2, "0")}`,
+        tier: "Sưu tầm",
+        topic: `Kho từ mở rộng #${idx}`,
+        isCustom: true,
+        letters: shuffleLocal(buildUnionLettersLocal(validTargets)),
+        targets: validTargets
+      });
+      remaining = nextRemaining;
+      idx += 1;
+    }
+    return levels;
+  }
+
+  function getCustomConnectLevels(lang, forceRebuild) {
+    if (forceRebuild || !customLevelsCache[lang]?.length) {
+      const expectedMin = Math.floor((state.collectedWords[lang] || []).length / COLLECT_THRESHOLD);
+      if (forceRebuild || (expectedMin > 0 && customLevelsCache[lang].length === 0)) {
+        customLevelsCache[lang] = buildCustomLevelsForLang(lang);
+      }
+    }
+    return customLevelsCache[lang] || [];
+  }
+
+  function collectExtraWord(wordKey) {
+    const list = state.collectedWords[state.lang] || (state.collectedWords[state.lang] = []);
+    if (list.includes(wordKey)) return null;
+    const prevCount = getCustomConnectLevels(state.lang).length;
+    list.push(wordKey);
+    const nextLevels = buildCustomLevelsForLang(state.lang);
+    if (nextLevels.length > prevCount) {
+      customLevelsCache[state.lang] = nextLevels;
+      populateLevelDropdown();
+      const newest = nextLevels[nextLevels.length - 1];
+      trackEvent("custom_level_unlocked", { lang: state.lang, level_id: newest.id, total_collected: list.length });
+      return newest;
+    }
+    return null;
+  }
+
   function getLevels() {
     if (state.mode === "connections") {
       return state.lang === "en" ? window.CONN_DATA.EN_LEVELS : window.CONN_DATA.VI_LEVELS;
     }
     const data = state.lang === "en" ? window.EN_DATA : window.VI_DATA;
-    return state.mode === "connect" ? data.CONNECT_LEVELS : data.MERGE_LEVELS;
+    if (state.mode === "connect") {
+      return [...data.CONNECT_LEVELS, ...getCustomConnectLevels(state.lang)];
+    }
+    return data.MERGE_LEVELS;
   }
 
   function getDailyIndex(levelsLen) {
@@ -838,9 +944,14 @@
     const levels = getLevels();
     state.levelIndex = (index + levels.length) % levels.length;
     if (fresh && state.mode === "connect") {
-      const dataPack = state.lang === "en" ? window.EN_DATA : window.VI_DATA;
-      if (dataPack && typeof dataPack.reshuffleLevel === "function") {
-        dataPack.reshuffleLevel(levels[state.levelIndex].id);
+      const cur = levels[state.levelIndex];
+      if (cur && cur.isCustom) {
+        getCustomConnectLevels(state.lang, true);
+      } else {
+        const dataPack = state.lang === "en" ? window.EN_DATA : window.VI_DATA;
+        if (dataPack && typeof dataPack.reshuffleLevel === "function") {
+          dataPack.reshuffleLevel(cur.id);
+        }
       }
     }
     const lvl = getCurrentLevel();
@@ -1119,6 +1230,7 @@
     state.bonusWords.unshift(makeBonusEntry(wordKey));
     state.combo += 1;
     const pts = awardOnce(lvl, `b:${wordKey}`, 15);
+    const unlockedCustom = collectExtraWord(wordKey);
 
     let bonusMsg = `Extra Ref: ${kpiNote(pts)}`;
     const rec = getRecord(lvl);
@@ -1128,6 +1240,15 @@
       state.hintQuota += 1;
       unlockAchievement("extra_ref");
       bonusMsg = `Extra Ref +${pts} KPI · Thưởng +1 Gợi ý!`;
+    }
+    if (unlockedCustom) {
+      bonusMsg = `✨ Đã mở Phiên Sưu Tầm mới: ${unlockedCustom.id}!`;
+    } else {
+      const totalCol = (state.collectedWords[state.lang] || []).length;
+      const mod = totalCol % COLLECT_THRESHOLD;
+      if (mod > 0) {
+        bonusMsg += ` · Sưu tầm ${mod}/${COLLECT_THRESHOLD} từ mở Phiên mới`;
+      }
     }
 
     setStatus(bonusMsg, "ok");
@@ -1149,7 +1270,7 @@
       state.completedBatches.add(lvl.id);
       trackEvent("level_complete", { level_id: lvl.id, mode: state.mode, lang: state.lang, mistakes: state.mistakes });
       state.streak += 1;
-      let clearBonus = lvl.tier === "Nâng cao" ? 120 : lvl.tier === "Trung bình" ? 80 : 60;
+      let clearBonus = lvl.tier === "Nâng cao" ? 120 : lvl.tier === "Sưu tầm" ? 100 : lvl.tier === "Trung bình" ? 80 : 60;
       if (state.deadlineMode) clearBonus = Math.round(clearBonus * 1.5);
       if (isCurrentDaily()) clearBonus *= 2;
       state.score += clearBonus;
