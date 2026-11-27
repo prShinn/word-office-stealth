@@ -479,7 +479,61 @@ window.EN_DATA = (function () {
     blackboard: "bảng đen", whiteboard: "bảng trắng", timetable: "thời khóa biểu",
     mindset: "tư duy", lifestyle: "lối sống", teamwork: "làm việc nhóm",
     backbone: "xương sống / trụ cột", heartbeat: "nhịp tim", footprint: "dấu chân",
-    brainstorm: "động não ý tưởng", breakthrough: "bước đột phá"
+    brainstorm: "động não ý tưởng", breakthrough: "bước đột phá",
+    // Bổ sung cho EN-21..EN-25 & EN-M13..EN-M16
+    prompt: "câu lệnh AI", model: "mô hình", train: "huấn luyện", bias: "thiên lệch",
+    vector: "véc-tơ", neural: "mạng nơ-ron",
+    cart: "giỏ hàng", shop: "cửa hàng", order: "đơn hàng", stock: "tồn kho",
+    store: "cửa tiệm", brand: "thương hiệu",
+    reach: "độ tiếp cận", click: "lượt nhấp", funnel: "phễu chuyển đổi", viral: "lan truyền",
+    boost: "đẩy mạnh", trend: "xu hướng",
+    vault: "kho bảo mật", patch: "bản vá", alert: "cảnh báo", breach: "rò rỉ dữ liệu",
+    shield: "lá chắn", cloud: "đám mây",
+    async: "bất đồng bộ", focus: "tập trung", sprint: "chu kỳ ngắn", standup: "họp nhanh",
+    remote: "từ xa", cowork: "làm việc chung",
+    startup: "khởi nghiệp", seedfund: "vốn hạt giống", pitchdeck: "bộ slide gọi vốn",
+    burnrate: "tốc độ đốt tiền", runway: "thời gian trụ vốn", breakeven: "hòa vốn",
+    roadmap: "lộ trình", milestone: "cột mốc",
+    clickbait: "giật tít câu view", hashtag: "thẻ gắn chủ đề", livestream: "phát trực tiếp",
+    newsletter: "bản tin email", copywrite: "viết nội dung quảng cáo", keyword: "từ khóa",
+    backlink: "liên kết trỏ về", conversion: "chuyển đổi",
+    chatbot: "trợ lý chat tự động", workflow: "luồng công việc", dataset: "tập dữ liệu",
+    pipeline: "đường ống xử lý", finetune: "tinh chỉnh mô hình", autofill: "tự động điền",
+    webhook: "cổng nhận sự kiện", metadata: "siêu dữ liệu",
+    onboarding: "hướng dẫn người mới", helpdesk: "bộ phận hỗ trợ",
+    upsell: "bán thêm gói cao", churnrate: "tỷ lệ rời bỏ", retention: "giữ chân khách hàng",
+    ticket: "phiếu yêu cầu", escalate: "chuyển cấp xử lý",
+    sla: "cam kết chất lượng dịch vụ",
+    // Bổ sung từ vựng IT chuyên sâu (EN-26..EN-30 & EN-M17..EN-M20)
+    merge: "gộp nhánh Git", stage: "đưa vào vùng chờ commit", reset: "đặt lại trạng thái",
+    http: "giao thức truyền tải web", cors: "chia sẻ tài nguyên chéo nguồn",
+    route: "định tuyến đường dẫn", trace: "truy vết lỗi hệ thống", cache: "bộ nhớ đệm",
+    sql: "ngôn ngữ truy vấn cơ sở dữ liệu", alter: "chỉnh sửa cấu trúc bảng",
+    sh: "trình thông dịch lệnh shell", ls: "liệt kê tệp thư mục", cd: "chuyển thư mục",
+    curl: "công cụ gọi HTTP dòng lệnh", shell: "giao diện dòng lệnh hệ điều hành",
+    docker: "nền tảng đóng gói container", sudo: "chạy lệnh quyền quản trị",
+    debug: "gỡ lỗi chương trình", guard: "câu lệnh bảo vệ điều kiện",
+    agent: "tác nhân phần mềm tự động",
+    // Ghép từ IT
+    typescript: "ngôn ngữ JS có kiểu tĩnh", websocket: "kết nối hai chiều thời gian thực",
+    stylesheet: "tệp định kiểu giao diện CSS", codebase: "kho mã nguồn dự án",
+    localhost: "máy chủ chạy cục bộ", callback: "hàm gọi lại bất đồng bộ",
+    promise: "đối tượng xử lý bất đồng bộ", bundler: "công cụ đóng gói mã nguồn",
+    polyfill: "mã bổ sung tính năng trình duyệt cũ", devtools: "bộ công cụ gỡ lỗi trình duyệt",
+    deadlock: "khóa chéo chờ nhau vô hạn", raceway: "đường đua",
+    threadpool: "nhóm luồng xử lý song song", ratelimit: "giới hạn tần suất gọi API",
+    loadbalance: "cân bằng tải hệ thống", microservice: "kiến trúc vi dịch vụ",
+    eventloop: "vòng lặp xử lý sự kiện", memleak: "rò rỉ bộ nhớ",
+    failover: "chuyển dự phòng khi gặp sự cố", healthcheck: "kiểm tra tình trạng sống của dịch vụ",
+    dockerfile: "tệp cấu hình dựng ảnh Docker", pipeline: "đường ống CI/CD tự động",
+    container: "môi trường chạy cô lập", kubernetes: "hệ thống điều phối container",
+    rollback: "khôi phục về phiên bản trước", bluegreen: "triển khai không gián đoạn",
+    terraform: "công cụ hạ tầng dưới dạng mã", autoscaling: "tự động co giãn tài nguyên",
+    firewall: "tường lửa bảo vệ mạng", whitelist: "danh sách cho phép truy cập",
+    blacklist: "danh sách chặn truy cập", keycloak: "hệ thống quản lý định danh SSO",
+    payload: "dữ liệu gói tin truyền đi", checksum: "mã kiểm tra toàn vẹn dữ liệu",
+    plaintext: "văn bản thô chưa mã hóa", ciphertext: "văn bản đã được mã hóa",
+    sandbox: "môi trường chạy thử cô lập", zerotrust: "mô hình bảo mật không tin cậy mặc định"
   };
 
   function buildUnionLetters(words, extras) {
@@ -523,18 +577,31 @@ window.EN_DATA = (function () {
     { id: "EN-17", tier: "Nâng cao", topic: "Sức khỏe & Vận động", targets: ["run", "rest", "heal", "care", "lean", "pace", "heart", "pulse", "sleep"] },
     { id: "EN-18", tier: "Nâng cao", topic: "Thiết kế UI & Đồ họa", targets: ["grid", "icon", "crop", "font", "tint", "form"] },
     { id: "EN-19", tier: "Nâng cao", topic: "Vũ trụ & Thiên văn", targets: ["sky", "ion", "ray", "rays", "star", "mars", "atom", "moon", "solar"] },
-    { id: "EN-20", tier: "Nâng cao", topic: "Doanh nghiệp & Điều hành", targets: ["ceo", "work", "deal", "sale", "cost", "team", "clerk"] }
+    { id: "EN-20", tier: "Nâng cao", topic: "Doanh nghiệp & Điều hành", targets: ["ceo", "work", "deal", "sale", "cost", "team", "clerk"] },
+    { id: "EN-21", tier: "Nâng cao", topic: "AI & Khoa học Dữ liệu", targets: ["ai", "data", "mode", "model", "idea", "lead", "deal", "load", "mail", "date"] },
+    { id: "EN-22", tier: "Trung bình", topic: "Thương mại Điện tử", targets: ["pay", "sale", "cart", "cost", "rate", "case", "seal", "store", "order"] },
+    { id: "EN-23", tier: "Trung bình", topic: "Marketing & Tăng trưởng", targets: ["ad", "seo", "lead", "deal", "sale", "goal", "page", "edge", "load"] },
+    { id: "EN-24", tier: "Nâng cao", topic: "An ninh Mạng & Đám mây", targets: ["key", "lock", "code", "node", "link", "sync", "disk", "site", "icon"] },
+    { id: "EN-25", tier: "Trung bình", topic: "Làm việc Từ xa & Năng suất", targets: ["plan", "task", "team", "time", "meet", "note", "mail", "list", "step", "item"] },
+    { id: "EN-26", tier: "Nâng cao", topic: "[IT] Git & Mã nguồn", targets: ["git", "tag", "log", "get", "set", "edit", "mode", "merge", "model", "stage", "store", "alert"] },
+    { id: "EN-27", tier: "Nâng cao", topic: "[IT] Web & REST API", targets: ["api", "code", "cors", "head", "host", "node", "path", "port", "post", "rest", "site", "trace"] },
+    { id: "EN-28", tier: "Nâng cao", topic: "[IT] Database & SQL", targets: ["sql", "row", "data", "load", "read", "sort", "alter", "store", "table", "rate", "date", "lead"] },
+    { id: "EN-29", tier: "Nâng cao", topic: "[IT] DevOps, Docker & Linux", targets: ["cd", "ls", "sh", "code", "curl", "disk", "lock", "node", "sudo", "cloud", "docker", "core"] },
+    { id: "EN-30", tier: "Nâng cao", topic: "[IT] Clean Code & Debug", targets: ["bug", "code", "set", "run", "agent", "debug", "guard", "route", "stage", "store", "trace"] }
   ];
 
   const CONNECT_LEVELS = RAW_CONNECT.map((lvl) => {
     const validTargets = lvl.targets
       .filter((w) => DICT[w])
       .sort((a, b) => a.length - b.length || a.localeCompare(b));
-    // Mức Nâng cao thêm 1 chữ cái nhiễu nếu lưới chưa đầy 12 ô để tăng độ thử thách
+    // Mức Nâng cao lấp đầy lên tối thiểu 11 chữ cái (tối đa 12) để tăng độ thử thách, tránh đoán mò
     const baseLetters = buildUnionLetters(validTargets);
-    if (lvl.tier === "Nâng cao" && baseLetters.length < 12) {
-      const filler = ["X", "Q", "W", "Z"].find((c) => !baseLetters.includes(c));
-      if (filler) baseLetters.push(filler);
+    if (lvl.tier === "Nâng cao") {
+      const fillers = ["X", "Q", "W", "Z", "J", "K"];
+      for (const f of fillers) {
+        if (baseLetters.length >= 11) break;
+        if (!baseLetters.includes(f)) baseLetters.push(f);
+      }
     }
     return {
       id: lvl.id,
@@ -741,6 +808,142 @@ window.EN_DATA = (function () {
         ["foot", "print", "footprint", "dấu ấn"],
         ["brain", "storm", "brainstorm", "động não ý tưởng"],
         ["break", "through", "breakthrough", "bước đột phá"]
+      ]
+    },
+    {
+      id: "EN-M13",
+      tier: "Nâng cao",
+      topic: "Khởi nghiệp & Gọi vốn",
+      decoys: ["angel", "equity", "grant", "scale"],
+      pairs: [
+        ["start", "up", "startup", "công ty khởi nghiệp"],
+        ["seed", "fund", "seedfund", "vốn hạt giống"],
+        ["pitch", "deck", "pitchdeck", "bộ slide gọi vốn"],
+        ["burn", "rate", "burnrate", "tốc độ đốt tiền"],
+        ["run", "way", "runway", "thời gian trụ vốn"],
+        ["break", "even", "breakeven", "điểm hòa vốn"],
+        ["road", "map", "roadmap", "lộ trình sản phẩm"],
+        ["mile", "stone", "milestone", "cột mốc quan trọng"]
+      ]
+    },
+    {
+      id: "EN-M14",
+      tier: "Trung bình",
+      topic: "Digital Marketing",
+      decoys: ["brand", "viral", "reach", "funnel"],
+      pairs: [
+        ["click", "bait", "clickbait", "giật tít câu nhấp"],
+        ["hash", "tag", "hashtag", "thẻ gắn chủ đề"],
+        ["live", "stream", "livestream", "phát sóng trực tiếp"],
+        ["news", "letter", "newsletter", "bản tin email"],
+        ["copy", "write", "copywrite", "viết nội dung quảng cáo"],
+        ["key", "word", "keyword", "từ khóa tìm kiếm"],
+        ["back", "link", "backlink", "liên kết trỏ về"],
+        ["land", "ing", "landing", "trang đích chiến dịch"]
+      ]
+    },
+    {
+      id: "EN-M15",
+      tier: "Nâng cao",
+      topic: "AI & Tự động hóa",
+      decoys: ["agent", "token", "model", "prompt"],
+      pairs: [
+        ["chat", "bot", "chatbot", "trợ lý chat tự động"],
+        ["work", "flow", "workflow", "luồng công việc"],
+        ["data", "set", "dataset", "tập dữ liệu"],
+        ["pipe", "line", "pipeline", "đường ống xử lý"],
+        ["fine", "tune", "finetune", "tinh chỉnh mô hình"],
+        ["auto", "fill", "autofill", "tự động điền"],
+        ["web", "hook", "webhook", "cổng nhận sự kiện"],
+        ["meta", "data", "metadata", "siêu dữ liệu"]
+      ]
+    },
+    {
+      id: "EN-M16",
+      tier: "Trung bình",
+      topic: "Chăm sóc Khách hàng",
+      decoys: ["agent", "reply", "score", "bonus"],
+      pairs: [
+        ["on", "boarding", "onboarding", "hướng dẫn người mới"],
+        ["help", "desk", "helpdesk", "bộ phận hỗ trợ"],
+        ["up", "sell", "upsell", "bán thêm gói cao"],
+        ["churn", "rate", "churnrate", "tỷ lệ rời bỏ"],
+        ["feed", "back", "feedback", "phản hồi khách hàng"],
+        ["check", "in", "checkin", "hỏi thăm định kỳ"],
+        ["follow", "up", "followup", "theo dõi sau bán"],
+        ["call", "back", "callback", "gọi lại hỗ trợ"]
+      ]
+    },
+    {
+      id: "EN-M17",
+      tier: "Nâng cao",
+      topic: "[IT] Lập trình Web & JS",
+      decoys: ["script", "react", "state", "fetch", "async", "parse"],
+      pairs: [
+        ["type", "script", "typescript", "ngôn ngữ JS có kiểu tĩnh"],
+        ["web", "socket", "websocket", "kết nối hai chiều thời gian thực"],
+        ["style", "sheet", "stylesheet", "tệp định kiểu giao diện CSS"],
+        ["code", "base", "codebase", "kho mã nguồn dự án"],
+        ["local", "host", "localhost", "máy chủ chạy cục bộ"],
+        ["call", "back", "callback", "hàm gọi lại bất đồng bộ"],
+        ["dev", "tools", "devtools", "bộ công cụ gỡ lỗi trình duyệt"],
+        ["poly", "fill", "polyfill", "mã bổ sung cho trình duyệt cũ"],
+        ["check", "sum", "checksum", "mã kiểm tra toàn vẹn dữ liệu"],
+        ["sand", "box", "sandbox", "môi trường chạy thử cô lập"]
+      ]
+    },
+    {
+      id: "EN-M18",
+      tier: "Nâng cao",
+      topic: "[IT] Hệ thống & Concurrency",
+      decoys: ["mutex", "queue", "cache", "shard", "proxy", "retry"],
+      pairs: [
+        ["dead", "lock", "deadlock", "khóa chéo chờ nhau vô hạn"],
+        ["thread", "pool", "threadpool", "nhóm luồng xử lý song song"],
+        ["rate", "limit", "ratelimit", "giới hạn tần suất gọi API"],
+        ["load", "balance", "loadbalance", "cân bằng tải hệ thống"],
+        ["micro", "service", "microservice", "kiến trúc vi dịch vụ"],
+        ["event", "loop", "eventloop", "vòng lặp xử lý sự kiện"],
+        ["mem", "leak", "memleak", "rò rỉ bộ nhớ"],
+        ["fail", "over", "failover", "chuyển dự phòng khi gặp sự cố"],
+        ["health", "check", "healthcheck", "kiểm tra trạng thái dịch vụ"],
+        ["time", "out", "timeout", "quá thời gian chờ phản hồi"]
+      ]
+    },
+    {
+      id: "EN-M19",
+      tier: "Nâng cao",
+      topic: "[IT] DevOps & Hạ tầng Cloud",
+      decoys: ["image", "stage", "build", "nginx", "helm", "vault"],
+      pairs: [
+        ["docker", "file", "dockerfile", "tệp cấu hình dựng ảnh Docker"],
+        ["pipe", "line", "pipeline", "đường ống CI/CD tự động"],
+        ["roll", "back", "rollback", "khôi phục về phiên bản trước"],
+        ["blue", "green", "bluegreen", "triển khai không gián đoạn"],
+        ["auto", "scaling", "autoscaling", "tự động co giãn tài nguyên"],
+        ["terra", "form", "terraform", "công cụ hạ tầng dưới dạng mã"],
+        ["web", "hook", "webhook", "cổng nhận sự kiện tự động"],
+        ["end", "point", "endpoint", "địa chỉ điểm cuối API"],
+        ["run", "time", "runtime", "môi trường thực thi ứng dụng"],
+        ["source", "code", "sourcecode", "mã nguồn chương trình"]
+      ]
+    },
+    {
+      id: "EN-M20",
+      tier: "Nâng cao",
+      topic: "[IT] Bảo mật & Mã hóa",
+      decoys: ["token", "oauth", "https", "audit", "alert", "breach"],
+      pairs: [
+        ["fire", "wall", "firewall", "tường lửa bảo vệ mạng"],
+        ["white", "list", "whitelist", "danh sách cho phép truy cập"],
+        ["black", "list", "blacklist", "danh sách chặn truy cập"],
+        ["pay", "load", "payload", "dữ liệu gói tin truyền đi"],
+        ["plain", "text", "plaintext", "văn bản thô chưa mã hóa"],
+        ["cipher", "text", "ciphertext", "văn bản đã được mã hóa"],
+        ["zero", "trust", "zerotrust", "bảo mật không tin cậy mặc định"],
+        ["pass", "word", "password", "mật khẩu xác thực"],
+        ["key", "cloak", "keycloak", "hệ thống định danh SSO"],
+        ["back", "door", "backdoor", "cửa hậu xâm nhập trái phép"]
       ]
     }
   ];
