@@ -1,7 +1,6 @@
 (function () {
   const STORAGE_KEY = "word_office_stealth_v3";
   const AUTH_KEY = "word_office_current_user";
-  const APP_VERSION = "20261127-03";
   const DAILY_HINT_GRANT = 0;
 
   function trackEvent(name, params) {
@@ -1131,6 +1130,7 @@
 
     startTimer();
     updateStatsUI();
+    document.dispatchEvent(new Event("levelloaded"));
   }
 
   // ================= CONNECT MODE =================
@@ -2195,41 +2195,55 @@
     setStatus(shown.includes("Quà mỗi ngày") ? `${shown} · ${reminder}` : reminder, "warn");
   }
 
-  // Tự động kiểm tra bản build mới từ GitHub Pages (qua ETag / Last-Modified) khi người dùng quay lại tab, không chạy định kỳ
-  let initialBuildTag = null;
+  // Tự cập nhật: so phiên bản ĐANG CHẠY (?v của app.js) với ?v trong index.html mới nhất trên máy chủ.
+  // So với mã đang chạy nên tab mở từ bản lưu tạm cũ vẫn nhận ra. Mỗi lần phát hành phải tăng ?v trong index.html.
+  // Kiểm tra khi mở trang, quay lại tab và đổi Phiên (không chạy định kỳ).
+  const runningVersion = new URL(document.currentScript.src).searchParams.get("v");
+  let pendingVersion = null;
   let lastVersionCheckAt = 0;
 
-  async function fetchBuildTag() {
-    const res = await fetch("./index.html", { method: "HEAD", cache: "no-store" });
-    if (!res.ok) return "";
-    return res.headers.get("etag") || res.headers.get("last-modified") || "";
+  // Chỉ tải lại khi không làm mất gì đang dở (mỗi Phiên không lưu bàn dở)
+  function canReloadNow() {
+    if (window.RewardedAd.isOpen() || window.Leaderboard.isOpen()) return false;
+    if (document.querySelector(".modal-backdrop:not(.hidden)")) return false;
+    if (state.batchFailed || isBatchDone()) return true;
+    return !(
+      state.solvedTargets.size ||
+      state.solvedPairs.size ||
+      state.connSolvedLevels.length ||
+      state.bonusWords.length ||
+      state.mistakes ||
+      state.usedHintInBatch
+    );
+  }
+
+  function applyPendingUpdate() {
+    if (!pendingVersion || !canReloadNow()) return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("_v") === pendingVersion) return; // Đã thử tải bản này: tránh lặp vô hạn
+    url.searchParams.set("_v", pendingVersion);
+    saveProgress();
+    window.location.replace(url.toString());
   }
 
   async function checkAppVersionUpdate() {
+    if (pendingVersion) return applyPendingUpdate();
     const now = Date.now();
-    if (now - lastVersionCheckAt < 30000) return;
+    if (!runningVersion || now - lastVersionCheckAt < 30000) return;
     lastVersionCheckAt = now;
     try {
-      const remoteTag = await fetchBuildTag();
-      if (!remoteTag) return;
-      if (initialBuildTag === null) {
-        initialBuildTag = remoteTag;
-        return;
-      }
-      if (remoteTag === initialBuildTag) return;
-      if (window.RewardedAd?.isOpen?.()) return; // Không cắt ngang lúc đang xem quảng cáo
-
-      saveProgress();
-      const url = new URL(window.location.href);
-      url.searchParams.set("_v", String(now));
-      window.location.replace(url.toString());
+      const res = await fetch(`./index.html?t=${now}`, { cache: "no-store" });
+      if (!res.ok) return;
+      const match = (await res.text()).match(/app\.js\?v=([\w.-]+)/);
+      if (!match || match[1] === runningVersion) return;
+      pendingVersion = match[1];
+      applyPendingUpdate();
     } catch (_) {}
   }
 
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-      checkAppVersionUpdate();
-    }
+    if (document.visibilityState === "visible") checkAppVersionUpdate();
   });
-  setTimeout(checkAppVersionUpdate, 2000);
+  document.addEventListener("levelloaded", () => checkAppVersionUpdate());
+  checkAppVersionUpdate();
 })();
