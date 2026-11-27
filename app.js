@@ -1,6 +1,7 @@
 (function () {
   const STORAGE_KEY = "word_office_stealth_v3";
   const AUTH_KEY = "word_office_current_user";
+  const APP_VERSION = "20261127-01";
   const DAILY_HINT_GRANT = 0;
 
   function trackEvent(name, params) {
@@ -11,13 +12,16 @@
     } catch (_) {}
   }
   const INITIAL_HINT_QUOTA = 1;
-  const DEADLINE_SECONDS = 90;
+  // Giới hạn thời gian mỗi Phiên (giây) theo độ khó; chế độ Tăng tốc còn một nửa
+  const TIME_LIMITS = { "Cơ bản": 180, "Trung bình": 240, "Nâng cao": 300 };
+  const DEFAULT_TIME_LIMIT = 240;
+  const TIMEOUT_RESET_MS = 3000;
 
   const ACHIEVEMENTS = [
     { id: "first_batch", title: "Khởi động suôn sẻ", desc: "Hoàn thành Phiên đầu tiên" },
     { id: "clean_sheet", title: "Clean Sheet", desc: "Hoàn thành 1 Phiên với 0 lỗi sai" },
     { id: "combo_5", title: "Chuỗi Đỉnh Cao", desc: "Đạt Combo x5 liên tiếp" },
-    { id: "deadline_win", title: "Vượt mốc Deadline", desc: "Hoàn thành Phiên khi bật Deadline 90s" },
+    { id: "deadline_win", title: "Vượt mốc Deadline", desc: "Hoàn thành Phiên khi bật chế độ Tăng tốc" },
     { id: "conn_master", title: "Phân loại thành thạo", desc: "Giải xong 1 Phiên Phân Nhóm 4x4" },
     { id: "extra_ref", title: "Mắt Diều Hâu", desc: "Tìm 3 Extra Refs trong cùng 1 Phiên" }
   ];
@@ -40,7 +44,7 @@
     focusedTargetKey: null,
     crossword: null,      // { rows, cols, cells, placements }
     bonusWords: [],
-    progress: {},         // { levelId: { paid: [], bonusPaid: 0, board: {...} | null } }
+    progress: {},         // { levelId: { paid: [], bonusPaid: 0 } }
 
     // Merge state
     mergeTiles: [],
@@ -59,8 +63,10 @@
     combo: 0,
     maxComboEver: 0,
     deadlineMode: false,
-    timeLeft: DEADLINE_SECONDS,
+    timeLeft: DEFAULT_TIME_LIMIT,
     timerId: null,
+    timeoutResetId: null,
+    timerWaiting: false,  // sau khi tự reset: chờ người dùng thao tác mới tính giờ
 
     // Economy & Persistence
     usedHintInBatch: false,
@@ -414,50 +420,12 @@
     };
   }
 
-  function storeBoard(lvl) {
-    const rec = getRecord(lvl);
-    if (state.batchFailed) {
-      rec.board = null;
-      return;
-    }
-    if (state.deadlineMode) {
-      // Lượt Deadline không ghi đè bàn đang chơi dở
-      if (isBatchDone()) rec.board = null;
-      return;
-    }
-    const solved =
-      state.mode === "connect"
-        ? Array.from(state.solvedTargets)
-        : state.mode === "merge"
-          ? Array.from(state.solvedPairs)
-          : state.connSolvedLevels.slice();
-    rec.board = {
-      solved,
-      hints: state.revealedHints,
-      bonus: state.bonusWords.map((b) => b.key),
-      mistakes: state.mistakes,
-      usedHint: state.usedHintInBatch
-    };
-  }
-
-  // Deadline luôn bắt đầu bàn trắng để không giải trước rồi mới bấm giờ
-  function restoreBoard(lvl) {
-    const rec = getRecord(lvl);
-    if (state.deadlineMode) return;
-    const board =
-      rec.board || (state.completedBatches.has(lvl.id) ? { solved: getAllSolvedKeys(lvl) } : null);
-    if (!board) return;
-
-    const valid = getAllSolvedKeys(lvl);
-    const solved = Array.isArray(board.solved) ? board.solved.filter((k) => valid.includes(k)) : [];
+  function restoreBoard(lvl, fresh) {
+    if (fresh || !state.completedBatches.has(lvl.id)) return;
+    const solved = getAllSolvedKeys(lvl);
     if (state.mode === "connect") state.solvedTargets = new Set(solved);
     else if (state.mode === "merge") state.solvedPairs = new Set(solved);
-    else state.connSolvedLevels = solved;
-
-    state.revealedHints = { ...board.hints };
-    state.bonusWords = (Array.isArray(board.bonus) ? board.bonus : []).map(makeBonusEntry).filter(Boolean);
-    state.mistakes = Number.isInteger(board.mistakes) ? board.mistakes : 0;
-    state.usedHintInBatch = board.usedHint === true;
+    else state.connSolvedLevels = solved.slice();
   }
 
   function showRetryButtons() {
@@ -669,13 +637,11 @@
     els.hudMistakes.classList.toggle("danger", state.mistakes >= state.maxMistakes - 1);
 
     els.btnDeadlineMode.classList.toggle("active", state.deadlineMode);
-    els.hudTimer.classList.toggle("hidden", !state.deadlineMode);
-    if (state.deadlineMode) {
-      const mm = String(Math.floor(state.timeLeft / 60)).padStart(2, "0");
-      const ss = String(state.timeLeft % 60).padStart(2, "0");
-      els.hudTimer.textContent = `⏱ ${mm}:${ss}`;
-      els.hudTimer.classList.toggle("urgent", state.timeLeft <= 15);
-    }
+    els.hudTimer.classList.remove("hidden");
+    const mm = String(Math.floor(state.timeLeft / 60)).padStart(2, "0");
+    const ss = String(state.timeLeft % 60).padStart(2, "0");
+    els.hudTimer.textContent = `⏱ ${mm}:${ss}`;
+    els.hudTimer.classList.toggle("urgent", state.timeLeft <= 15);
   }
 
   function getComboMultiplier() {
@@ -765,21 +731,51 @@
       clearInterval(state.timerId);
       state.timerId = null;
     }
+    // Người dùng đã tự chuyển/làm lại Phiên thì hủy lượt tự reset đang chờ
+    if (state.timeoutResetId) {
+      clearTimeout(state.timeoutResetId);
+      state.timeoutResetId = null;
+    }
   }
 
-  function startTimerIfEnabled() {
+  function getTimeLimit() {
+    const limit = TIME_LIMITS[getCurrentLevel().tier] || DEFAULT_TIME_LIMIT;
+    return state.deadlineMode ? Math.round(limit / 2) : limit;
+  }
+
+  // Đồng hồ đứng khi người dùng không ở màn luyện tập
+  function isTimerPaused() {
+    return (
+      state.bossMode ||
+      state.timerWaiting ||
+      document.hidden ||
+      window.RewardedAd.isOpen() ||
+      ["achievements-modal", "auth-modal", "legal-modal"].some((id) => {
+        const el = $(id);
+        return el && !el.classList.contains("hidden");
+      })
+    );
+  }
+
+  function startTimer() {
     stopTimer();
-    state.timeLeft = DEADLINE_SECONDS;
+    state.timeLeft = getTimeLimit();
     updateHudUI();
-    if (!state.deadlineMode || state.batchFailed) return;
+    if (state.batchFailed || isBatchDone()) return;
 
     state.timerId = setInterval(() => {
-      if (state.bossMode || state.batchFailed || isBatchDone() || window.RewardedAd.isOpen()) return;
+      if (state.batchFailed || isBatchDone() || isTimerPaused()) return;
       state.timeLeft -= 1;
       updateHudUI();
       if (state.timeLeft <= 0) {
-        stopTimer();
-        failCurrentBatch("#TIMEOUT! Hết thời gian Deadline 90s");
+        failCurrentBatch("#TIMEOUT! Hết thời gian · Phiên sẽ reset sau 3 giây");
+        state.timeoutResetId = setTimeout(() => {
+          state.timeoutResetId = null;
+          state.timerWaiting = true;
+          // Giống nút "Làm lại Phiên": đổi đề để không dò đáp án
+          loadLevel(state.levelIndex, true);
+          setStatus("Đã reset do hết giờ · Chạm hoặc bấm phím để bắt đầu tính giờ", "warn");
+        }, TIMEOUT_RESET_MS);
       }
     }, 1000);
   }
@@ -799,7 +795,6 @@
       failCurrentBatch(`${msg} — Đã quá giới hạn ${state.maxMistakes} lỗi!`);
     } else {
       setStatus(`${msg} (Lỗi ${state.mistakes}/${state.maxMistakes})`, "err");
-      storeBoard(getCurrentLevel());
       saveProgress();
     }
   }
@@ -1069,12 +1064,7 @@
     els.btnRetryMerge.classList.add("hidden");
     els.btnConnRetry.classList.add("hidden");
     setStatus("Ready", "");
-    if (fresh) {
-      // Chơi lại: xóa bàn cũ, giữ lịch sử đã trả KPI
-      const rec = getRecord(lvl);
-      rec.board = { solved: [] };
-    }
-    restoreBoard(lvl);
+    restoreBoard(lvl, fresh);
     if (isBatchDone()) {
       showRetryButtons();
       setStatus('Phiên đã hoàn tất · "Làm lại Phiên" để luyện lại', "ok");
@@ -1137,7 +1127,7 @@
       renderBonusList();
     }
 
-    startTimerIfEnabled();
+    startTimer();
     updateStatsUI();
   }
 
@@ -1763,7 +1753,6 @@
     els.statScore.textContent = `Tổng KPI: ${state.score}`;
     updateHudUI();
     updateHintButtonUI();
-    storeBoard(lvl);
     saveProgress();
   }
 
@@ -1978,6 +1967,12 @@
       if (state.hintQuota > 0) triggerHint();
       else requestHintByAd();
     });
+
+    const resumeTimer = () => {
+      state.timerWaiting = false;
+    };
+    document.addEventListener("pointerdown", resumeTimer, true);
+    document.addEventListener("keydown", resumeTimer, true);
 
     els.btnDeadlineMode.addEventListener("click", () => {
       state.deadlineMode = !state.deadlineMode;
@@ -2196,4 +2191,35 @@
     const reminder = `Giải 1 mục hôm nay để giữ chuỗi ${daily.streak} ngày`;
     setStatus(shown.includes("Quà mỗi ngày") ? `${shown} · ${reminder}` : reminder, "warn");
   }
+
+  // Tự động kiểm tra bản cập nhật mới từ version.json khi mở/quay lại tab và reload ngầm phá cache
+  let lastVersionCheckAt = 0;
+  async function checkAppVersionUpdate() {
+    const now = Date.now();
+    if (now - lastVersionCheckAt < 60000) return;
+    lastVersionCheckAt = now;
+    try {
+      const res = await fetch(`./version.json?t=${now}`, { cache: "no-store" });
+      if (!res.ok) return;
+      const data = await res.json();
+      const remoteVer = data && typeof data.version === "string" ? data.version.trim() : "";
+      if (!remoteVer || remoteVer === APP_VERSION) return;
+
+      const url = new URL(window.location.href);
+      if (url.searchParams.get("_v") === remoteVer) return; // Tránh reload lặp nếu URL đã mang bản mới
+      if (window.RewardedAd?.isOpen?.()) return; // Không cắt ngang lúc đang xem quảng cáo
+
+      saveProgress();
+      url.searchParams.set("_v", remoteVer);
+      window.location.replace(url.toString());
+    } catch (_) {}
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      checkAppVersionUpdate();
+    }
+  });
+  setInterval(checkAppVersionUpdate, 5 * 60 * 1000);
+  setTimeout(checkAppVersionUpdate, 4000);
 })();
