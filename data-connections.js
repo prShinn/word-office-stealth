@@ -462,7 +462,7 @@ window.CONN_DATA = (function () {
       topic: "[Siêu khó] Chơi chữ Đảo Nghĩa & Đồng Âm",
       groups: [
         { level: 1, title: "Đi sau KHÓA (Khóa ___)", words: ["Chính", "Ngoại", "Chéo", "Mềm"] },
-        { level: 2, title: "Đi sau BẢN (Bản ___)", words: ["Vá", "Nháp", "Ghi", "Màu"] },
+        { level: 2, title: "Đi sau BẢN (Bản ___)", words: ["Vá", "Nháp", "Sao", "Màu"] },
         { level: 3, title: "Cặp từ chỉ Chiều dữ liệu", words: ["Đọc", "Ghi", "Xuất", "Nhập"] },
         { level: 4, title: "Từ đi với MẶT (Mặt ___)", words: ["Bằng", "Tiền", "Cắt", "Nạ"] }
       ]
