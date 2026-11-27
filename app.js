@@ -228,9 +228,79 @@
     customLevelsCache = { vi: [], en: [] };
   }
 
+  const MAX_LOCAL_BYTES = 128 * 1024; // Trần 128KB mỗi tài khoản trong localStorage
+  const MAX_LOCAL_ACCOUNTS = 5;       // Tối đa 5 tài khoản lưu trên 1 trình duyệt
+  const ACCOUNT_TTL_MS = 30 * 86400000; // Tự động xóa tài khoản không hoạt động > 30 ngày
+  const MAX_COLLECTED_PER_LANG = 120;
+  const MAX_PROGRESS_ENTRIES = 40;
+  const ENGAGE_KEY_PREFIX = "word_office_stealth_engage_v1_";
+
+  function cleanupStaleLocalAccounts(activeUser) {
+    try {
+      const prefix = `${STORAGE_KEY}_`;
+      const now = Date.now();
+      const entries = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (!key || !key.startsWith(prefix)) continue;
+        const uname = key.slice(prefix.length);
+        let lastActiveAt = 0;
+        try {
+          const parsed = JSON.parse(localStorage.getItem(key) || "{}");
+          lastActiveAt = typeof parsed.lastActiveAt === "number" ? parsed.lastActiveAt : 0;
+        } catch (_) {}
+        if (uname !== activeUser && lastActiveAt > 0 && now - lastActiveAt > ACCOUNT_TTL_MS) {
+          localStorage.removeItem(key);
+          localStorage.removeItem(`${ENGAGE_KEY_PREFIX}${uname}`);
+          i -= 1;
+          continue;
+        }
+        entries.push({ key, uname, lastActiveAt });
+      }
+      if (entries.length > MAX_LOCAL_ACCOUNTS) {
+        entries
+          .filter((e) => e.uname !== activeUser)
+          .sort((a, b) => a.lastActiveAt - b.lastActiveAt)
+          .slice(0, entries.length - MAX_LOCAL_ACCOUNTS)
+          .forEach((e) => {
+            localStorage.removeItem(e.key);
+            localStorage.removeItem(`${ENGAGE_KEY_PREFIX}${e.uname}`);
+          });
+      }
+    } catch (_) {}
+  }
+
+  function compactPayloadForStorage(payload) {
+    const trimmed = {
+      ...payload,
+      collectedWords: {
+        vi: (payload.collectedWords?.vi || []).slice(-MAX_COLLECTED_PER_LANG),
+        en: (payload.collectedWords?.en || []).slice(-MAX_COLLECTED_PER_LANG)
+      }
+    };
+    const progEntries = Object.entries(payload.progress || {});
+    if (progEntries.length > MAX_PROGRESS_ENTRIES) {
+      trimmed.progress = Object.fromEntries(progEntries.slice(-MAX_PROGRESS_ENTRIES));
+    }
+    let json = JSON.stringify(trimmed);
+    const byteLen = (s) => (typeof TextEncoder !== "undefined" ? new TextEncoder().encode(s).byteLength : s.length * 2);
+    if (byteLen(json) > MAX_LOCAL_BYTES) {
+      // Cắt bớt lịch sử từng phiên nếu vẫn vượt ngưỡng 128KB
+      const slimProg = Object.entries(trimmed.progress || {}).slice(-15);
+      trimmed.progress = Object.fromEntries(slimProg);
+      json = JSON.stringify(trimmed);
+    }
+    if (byteLen(json) > MAX_LOCAL_BYTES) {
+      trimmed.progress = {};
+      json = JSON.stringify(trimmed);
+    }
+    return { trimmed, json };
+  }
+
   function loadProgress() {
     resetUserProgressState();
     const user = getAuthUser();
+    cleanupStaleLocalAccounts(user);
     if (!user) {
       updateAuthUI();
       return;
@@ -263,7 +333,7 @@
     const user = getAuthUser();
     if (!user) return; // Chỉ lưu tiến độ khi đã đăng nhập
     try {
-      const payload = {
+      const rawPayload = {
         score: state.score,
         streak: state.streak,
         hintQuota: state.hintQuota,
@@ -276,10 +346,20 @@
         lang: state.lang,
         mode: state.mode,
         levelIndex: state.levelIndex,
-        progress: state.progress
+        progress: state.progress,
+        lastActiveAt: Date.now()
       };
-      localStorage.setItem(`${STORAGE_KEY}_${user}`, JSON.stringify(payload));
-      scheduleProfileSync(payload);
+      const { trimmed, json } = compactPayloadForStorage(rawPayload);
+      try {
+        localStorage.setItem(`${STORAGE_KEY}_${user}`, json);
+      } catch (_) {
+        // QuotaExceededError: dọn tài khoản cũ & thử lưu bản gọn
+        cleanupStaleLocalAccounts(user);
+        try {
+          localStorage.setItem(`${STORAGE_KEY}_${user}`, JSON.stringify({ ...trimmed, progress: {} }));
+        } catch (__) {}
+      }
+      scheduleProfileSync(trimmed);
     } catch (_) {}
   }
 
