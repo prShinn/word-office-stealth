@@ -599,16 +599,38 @@ window.EN_DATA = (function () {
     return copy;
   }
 
+  function canBuildFromLetters(word, lettersArr) {
+    const pool = {};
+    for (const ch of lettersArr) {
+      const k = ch.toLowerCase();
+      pool[k] = (pool[k] || 0) + 1;
+    }
+    for (const ch of word) {
+      if (!pool[ch]) return false;
+      pool[ch] -= 1;
+    }
+    return true;
+  }
+
+  const DICT_POOL_KEYS = Object.keys(DICT).filter((w) => w.length >= 3 && w.length <= 6);
+
   function buildConnectLevel(lvl, avoidWords) {
-    const allValid = lvl.targets.filter((w) => DICT[w]);
+    const baseValid = lvl.targets.filter((w) => DICT[w]);
+    const baseUnion = buildUnionLetters(baseValid);
+    const extraFromDict = shuffleArray(
+      DICT_POOL_KEYS.filter((w) => !baseValid.includes(w) && canBuildFromLetters(w, baseUnion))
+    ).slice(0, 14);
+    const allValid = [...baseValid, ...extraFromDict];
+
     const avoidSet = new Set(Array.isArray(avoidWords) ? avoidWords : []);
     const pool = [
       ...shuffleArray(allValid.filter((w) => !avoidSet.has(w))),
       ...shuffleArray(allValid.filter((w) => avoidSet.has(w)))
     ];
+    const limitCount = lvl.tier === "Nâng cao" ? 8 : 7;
     const picked = [];
     for (const w of pool) {
-      if (picked.length >= 10) break;
+      if (picked.length >= limitCount) break;
       if (buildUnionLetters([...picked, w]).length <= 12) {
         picked.push(w);
       }
