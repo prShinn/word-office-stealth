@@ -1673,13 +1673,11 @@
             })
             .join(" ");
           wordCellHtml = `<span class="masked-word">${chars}</span>`;
-          // Ở mức Cơ bản cho gợi ý nghĩa đã che từ trùng đáp án; Trung bình/Nâng cao ẩn nghĩa tăng độ thử thách!
+          // Hiển thị gợi ý nghĩa cho cả 2 ngôn ngữ, mọi tier; che bớt từ trùng đáp án qua sanitizeClueMeaning
           const meaningText = state.lang === "en" ? entry : entry.meaning;
           const safeClue = escapeHtml(sanitizeClueMeaning(meaningText, wordKey, lvl.topic));
-          meaningHtml =
-            lvl.tier === "Cơ bản"
-              ? `<span class="masked-word">${dirLabel} · ${wordKey.length} chữ (${safeClue})</span>`
-              : `<span class="masked-word">${dirLabel} · ${wordKey.length} ký tự</span>`;
+          const lenUnit = state.lang === "en" ? "ký tự" : "chữ";
+          meaningHtml = `<span class="masked-word">${dirLabel} · ${wordKey.length} ${lenUnit} (${safeClue})</span>`;
         }
 
         tr.innerHTML = `
