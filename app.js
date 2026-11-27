@@ -11,9 +11,9 @@
     } catch (_) {}
   }
   const INITIAL_HINT_QUOTA = 1;
-  // Giới hạn thời gian mỗi Phiên (giây) theo độ khó; chế độ Tăng tốc còn một nửa
-  const TIME_LIMITS = { "Cơ bản": 180, "Trung bình": 240, "Nâng cao": 300 };
-  const DEFAULT_TIME_LIMIT = 240;
+  // Giới hạn thời gian mỗi Phiên: 10 phút (600s); chế độ Tăng tốc còn một nửa (5 phút)
+  const TIME_LIMITS = { "Cơ bản": 600, "Trung bình": 600, "Nâng cao": 600, "Sưu tầm": 600 };
+  const DEFAULT_TIME_LIMIT = 600;
   const TIMEOUT_RESET_MS = 3000;
 
   const ACHIEVEMENTS = [
