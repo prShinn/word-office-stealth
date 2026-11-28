@@ -3018,6 +3018,91 @@
       }
     });
 
+    // Custom Algo Modal Tabs
+    const tabSingleCustom = $("btn-tab-single-custom");
+    const tabBatchCustom = $("btn-tab-batch-custom");
+    const algoCustomForm = $("algo-custom-form");
+    const algoBatchWrap = $("algo-batch-wrap");
+    const batchAlgoJson = $("batch-algo-json");
+
+    tabSingleCustom?.addEventListener("click", () => {
+      tabSingleCustom.classList.add("active");
+      tabBatchCustom?.classList.remove("active");
+      algoCustomForm?.classList.remove("hidden");
+      algoBatchWrap?.classList.add("hidden");
+    });
+
+    tabBatchCustom?.addEventListener("click", () => {
+      tabBatchCustom.classList.add("active");
+      tabSingleCustom?.classList.remove("active");
+      algoBatchWrap?.classList.remove("hidden");
+      algoCustomForm?.classList.add("hidden");
+    });
+
+    $("btn-cancel-batch-custom")?.addEventListener("click", closeAlgoCustom);
+
+    $("btn-load-sample-quiz")?.addEventListener("click", () => {
+      if (!batchAlgoJson) return;
+      const sample = [
+        {
+          domain: "react",
+          domainLabel: "React",
+          tier: "Cơ bản",
+          topic: "React Custom Hook Naming",
+          snippet: "function useFetch(url) { /* ... */ }",
+          question: "Theo quy ước của React, mọi Custom Hook bắt buộc phải bắt đầu bằng tiền tố gì?",
+          type: "input",
+          expectedAnswers: ["use", "use..."],
+          explanation: "React yêu cầu Custom Hook phải bắt đầu bằng chữ 'use' để linter và compiler nhận diện và áp dụng Quy tắc Hooks (Rules of Hooks)."
+        },
+        {
+          domain: "nodejs",
+          domainLabel: "Node.js",
+          tier: "Cơ bản",
+          topic: "Node.js Global Object",
+          snippet: "console.log(typeof window, typeof global);",
+          question: "Trong Node.js runtime, đối tượng toàn cục tương đương với 'window' của trình duyệt tên là gì?",
+          type: "input",
+          expectedAnswers: ["global", "globalThis", "global\n"],
+          explanation: "Trong Node.js, đối tượng toàn cục là 'global' (hoặc 'globalThis' theo chuẩn ECMAScript hiện đại)."
+        }
+      ];
+      batchAlgoJson.value = JSON.stringify(sample, null, 2);
+      setStatus("Đã nạp đề thi mẫu vào khung JSON!", "ok");
+    });
+
+    $("btn-submit-batch-custom")?.addEventListener("click", () => {
+      const raw = (batchAlgoJson?.value || "").trim();
+      if (!raw) {
+        setStatus("Vui lòng dán nội dung JSON vào khung trước khi nhập", "warn");
+        return;
+      }
+      try {
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed) || parsed.length === 0) {
+          setStatus("Dữ liệu JSON phải là một mảng [] danh sách câu hỏi", "err");
+          return;
+        }
+        const count = window.ALGO_DATA?.addBatchCustomLevels?.(parsed) || 0;
+        if (count > 0) {
+          closeAlgoCustom();
+          if (batchAlgoJson) batchAlgoJson.value = "";
+          state.lang = "it";
+          state.mode = "algo";
+          state.algoDomain = "all";
+          document.querySelectorAll(".domain-pill").forEach(p => p.classList.toggle("active", p.dataset.domain === "all"));
+          populateLevelDropdown();
+          loadLevel(0, true);
+          saveProgress();
+          setStatus(`Đã nhập thành công ${count} câu hỏi vào ngân hàng Thuật toán!`, "ok");
+        } else {
+          setStatus("Không tìm thấy câu hỏi hợp lệ (cần có các trường topic, question)", "warn");
+        }
+      } catch (err) {
+        setStatus("Lỗi cú pháp JSON: " + err.message, "err");
+      }
+    });
+
     els.achModal.addEventListener("click", (e) => {
       if (e.target === els.achModal) els.achModal.classList.add("hidden");
     });

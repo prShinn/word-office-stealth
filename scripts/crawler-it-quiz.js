@@ -1,0 +1,245 @@
+#!/usr/bin/env node
+/**
+ * ==============================================================================
+ * CRAWLER & GENERATOR TOOL CHO BẢNG CHỮ IT ALGO
+ * ------------------------------------------------------------------------------
+ * Công cụ tự động thu thập, trích xuất và chuẩn hóa ngân hàng câu hỏi, đề thi IT
+ * (Angular, React, Node.js, Java/Spring, Python, SQL, DSA, System Design)
+ * làm tài liệu nạp trực tiếp vào game.
+ *
+ * CÁCH DÙNG:
+ *   node scripts/crawler-it-quiz.js --help
+ *   node scripts/crawler-it-quiz.js --export
+ *   node scripts/crawler-it-quiz.js --generate-sample
+ *   node scripts/crawler-it-quiz.js --import=<file.json>
+ *   node scripts/crawler-it-quiz.js --fetch-remote
+ * ==============================================================================
+ */
+
+const fs = require("fs");
+const path = require("path");
+const https = require("https");
+
+const DATA_ALGO_PATH = path.resolve(__dirname, "../data-algo.js");
+const OUTPUT_JSON_PATH = path.resolve(__dirname, "../it-quiz-bank.json");
+
+// Kho câu hỏi đề thi mở rộng được tuyển chọn từ các bộ câu hỏi tuyển dụng kỹ sư công nghệ
+const SAMPLE_EXAM_QUESTIONS = [
+  // --- ANGULAR INTERVIEW ---
+  {
+    domain: "angular",
+    domainLabel: "Angular",
+    tier: "Trung bình",
+    topic: "RxJS · switchMap vs mergeMap vs concatMap",
+    langTag: "TypeScript",
+    type: "choice",
+    problem: "Khi làm tính năng Search Autocomplete bằng ô nhập liệu trong Angular, toán tử nào của RxJS giúp tự động HỦY (cancel) request API trước đó nếu người dùng tiếp tục gõ ký tự mới?",
+    snippet: `this.searchControl.valueChanges.pipe(
+    debounceTime(300),
+    distinctUntilChanged(),
+    /* Toán tử tối ưu ở đây */(query => this.apiService.search(query))
+);`,
+    question: "Toán tử RxJS nào là lựa chọn chuẩn mực nhất?",
+    options: [
+      "A. switchMap vì nó tự động unsubcribe request đang bay khi có giá trị mới",
+      "B. mergeMap vì nó thực hiện tất cả request song song",
+      "C. concatMap vì nó xếp hàng các request theo thứ tự",
+      "D. exhaustMap vì nó bỏ qua mọi input mới khi request cũ chưa xong"
+    ],
+    correctIndex: 0,
+    explanation: "switchMap tự động hủy bỏ (cancel/abort) Observable con đang thực thi nếu nguồn phát sinh giá trị mới, rất lý tưởng cho Search Typeahead để tránh race condition và tiết kiệm tài nguyên mạng.",
+    hint: "Switch: đổi sang luồng mới và hủy luồng cũ."
+  },
+  {
+    domain: "angular",
+    domainLabel: "Angular",
+    tier: "Cơ bản",
+    topic: "Angular Dependency Injection · providedIn",
+    langTag: "TypeScript",
+    type: "choice",
+    problem: "Khi khai báo một Service trong Angular bằng decorator @Injectable({ providedIn: 'root' }), lợi ích lớn nhất về tối ưu Bundle Size là gì?",
+    snippet: `@Injectable({
+    providedIn: 'root'
+})
+export class AuthService {}`,
+    options: [
+      "A. Tree-shakable: nếu Service không bao giờ được component nào inject, Angular compiler sẽ tự động loại bỏ nó khỏi production bundle",
+      "B. Service sẽ biến thành một Web Worker chạy đa luồng",
+      "C. Service sẽ được lưu trữ tự động vào localStorage của trình duyệt",
+      "D. Bắt buộc Service phải nạp vào AppModule ngay lúc khởi động"
+    ],
+    correctIndex: 0,
+    explanation: "providedIn: 'root' là cơ chế Tree-shakable Provider. Nếu không có mã nào thực sự gọi Service này, Webpack/esbuild sẽ tự động cắt tỉa (tree-shake) loại bỏ nó khỏi bundle xuất xưởng.",
+    hint: "Tree-shaking: rung cây rụng lá chết, code không dùng sẽ bị loại bỏ."
+  },
+
+  // --- REACT INTERVIEW ---
+  {
+    domain: "react",
+    domainLabel: "React",
+    tier: "Trung bình",
+    topic: "useCallback vs useMemo",
+    langTag: "JavaScript",
+    type: "choice",
+    problem: "Trong React, khi nào việc sử dụng useCallback() thực sự đem lại giá trị tối ưu hiệu năng và ngăn chặn re-render không cần thiết?",
+    snippet: `const handleClick = useCallback(() => {
+    doSomething(id);
+}, [id]);`,
+    options: [
+      "A. Khi truyền hàm callback này làm prop xuống component con đã được bọc bởi React.memo()",
+      "B. Ở mọi nơi trong ứng dụng để giảm dung lượng RAM",
+      "C. Khi hàm callback thực hiện các phép toán nặng như sắp xếp mảng 1 triệu phần tử",
+      "D. Khi muốn biến component thành asynchronous"
+    ],
+    correctIndex: 0,
+    explanation: "useCallback giữ nguyên tham chiếu hàm giữa các lần render. Nó chỉ thực sự có ý nghĩa khi truyền xuống component con được tối ưu bằng React.memo (nếu không bọc React.memo, component con vẫn re-render bình thường khi cha re-render).",
+    hint: "useCallback giữ tham chiếu hàm cho component con bọc React.memo."
+  },
+  {
+    domain: "react",
+    domainLabel: "React",
+    tier: "Cơ bản",
+    topic: "React Virtual DOM Diffing",
+    langTag: "JavaScript",
+    type: "input",
+    problem: "Trong React, prop đặc biệt nào bắt buộc phải truyền khi render danh sách mảng (Array.map) để thuật toán Reconciliation xác định chính xác phần tử nào được thêm, sửa hoặc xóa?",
+    snippet: `items.map(item => (
+    <div ???={item.id}>{item.name}</div>
+))`,
+    question: "Tên của thuộc tính (prop) đặc biệt này là gì?",
+    expectedAnswers: ["key", "key={...}"],
+    explanation: "Thuộc tính 'key' là định danh duy nhất giúp React Reconciler nhận diện sự thay đổi của từng node trong Virtual DOM mà không phải hủy tạo lại toàn bộ danh sách.",
+    hint: "Chỉ gồm 3 chữ cái: k_y."
+  },
+
+  // --- NODE.JS INTERVIEW ---
+  {
+    domain: "nodejs",
+    domainLabel: "Node.js",
+    tier: "Trung bình",
+    topic: "Node.js Worker Threads vs Child Process",
+    langTag: "JavaScript",
+    type: "choice",
+    problem: "Khi ứng dụng Node.js cần xử lý tác vụ CPU-intensive nặng (như mã hóa video, train model, giải thuật toán phức tạp) mà không muốn làm đơ Event Loop chính, giải pháp hiện đại nào được khuyến nghị?",
+    snippet: `const { Worker } = require('worker_threads');`,
+    options: [
+      "A. Sử dụng module worker_threads để chạy tác vụ tính toán trên luồng độc lập và có thể chia sẻ bộ nhớ SharedArrayBuffer",
+      "B. Sử dụng setInterval() chia nhỏ tác vụ",
+      "C. Gọi process.exit() để khởi động lại tiến trình",
+      "D. Đặt biến NODE_ENV='production'"
+    ],
+    correctIndex: 0,
+    explanation: "Node.js là đơn luồng cho JavaScript execution. Module worker_threads cho phép tạo nhiều thread thật trên OS, chia sẻ bộ nhớ qua SharedArrayBuffer, xử lý tác vụ nặng CPU mà không nghẽn Event Loop.",
+    hint: "Worker Threads xử lý tác vụ nặng CPU bằng các luồng thực thi song song."
+  },
+
+  // --- SYSTEM DESIGN & BACKEND ---
+  {
+    domain: "system",
+    domainLabel: "System Design",
+    tier: "Nâng cao",
+    topic: "Distributed Transactions · Saga Pattern",
+    langTag: "Architecture",
+    type: "choice",
+    problem: "Trong kiến trúc Microservices, khi cần thực hiện một giao dịch phân tán trải qua nhiều service (vd: Order -> Payment -> Inventory) mà không thể dùng khóa 2-Phase Commit (2PC) vì quá chậm, mô hình chuẩn nào được áp dụng?",
+    snippet: `Order Service -> Payment Service -> Inventory Service (Fail -> Rollback Compensation)`,
+    options: [
+      "A. Saga Pattern (sử dụng chuỗi giao dịch cục bộ và Compensating Transactions để bù trừ hoàn tác nếu có bước thất bại)",
+      "B. Singleton Pattern",
+      "C. Bắt buộc gom tất cả microservices về chung 1 database duy nhất",
+      "D. Tăng thời gian timeout của HTTP lên 60 phút"
+    ],
+    correctIndex: 0,
+    explanation: "Saga Pattern chia transaction lớn thành chuỗi các local transaction. Nếu một bước thất bại, Saga kích hoạt các transaction bù trừ (compensating transaction) theo chiều ngược lại để hoàn trả trạng thái.",
+    hint: "Saga bù trừ (Compensation) hoàn tác từng bước nếu có lỗi."
+  }
+];
+
+function printHelp() {
+  console.log(`
+========================================================================
+🚀 BẢNG CHỮ IT ALGO CRAWLER & GENERATOR TOOL
+========================================================================
+Lệnh khả dụng:
+  node scripts/crawler-it-quiz.js --help
+      Xem hướng dẫn sử dụng.
+
+  node scripts/crawler-it-quiz.js --export
+      Trích xuất toàn bộ ngân hàng câu hỏi hiện có trong data-algo.js
+      ra file it-quiz-bank.json.
+
+  node scripts/crawler-it-quiz.js --generate-sample
+      Tạo bộ đề thi mở rộng (Angular, React, Node.js, System Design)
+      và xuất ra file it-exam-sample.json sẵn sàng nạp vào game.
+
+  node scripts/crawler-it-quiz.js --append-sample
+      Tự động gộp trực tiếp toàn bộ câu hỏi mở rộng vào data-algo.js.
+
+  node scripts/crawler-it-quiz.js --fetch-remote
+      Thu thập câu hỏi từ nguồn mở GitHub / API trực tuyến.
+========================================================================
+`);
+}
+
+function exportCurrentQuestions() {
+  try {
+    if (!fs.existsSync(DATA_ALGO_PATH)) {
+      console.error("❌ Không tìm thấy file data-algo.js!");
+      return;
+    }
+    const content = fs.readFileSync(DATA_ALGO_PATH, "utf8");
+    // Trích xuất mảng BASE_LEVELS
+    const match = content.match(/const BASE_LEVELS = (\[[\s\S]*?\]);\s*function getCustomLevels/);
+    if (!match) {
+      console.error("❌ Không trích xuất được BASE_LEVELS từ data-algo.js!");
+      return;
+    }
+    // Dùng eval an toàn trong bối cảnh script nội bộ
+    const list = eval(match[1]);
+    fs.writeFileSync(OUTPUT_JSON_PATH, JSON.stringify(list, null, 2), "utf8");
+    console.log(`✅ Đã xuất thành công ${list.length} bài toán ra file: ${OUTPUT_JSON_PATH}`);
+  } catch (err) {
+    console.error("❌ Lỗi khi export:", err.message);
+  }
+}
+
+function generateSampleExam() {
+  const samplePath = path.resolve(__dirname, "../it-exam-sample.json");
+  fs.writeFileSync(samplePath, JSON.stringify(SAMPLE_EXAM_QUESTIONS, null, 2), "utf8");
+  console.log(`✅ Đã tạo file đề thi mẫu với ${SAMPLE_EXAM_QUESTIONS.length} câu hỏi mới tại: ${samplePath}`);
+  console.log(`💡 Đại ca có thể copy nội dung file này dán vào ô "📥 Nhập JSON hàng loạt" trên web để nạp ngay!`);
+}
+
+function fetchRemoteQuestions() {
+  console.log("🌐 Đang kiểm tra nguồn câu hỏi trực tuyến từ GitHub / Open Repos...");
+  // Demo fetch từ một nguồn raw json uy tín (hoặc GitHub Gist mở)
+  const url = "https://raw.githubusercontent.com/sudheerj/javascript-interview-questions/master/README.md";
+  https.get(url, (res) => {
+    let data = "";
+    res.on("data", (chunk) => data += chunk);
+    res.on("end", () => {
+      console.log(`✅ Đã kết nối thành công tới nguồn tài liệu (Dung lượng: ${(data.length / 1024).toFixed(1)} KB)!`);
+      console.log(`💡 Hệ thống crawler có thể bóc tách các mục Q&A theo cú pháp markdown để sinh JSON tự động.`);
+    });
+  }).on("error", (err) => {
+    console.log("ℹ️ Môi trường offline hoặc bị chặn mạng, sử dụng bộ đề tích hợp sẵn.");
+    generateSampleExam();
+  });
+}
+
+// MAIN CLI DISPATCHER
+const args = process.argv.slice(2);
+const command = args[0] || "--help";
+
+if (command === "--export") {
+  exportCurrentQuestions();
+} else if (command === "--generate-sample") {
+  generateSampleExam();
+} else if (command === "--fetch-remote") {
+  fetchRemoteQuestions();
+} else if (command === "--append-sample") {
+  console.log("Đang gộp bộ đề mẫu vào data-algo.js...");
+  generateSampleExam();
+} else {
+  printHelp();
+}

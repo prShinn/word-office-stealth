@@ -9,7 +9,7 @@
   <meta property="og:type" content="website" />
   <title id="page-title">Bao_Cao_Kinh_Doanh_Q4 - Bảng Chữ</title>
   <link id="page-favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%230f766e'/%3E%3Crect x='5' y='5' width='6' height='6' rx='1.5' fill='white'/%3E%3Crect x='13' y='5' width='6' height='6' rx='1.5' fill='white' opacity='.55'/%3E%3Crect x='5' y='13' width='6' height='6' rx='1.5' fill='white' opacity='.55'/%3E%3Ccircle cx='16' cy='16' r='3' fill='white'/%3E%3C/svg%3E" />
-  <link rel="stylesheet" href="styles.css?v=20261128-20" />
+  <link rel="stylesheet" href="styles.css?v=20261128-21" />
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5DWNBBMQSX"></script>
   <script>
@@ -318,7 +318,10 @@
           <div class="algo-domain-pills" id="algo-domain-pills">
             <button class="domain-pill active" data-domain="all">Tất cả (All)</button>
             <button class="domain-pill" data-domain="dsa">⚡ DSA</button>
-            <button class="domain-pill" data-domain="js">🟨 JavaScript / TS</button>
+            <button class="domain-pill" data-domain="angular">🅰️ Angular</button>
+            <button class="domain-pill" data-domain="react">⚛️ React</button>
+            <button class="domain-pill" data-domain="nodejs">🟢 Node.js</button>
+            <button class="domain-pill" data-domain="js">🟨 JS / TS</button>
             <button class="domain-pill" data-domain="java">☕ Java / Spring</button>
             <button class="domain-pill" data-domain="python">🐍 Python</button>
             <button class="domain-pill" data-domain="sql">🗄️ SQL / DB</button>
@@ -485,6 +488,11 @@
         <button class="modal-close" id="btn-close-algo-custom">✕</button>
       </div>
       <div class="modal-body">
+        <div style="display: flex; gap: 6px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+          <button type="button" class="mini-pill active" id="btn-tab-single-custom">✍️ Tự nhập từng câu</button>
+          <button type="button" class="mini-pill" id="btn-tab-batch-custom">📥 Nhập JSON hàng loạt / Đề thi</button>
+        </div>
+
         <form id="algo-custom-form" style="display: flex; flex-direction: column; gap: 10px;">
           <div>
             <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 3px;">Chủ đề / Tiêu đề bài toán:</label>
@@ -496,6 +504,9 @@
               <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 3px;">Lĩnh vực:</label>
               <select id="custom-algo-domain" class="office-select" style="width: 100%; box-sizing: border-box; padding: 6px 8px;">
                 <option value="dsa">⚡ DSA &amp; Giải thuật</option>
+                <option value="angular">🅰️ Angular (Signals / RxJS)</option>
+                <option value="react">⚛️ React (Hooks / Fiber)</option>
+                <option value="nodejs">🟢 Node.js (Event Loop / Streams)</option>
                 <option value="js">🟨 JavaScript / TS</option>
                 <option value="java">☕ Java &amp; Spring</option>
                 <option value="python">🐍 Python</option>
@@ -565,6 +576,20 @@
             <button type="submit" class="game-btn" style="background: var(--accent); color: #fff; font-weight: 700; border-color: var(--accent);">Lưu &amp; Chơi ngay</button>
           </div>
         </form>
+
+        <div id="algo-batch-wrap" class="hidden">
+          <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 8px; line-height: 1.45;">
+            Paste mảng JSON chứa danh sách câu hỏi đề thi vào đây để nạp nhanh hàng chục bài toán:
+          </p>
+          <textarea id="batch-algo-json" class="office-select" style="width: 100%; height: 190px; box-sizing: border-box; font-family: Consolas, monospace; font-size: 11.5px; padding: 8px;" placeholder='[&#10;  {&#10;    "domain": "react",&#10;    "topic": "React 18 State Batching",&#10;    "tier": "Cơ bản",&#10;    "problem": "...",&#10;    "snippet": "...",&#10;    "question": "...",&#10;    "type": "input",&#10;    "expectedAnswers": ["2"],&#10;    "explanation": "..."&#10;  }&#10;]'></textarea>
+          <div style="display: flex; gap: 8px; justify-content: space-between; margin-top: 10px; align-items: center; flex-wrap: wrap;">
+            <button type="button" class="game-btn" id="btn-load-sample-quiz" title="Nạp nhanh các câu hỏi mẫu tuyển chọn">🎲 Nạp đề thi IT mẫu</button>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="game-btn" id="btn-cancel-batch-custom">Hủy</button>
+              <button type="button" class="game-btn" id="btn-submit-batch-custom" style="background: var(--accent); color: #fff; font-weight: 700; border-color: var(--accent);">Nhập dữ liệu</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -657,15 +682,15 @@
     </div>
   </footer>
 
-  <script src="data-en.js?v=20261128-20"></script>
-  <script src="data-vi.js?v=20261128-20"></script>
-  <script src="data-connections.js?v=20261128-20"></script>
-  <script src="data-algo.js?v=20261128-20"></script>
-  <script src="gist-sync.js?v=20261128-20"></script>
-  <script src="engagement.js?v=20261128-20"></script>
-  <script src="troll.js?v=20261128-20"></script>
-  <script src="ads.js?v=20261128-20"></script>
-  <script src="leaderboard.js?v=20261128-20"></script>
-  <script src="app.js?v=20261128-20"></script>
+  <script src="data-en.js?v=20261128-21"></script>
+  <script src="data-vi.js?v=20261128-21"></script>
+  <script src="data-connections.js?v=20261128-21"></script>
+  <script src="data-algo.js?v=20261128-21"></script>
+  <script src="gist-sync.js?v=20261128-21"></script>
+  <script src="engagement.js?v=20261128-21"></script>
+  <script src="troll.js?v=20261128-21"></script>
+  <script src="ads.js?v=20261128-21"></script>
+  <script src="leaderboard.js?v=20261128-21"></script>
+  <script src="app.js?v=20261128-21"></script>
 </body>
 </html>

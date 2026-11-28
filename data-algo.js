@@ -594,6 +594,213 @@ Header: Idempotency-Key: 9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d`,
       correctIndex: 0,
       explanation: "Mạng internet không tin cậy: client có thể gửi request trừ tiền, server trừ tiền thành công nhưng phản hồi bị drop trên đường truyền. Khi client retry request, server dùng Idempotency-Key để nhận diện giao dịch này đã được thực hiện, trả về kết quả cũ mà KHÔNG trừ tiền thêm lần nữa.",
       hint: "Idempotent: Thực hiện 1 lần hay 100 lần thì kết quả và tác dụng phụ (trừ tiền) vẫn như nhau."
+    },
+
+    // ================= ANGULAR =================
+    {
+      id: "IT-25",
+      domain: "angular",
+      domainLabel: "Angular",
+      tier: "Cơ bản",
+      topic: "RxJS · BehaviorSubject vs Subject",
+      langTag: "TypeScript",
+      type: "input",
+      problem: "Xem xét đoạn mã Angular / RxJS sau khi một subscriber đăng ký lắng nghe BehaviorSubject sau khi đã có dữ liệu được phát trước đó.",
+      snippet: `import { BehaviorSubject } from 'rxjs';
+
+const state$ = new BehaviorSubject<string>("init");
+state$.next("logged-in");
+
+// Subscriber lắng nghe:
+state$.subscribe(val => {
+    console.log(val);
+});
+
+state$.next("profile-loaded");`,
+      question: "Nhập các chuỗi được in ra console theo đúng thứ tự (cách nhau bởi dấu cách):",
+      expectedAnswers: ["logged-in profile-loaded", "logged-in, profile-loaded", "logged-in\nprofile-loaded"],
+      explanation: "BehaviorSubject luôn lưu trữ một giá trị hiện tại (current value). Khi có một subscriber mới đăng ký, nó ngay lập tức phát ra giá trị gần nhất đó ('logged-in'), sau đó tiếp tục nhận các giá trị phát tiếp theo ('profile-loaded'). Giá trị 'init' ban đầu đã bị 'logged-in' ghi đè.",
+      hint: "BehaviorSubject nhớ giá trị gần nhất và phát ngay cho người đăng ký mới."
+    },
+    {
+      id: "IT-26",
+      domain: "angular",
+      domainLabel: "Angular",
+      tier: "Trung bình",
+      topic: "ChangeDetection · OnPush & Object Mutation",
+      langTag: "TypeScript",
+      type: "choice",
+      problem: "Một component Angular cấu hình ChangeDetectionStrategy.OnPush nhận input @Input() user = { name: 'Nam', age: 20 }. Khi cha chạy lệnh 'this.user.age = 21' mà không đổi tham chiếu đối tượng, vì sao component con KHÔNG re-render?",
+      snippet: `@Component({
+    selector: 'app-user-card',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    template: '<div>{{ user.age }}</div>'
+})
+export class UserCardComponent {
+    @Input() user!: { name: string; age: number };
+}`,
+      question: "Cơ chế kiểm tra thay đổi của OnPush hoạt động như thế nào?",
+      options: [
+        "A. OnPush so sánh tham chiếu đối tượng qua phép so sánh bằng ba (===); sửa thuộc tính bên trong không đổi địa chỉ ô nhớ nên Angular bỏ qua Change Detection",
+        "B. OnPush tự động đóng băng (Object.freeze) toàn bộ dữ liệu @Input()",
+        "C. OnPush chỉ chạy trên server-side rendering (SSR), không hoạt động trên trình duyệt",
+        "D. Angular tự động chuyển mọi Object thành Immutable.js nên lệnh gán bị lỗi runtime"
+      ],
+      correctIndex: 0,
+      explanation: "Với OnPush, Angular chỉ kích hoạt Change Detection cho component khi phát hiện tham chiếu @Input() thay đổi (shallow comparison ===). Việc gán thuộc tính 'this.user.age = 21' chỉ thay đổi nội dung bên trong vùng nhớ cũ, tham chiếu đối tượng không đổi -> Angular coi như không có gì thay đổi. Giải pháp chuẩn: this.user = { ...this.user, age: 21 }.",
+      hint: "OnPush so sánh địa chỉ tham chiếu (===), không quét đệ quy các trường bên trong object."
+    },
+    {
+      id: "IT-27",
+      domain: "angular",
+      domainLabel: "Angular",
+      tier: "Cơ bản",
+      topic: "Angular Signals · Tính toán phản ứng (Reactivity)",
+      langTag: "TypeScript",
+      type: "input",
+      problem: "Từ Angular 16+, Signals được giới thiệu làm mô hình phản ứng mới. Hãy dự đoán giá trị in ra màn hình của hàm computed double() sau khi cập nhật signal count.",
+      snippet: `import { signal, computed } from '@angular/core';
+
+const count = signal(3);
+const double = computed(() => count() * 2);
+
+count.set(7);
+console.log(double());`,
+      question: "Giá trị in ra console của double() là bao nhiêu?",
+      expectedAnswers: ["14", "14\n"],
+      explanation: "Signal 'count' có giá trị ban đầu là 3. Sau khi gọi count.set(7), giá trị của count trở thành 7. Hàm computed 'double' tự động nhận biết dependency của nó đã đổi và tính toán lại: 7 * 2 = 14.",
+      hint: "Lấy giá trị mới của count (7) nhân 2."
+    },
+
+    // ================= REACT =================
+    {
+      id: "IT-28",
+      domain: "react",
+      domainLabel: "React",
+      tier: "Cơ bản",
+      topic: "React 18 State Batching & Functional Updates",
+      langTag: "JavaScript",
+      type: "input",
+      problem: "Trong component React sau, khi người dùng click nút một lần, hàm handleClick() được thực thi. Dự đoán giá trị của count ở lần render tiếp theo.",
+      snippet: `const [count, setCount] = useState(0);
+
+const handleClick = () => {
+    setCount(count + 1);
+    setCount(count + 1);
+    setCount(prev => prev + 1);
+};`,
+      question: "Giá trị cuối cùng của count là bao nhiêu?",
+      expectedAnswers: ["2", "2\n"],
+      explanation: "Trong lần render hiện tại, count = 0. Lệnh 1: setCount(0 + 1) lên lịch gán count = 1. Lệnh 2: setCount(0 + 1) vẫn đọc count = 0 từ closure hiện tại, lên lịch gán count = 1 (ghi đè lệnh 1). Lệnh 3 dùng updater function (prev => prev + 1), nhận giá trị mới nhất đang chờ là 1 và cộng 1 -> kết quả cuối cùng là 2.",
+      hint: "Hai lệnh đầu đọc chung count = 0 trong closure, lệnh thứ 3 nhận prev đã được tính."
+    },
+    {
+      id: "IT-29",
+      domain: "react",
+      domainLabel: "React",
+      tier: "Trung bình",
+      topic: "useEffect · Stale Closure trong setInterval",
+      langTag: "JavaScript",
+      type: "input",
+      problem: "Xem xét đoạn mã React Hooks sau. Component tăng count sau mỗi lần re-render, nhưng useEffect có dependency array rỗng [].",
+      snippet: `const [count, setCount] = useState(0);
+
+useEffect(() => {
+    const timer = setInterval(() => {
+        console.log(count);
+    }, 1000);
+    return () => clearInterval(timer);
+}, []);`,
+      question: "Sau 3 giây (khi count bên ngoài đã tăng lên 3), hàm setInterval trong effect sẽ in ra số mấy?",
+      expectedAnswers: ["0", "0\n"],
+      explanation: "Hiện tượng Stale Closure: Do dependency array là [] rỗng, effect chỉ chạy một lần duy nhất lúc component mount. Hàm callback trong setInterval bị đóng băng và 'bắt giữ' giá trị của biến count tại thời điểm mount đó (count = 0). Dù state bên ngoài có tăng lên bao nhiêu, hàm setInterval vẫn luôn nhìn thấy count = 0.",
+      hint: "Dependency array rỗng khiến closure giữ nguyên giá trị state tại render đầu tiên."
+    },
+    {
+      id: "IT-30",
+      domain: "react",
+      domainLabel: "React",
+      tier: "Nâng cao",
+      topic: "React Fiber Architecture",
+      langTag: "Architecture",
+      type: "choice",
+      problem: "Kiến trúc React Fiber (từ React 16+) được thiết kế lại để giải quyết nhược điểm cốt lõi nào của Stack Reconciler cũ?",
+      snippet: `Fiber = Unit of Work (Virtual Stack Frame)`,
+      question: "Mục đích lớn nhất của React Fiber là gì?",
+      options: [
+        "A. Cho phép chia nhỏ công việc điều hòa (Reconciliation) thành các phần việc có thể tạm dừng, ưu tiên và tiếp tục lại để không làm nghẽn luồng UI chính (Main Thread)",
+        "B. Loại bỏ hoàn toàn Virtual DOM để tương tác trực tiếp với Real DOM như Svelte",
+        "C. Tự động chuyển code React thành WebAssembly để chạy nhanh gấp 10 lần",
+        "D. Ngăn cản việc component con bị re-render khi component cha đổi state"
+      ],
+      correctIndex: 0,
+      explanation: "Stack Reconciler cũ xử lý cây DOM đệ quy đồng bộ: một khi đã bắt đầu render cây lớn, JavaScript chiếm toàn bộ main thread cho đến khi xong, khiến animation giật lag và click bị trễ. React Fiber biến cây component thành danh sách liên kết các Fiber node (đơn vị công việc), cho phép engine tạm dừng khi có thao tác người dùng quan trọng và resume lại sau.",
+      hint: "Fiber cho phép ngắt quãng, chia nhỏ thời gian (time-slicing) và ưu tiên công việc render."
+    },
+
+    // ================= NODE.JS =================
+    {
+      id: "IT-31",
+      domain: "nodejs",
+      domainLabel: "Node.js",
+      tier: "Trung bình",
+      topic: "Node.js Event Loop · process.nextTick vs setImmediate",
+      langTag: "JavaScript",
+      type: "input",
+      problem: "Dự đoán chính xác thứ tự in ra console trong môi trường Node.js runtime của đoạn mã sau:",
+      snippet: `setImmediate(() => console.log("immediate"));
+process.nextTick(() => console.log("nextTick"));
+Promise.resolve().then(() => console.log("promise"));
+console.log("sync");`,
+      question: "Nhập các từ in ra console theo đúng thứ tự (cách nhau bởi dấu cách):",
+      expectedAnswers: ["sync nextTick promise immediate", "sync, nextTick, promise, immediate", "sync\nnextTick\npromise\nimmediate"],
+      explanation: "1) 'sync' chạy ngay lập tức đồng bộ trên Call Stack. 2) 'process.nextTick' nằm trong nextTickQueue có độ ưu tiên cao nhất, chạy ngay khi Call Stack trống trước mọi microtask khác. 3) 'promise' nằm trong Promise Microtask Queue chạy tiếp theo. 4) 'immediate' nằm trong Check Phase của libuv Event Loop, chạy sau cùng.",
+      hint: "Đồng bộ -> process.nextTick -> Promise -> setImmediate (Check phase)."
+    },
+    {
+      id: "IT-32",
+      domain: "nodejs",
+      domainLabel: "Node.js",
+      tier: "Nâng cao",
+      topic: "Node.js Streams · Xử lý hiện tượng Backpressure",
+      langTag: "JavaScript",
+      type: "choice",
+      problem: "Khi đọc một file dung lượng 10GB bằng fs.createReadStream và ghi vào socket mạng fs.createWriteStream, nếu tốc độ đọc nhanh hơn nhiều so với tốc độ ghi, hiện tượng gì xảy ra và làm sao phòng ngừa?",
+      snippet: `// Đoạn mã chuẩn phòng ngừa Backpressure:
+readable.pipe(writable);`,
+      question: "Cơ chế điều tiết Backpressure hoạt động như thế nào?",
+      options: [
+        "A. Khi bộ nhớ đệm (internal buffer) của Writable Stream đầy, hàm .write() trả về false; Readable Stream tạm dừng đọc cho đến khi Writable Stream phát ra sự kiện 'drain'",
+        "B. Node.js tự động nén dữ liệu bằng thuật toán zip trước khi gửi qua socket",
+        "C. Writable Stream tự động hủy (drop) các gói tin đến sau nếu bộ đệm bị tràn",
+        "D. Node.js sẽ tự động tạo thêm một process con mới để chia tải ghi file"
+      ],
+      correctIndex: 0,
+      explanation: "Nếu ghi mà không điều tiết, RAM sẽ phình to cho đến khi Node.js bị crash vì lỗi heap out of memory. Khi buffer đạt ngưỡng highWaterMark, write() trả về false báo hiệu 'quá tải' (backpressure). Readable stream sẽ pause() và chỉ resume() khi Writable phát sự kiện 'drain' (đã tiêu thụ bớt buffer). Hàm .pipe() tự động quản lý vòng đời này.",
+      hint: "Buffer đầy -> trả về false -> dừng đọc -> đợi sự kiện 'drain' xả bộ đệm."
+    },
+    {
+      id: "IT-33",
+      domain: "nodejs",
+      domainLabel: "Node.js",
+      tier: "Cơ bản",
+      topic: "Node.js Module Caching",
+      langTag: "JavaScript",
+      type: "input",
+      problem: "Trong Node.js, hàm require() có cơ chế lưu cache kết quả xuất ra (module caching). Xem xét file counter.js và app.js sau:",
+      snippet: `// counter.js
+let count = 0;
+module.exports = { getCount: () => ++count };
+
+// app.js
+const c1 = require('./counter');
+c1.getCount();
+const c2 = require('./counter');
+console.log(c2.getCount());`,
+      question: "Kết quả in ra của c2.getCount() là bao nhiêu?",
+      expectedAnswers: ["2", "2\n"],
+      explanation: "Lần require('./counter') đầu tiên thực thi file và lưu kết quả vào require.cache. Lần require thứ hai lấy thẳng đối tượng đã cache trong bộ nhớ (singleton), chia sẻ chung biến 'count'. Do c1.getCount() đã tăng count từ 0 lên 1, nên c2.getCount() tiếp tục tăng count lên 2.",
+      hint: "Node.js cache module sau lần require đầu tiên, cả c1 và c2 đều trỏ tới chung 1 instance."
     }
   ];
 
@@ -629,6 +836,28 @@ Header: Idempotency-Key: 9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d`,
     return newLevel;
   }
 
+  function addBatchCustomLevels(levelsArray) {
+    if (!Array.isArray(levelsArray) || levelsArray.length === 0) return 0;
+    const customs = getCustomLevels();
+    let count = 0;
+    levelsArray.forEach((item) => {
+      if (!item || !item.topic || !item.question) return;
+      const newId = `CUSTOM-${String(customs.length + 1).padStart(2, "0")}`;
+      customs.push({
+        ...item,
+        id: newId,
+        domain: item.domain || "dsa",
+        domainLabel: item.domainLabel || "Đề thi nạp nhanh",
+        tier: item.tier || "Cơ bản",
+        type: item.type || (Array.isArray(item.options) ? "choice" : "input"),
+        isCustom: true
+      });
+      count++;
+    });
+    saveCustomLevels(customs);
+    return count;
+  }
+
   function getAllLevels() {
     return [...BASE_LEVELS, ...getCustomLevels()];
   }
@@ -637,6 +866,7 @@ Header: Idempotency-Key: 9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d`,
     ALGO_LEVELS: BASE_LEVELS,
     getAllLevels,
     getCustomLevels,
-    addCustomLevel
+    addCustomLevel,
+    addBatchCustomLevels
   };
 })();
