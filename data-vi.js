@@ -29,6 +29,7 @@ window.VI_DATA = (function () {
     ["bun", "bún", "món bún"],
     ["but", "bút", "cây bút viết"],
     ["ca", "ca / cá / cà", "ca làm việc / con cá / cà phê"],
+    ["cai", "cái / cài", "loại từ chỉ đồ vật / cài đặt"],
     ["can", "cần / cân / căn", "cần thiết / đo lường"],
     ["canh", "canh / cánh / cảnh", "món canh / phong cảnh"],
     ["cao", "cao / cáo", "báo cáo / chiều cao"],
@@ -314,6 +315,9 @@ window.VI_DATA = (function () {
     ["xuat", "xuất", "xuất báo cáo"],
 
     // Từ ghép 2 tiếng viết liền cho các Phiên Trung bình & Nâng cao
+    ["caiban", "cái bàn", "vật dụng mặt phẳng để làm việc, đặt máy tính"],
+    ["caighe", "cái ghế", "vật dụng để ngồi làm việc văn phòng"],
+    ["banlamviec", "bàn làm việc", "bàn phục vụ công việc văn phòng"],
     ["banghe", "bàn ghế", "nội thất bàn ghế làm việc"],
     ["banthao", "bản thảo", "tài liệu nháp chưa hoàn chỉnh"],
     ["ghexoay", "ghế xoay", "ghế xoay làm việc văn phòng"],
@@ -1338,7 +1342,7 @@ window.VI_DATA = (function () {
 
   // 32 Phiên Nối Chữ Tiếng Việt thuần TỪ GHÉP (pool 9–14 từ/phiên, xáo trộn chọn 6–8 từ <= 16 chữ cái mỗi lần load)
   const RAW_CONNECT = [
-    { id: "VI-01", tier: "Cơ bản", topic: "Công việc Văn phòng", targets: ["baocao", "banhang", "banghe", "banthao", "congno", "donhang", "hoadon", "phancong", "bangiao", "hopdong", "kehoach", "ghichu", "congviec", "hophanh", "email", "mayin", "tailieu", "vanphong", "lichhop", "kyduyet", "congvan", "dongdau", "soanthao", "chamcong", "tangca", "giaoviec", "trinhky", "nghiphep", "sotay", "butbi", "butky", "kepgiay", "mucin"] },
+    { id: "VI-01", tier: "Cơ bản", topic: "Công việc Văn phòng", targets: ["baocao", "caiban", "caighe", "banlamviec", "banhang", "banghe", "banthao", "congno", "donhang", "hoadon", "phancong", "bangiao", "hopdong", "kehoach", "ghichu", "congviec", "hophanh", "email", "mayin", "tailieu", "vanphong", "lichhop", "kyduyet", "congvan", "dongdau", "soanthao", "chamcong", "tangca", "giaoviec", "trinhky", "nghiphep", "sotay", "butbi", "butky", "kepgiay", "mucin"] },
     { id: "VI-02", tier: "Cơ bản", topic: "Báo cáo & Sổ sách", targets: ["baocao", "hoso", "bienban", "ghichu", "ngansach", "congno", "bangiao", "kiemtoan", "chungtu", "tongket", "sosach", "thuchi", "doanhso", "saoke", "phieuthu", "soquy", "socai", "phieuchi", "bangke", "tonkho", "doisoat", "sodu", "bieumau", "thongke", "kekhai", "quyettoan"] },
     { id: "VI-03", tier: "Cơ bản", topic: "Ẩm thực & Bữa ăn", targets: ["banhmi", "comtam", "anvat", "datmon", "comtrua", "banhbao", "bundau", "nuocep", "trasua", "caphe", "pho", "xoi", "chao", "buncha", "miga", "bunbo", "banhcuon", "goicuon", "chagio", "nemran", "hutieu", "banhxeo", "lau", "comga", "miquang", "banhcanh", "trungran"] },
     { id: "VI-04", tier: "Cơ bản", topic: "Đồ uống Văn phòng", targets: ["caphe", "trasua", "tradao", "cacao", "nuocep", "sinhto", "nuocloc", "tratac", "suachua", "nuocdua", "traxanh", "suadau", "bacxiu", "sodachanh", "nuoccam", "trachanh", "caphesua", "nuocmia", "trada", "nuocsuoi", "suatuoi", "nuocchanh", "nuocngot"] },
@@ -1366,7 +1370,7 @@ window.VI_DATA = (function () {
     { id: "VI-23", tier: "Trung bình", topic: "Thương mại Điện tử", targets: ["donhang", "datmua", "giaohang", "giamgia", "hoantien", "danhgia", "chotdon", "khuyenmai", "muaban", "banhang", "giohang", "vanchuyen", "thanhtoan", "magiamgia", "hoantra", "sanpham", "dathang", "nguoiban", "nguoimua", "theodoi", "dongia", "kiemhang", "gianhang", "phivanchuyen"] },
     { id: "VI-24", tier: "Nâng cao", topic: "Marketing & Truyền thông", targets: ["quangcao", "tiepthi", "thitruong", "tuongtac", "thuonghieu", "khuyenmai", "chuyendoi", "canhtranh", "tintuc", "baochi", "nhanhang", "banner", "sukien", "khaosat", "noidung", "tiepcan", "chiendich", "khauhieu", "xuhuong", "luotxem", "luotthich", "chiase", "phanphoi", "kenh", "dinhvi", "baiviet", "lantoa", "doanhso"] },
     { id: "VI-25", tier: "Trung bình", topic: "Bất động sản & Nhà ở", targets: ["nhadat", "canho", "datcoc", "chothue", "matbang", "vitri", "hatang", "sodo", "chungcu", "nhapho", "muanha", "giadat", "moigioi", "bietthu", "thocu", "phaply", "dientich", "thuenha", "chudautu", "phongngu", "nhatro", "manhdat", "mattien", "hopdong", "bangiao"] },
-    { id: "VI-26", tier: "Trung bình", topic: "Nội thất & Tiện nghi", targets: ["noithat", "tulanh", "bepga", "denban", "tudo", "canho", "maygiat", "giuong", "tivi", "ban", "ghe", "guong", "rem", "quat", "tham", "kesach", "bontam", "maylanh", "dieuhoa", "bepdien", "lovisong", "noicom", "goi", "chan", "denngu", "tuquanao", "sofa"] },
+    { id: "VI-26", tier: "Trung bình", topic: "Nội thất & Tiện nghi", targets: ["noithat", "caiban", "caighe", "tulanh", "bepga", "denban", "tudo", "canho", "maygiat", "giuong", "tivi", "ban", "ghe", "guong", "rem", "quat", "tham", "kesach", "bontam", "maylanh", "dieuhoa", "bepdien", "lovisong", "noicom", "goi", "chan", "denngu", "tuquanao", "sofa"] },
 
     { id: "VI-27", tier: "Nâng cao", topic: "AI & Tự động hóa", targets: ["tritue", "nhantao", "tudong", "toiuu", "danhgia", "thuattoan", "mohinh", "tichhop", "phantich", "robot", "dulieu", "hocmay", "dubao", "tuhanh", "ngonngu", "nhandang", "huanluyen", "suyluan", "thigiac", "giongnoi", "dichthuat", "phanloai", "goiy", "thamso", "trolyao", "chatbot"] },
     { id: "VI-28", tier: "Nâng cao", topic: "[IT] Mã nguồn & Hàm xử lý", targets: ["manguon", "hamso", "goloi", "giaima", "mahoa", "mangluoi", "kientruc", "trunggian", "dongbo", "phanhoi", "bienso", "vonglap", "thuvien", "banva", "laplai", "kieudulieu", "dieukien", "doituong", "phuongthuc", "giaodien", "chuthich", "thamso", "biendich", "goiham", "trave", "dequy", "thongdich"] },
