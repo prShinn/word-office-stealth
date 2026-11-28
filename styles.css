@@ -322,6 +322,10 @@ html, body {
   cursor: pointer;
 }
 
+#tier-select {
+  max-width: 135px;
+}
+
 .hud-pill {
   font-family: Consolas, monospace;
   font-size: 11.5px;

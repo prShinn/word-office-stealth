@@ -32,6 +32,7 @@
     lang: "en",           // "en" | "vi"
     mode: "connect",      // "connect" | "merge" | "connections"
     levelIndex: 0,
+    tierFilter: (function() { try { return localStorage.getItem("stealth_tier_filter") || "all"; } catch (_) { return "all"; } })(),
     bossMode: false,
 
     // Crossword & Connect state
@@ -90,6 +91,7 @@
     docName: $("doc-name"),
     batchLabel: $("batch-label"),
     dailyTag: $("daily-tag"),
+    tierSelect: $("tier-select"),
     levelSelect: $("level-select"),
     keyboardInput: $("keyboard-input"),
     formulaStatus: $("formula-status"),
@@ -337,6 +339,10 @@
       if (saved.lang === "vi" || saved.lang === "en") state.lang = saved.lang;
       if (["connect", "merge", "connections"].includes(saved.mode)) state.mode = saved.mode;
       if (Number.isInteger(saved.levelIndex) && saved.levelIndex >= 0) state.levelIndex = saved.levelIndex;
+      if (saved.tierFilter) state.tierFilter = saved.tierFilter;
+      else {
+        try { state.tierFilter = localStorage.getItem("stealth_tier_filter") || "all"; } catch (_) {}
+      }
       if (saved.progress && typeof saved.progress === "object") state.progress = saved.progress;
       if (saved.stars && typeof saved.stars === "object") state.stars = saved.stars;
     } catch (_) {}
@@ -360,6 +366,7 @@
         lang: state.lang,
         mode: state.mode,
         levelIndex: state.levelIndex,
+        tierFilter: state.tierFilter,
         progress: state.progress,
         stars: state.stars,
         lastActiveAt: Date.now()
@@ -709,17 +716,44 @@
     updateStatsUI();
   }
 
+  function matchesTier(tier, filter) {
+    if (!filter || filter === "all") return true;
+    if (filter === "Trung bình" || filter === "Thông thường") {
+      return tier === "Trung bình" || tier === "Thông thường";
+    }
+    return tier === filter;
+  }
+
+  function getAdjacentLevelIndex(delta) {
+    const levels = getLevels();
+    if (!state.tierFilter || state.tierFilter === "all") {
+      return (state.levelIndex + delta + levels.length) % levels.length;
+    }
+    const matchingIndices = levels
+      .map((lvl, idx) => matchesTier(lvl.tier, state.tierFilter) ? idx : -1)
+      .filter((idx) => idx !== -1);
+    if (matchingIndices.length === 0) return 0;
+    const curPos = matchingIndices.indexOf(state.levelIndex);
+    if (curPos === -1) return matchingIndices[0];
+    const nextPos = (curPos + delta + matchingIndices.length) % matchingIndices.length;
+    return matchingIndices[nextPos];
+  }
+
   function populateLevelDropdown() {
     const levels = getLevels();
     const dailyIdx = getDailyIndex(levels.length);
-    els.levelSelect.innerHTML = levels
-      .map((lvl, idx) => {
-        const mask = state.stars[lvl.id];
-        const done = mask !== undefined ? ` ${starText(mask)}` : state.completedBatches.has(lvl.id) ? " ✓" : "";
-        const star = idx === dailyIdx ? "◆ " : "";
-        return `<option value="${idx}">${star}${lvl.id} [${lvl.tier}]: ${lvl.topic}${done}</option>`;
-      })
-      .join("");
+    if (els.tierSelect) {
+      els.tierSelect.value = state.tierFilter || "all";
+    }
+    const filtered = [];
+    levels.forEach((lvl, idx) => {
+      if (!matchesTier(lvl.tier, state.tierFilter)) return;
+      const mask = state.stars[lvl.id];
+      const done = mask !== undefined ? ` ${starText(mask)}` : state.completedBatches.has(lvl.id) ? " ✓" : "";
+      const star = idx === dailyIdx ? "◆ " : "";
+      filtered.push(`<option value="${idx}">${star}${lvl.id} [${lvl.tier}]: ${lvl.topic}${done}</option>`);
+    });
+    els.levelSelect.innerHTML = filtered.join("");
     els.levelSelect.value = String(state.levelIndex);
   }
 
@@ -1209,6 +1243,15 @@
   function loadLevel(index, fresh) {
     const levels = getLevels();
     state.levelIndex = (index + levels.length) % levels.length;
+    if (state.tierFilter && state.tierFilter !== "all") {
+      const cur = levels[state.levelIndex];
+      if (cur && !matchesTier(cur.tier, state.tierFilter)) {
+        const matchIdx = levels.findIndex((lvl) => matchesTier(lvl.tier, state.tierFilter));
+        if (matchIdx !== -1) {
+          state.levelIndex = matchIdx;
+        }
+      }
+    }
     if (fresh) {
       if (state.mode === "connect") {
         const cur = levels[state.levelIndex];
@@ -2407,8 +2450,25 @@
       }
     });
 
-    $("btn-prev-level").addEventListener("click", () => loadLevel(state.levelIndex - 1, true));
-    $("btn-next-level").addEventListener("click", () => loadLevel(state.levelIndex + 1, true));
+    $("btn-prev-level").addEventListener("click", () => loadLevel(getAdjacentLevelIndex(-1), true));
+    $("btn-next-level").addEventListener("click", () => loadLevel(getAdjacentLevelIndex(1), true));
+
+    if (els.tierSelect) {
+      els.tierSelect.addEventListener("change", (e) => {
+        state.tierFilter = e.target.value;
+        try { localStorage.setItem("stealth_tier_filter", state.tierFilter); } catch (_) {}
+        const levels = getLevels();
+        const curLvl = levels[state.levelIndex];
+        if (state.tierFilter !== "all" && curLvl && !matchesTier(curLvl.tier, state.tierFilter)) {
+          const firstMatch = levels.findIndex((lvl) => matchesTier(lvl.tier, state.tierFilter));
+          if (firstMatch !== -1) {
+            loadLevel(firstMatch, true);
+            return;
+          }
+        }
+        populateLevelDropdown();
+      });
+    }
 
     els.levelSelect.addEventListener("change", (e) => {
       loadLevel(Number(e.target.value), true);
