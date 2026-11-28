@@ -807,14 +807,17 @@
     const lvl = getCurrentLevel();
     const earned = state.stars[lvl.id] || 0;
     const playing = !state.batchFailed && !isBatchDone();
-    const html = getStarGoals()
+    const starCount = (earned & 1 ? 1 : 0) + (earned & 2 ? 1 : 0) + (earned & 4 ? 1 : 0);
+    const badgeHtml = `<span class="star-badge-summary"><span class="star-icon">⭐</span> ${starCount}/3 SAO</span>`;
+    const goalsHtml = getStarGoals()
       .map((g) => {
         const got = Boolean(earned & g.bit);
         const missed = !got && (state.batchFailed || (playing && !g.met()));
         const cls = got ? "star-goal got" : missed ? "star-goal missed" : "star-goal";
-        return `<span class="${cls}">${got ? "★" : "☆"} ${g.label}</span>`;
+        return `<span class="${cls}"><span class="star-icon">${got ? "★" : "☆"}</span> ${g.label}</span>`;
       })
       .join("");
+    const html = `${badgeHtml}${goalsHtml}`;
     document.querySelectorAll(".star-goals").forEach((el) => {
       if (el.dataset.html === html) return;
       el.dataset.html = html;
@@ -1380,26 +1383,26 @@
 
   // ================= CONNECT MODE =================
   function getNodeLayout(total) {
-    const rawW = els.wheelWrap ? els.wheelWrap.clientWidth : 300;
-    const width = Math.max(260, Math.min(360, rawW || 300));
+    const rawW = els.wheelWrap ? els.wheelWrap.clientWidth : 320;
+    const width = Math.max(280, Math.min(360, rawW || 320));
     if (total >= 10) {
       const cols = total > 24 ? 6 : (total > 16 ? 5 : 4);
       const rows = Math.ceil(total / cols);
-      const stepX = Math.min(68, Math.floor((width - 16) / cols));
-      const stepY = Math.min(total > 12 ? 52 : 68, Math.max(36, Math.floor(228 / rows)));
-      const height = Math.max(244, rows * stepY + 16);
-      const size = Math.max(28, Math.min(48, Math.min(stepX, stepY) - 6));
+      const stepX = Math.min(72, Math.floor((width - 16) / cols));
+      const stepY = Math.min(total > 12 ? 54 : 70, Math.max(38, Math.floor(236 / rows)));
+      const height = Math.max(250, rows * stepY + 16);
+      const size = Math.max(30, Math.min(52, Math.min(stepX, stepY) - 5));
       return { width, height, cols, rows, stepX, stepY, size };
     }
-    const height = 244;
+    const height = 250;
     if (total >= 7) {
       const cols = 3;
       const rows = Math.ceil(total / cols);
-      const stepX = Math.min(76, Math.floor((width - 24) / cols));
-      return { width, height, cols, rows, stepX, stepY: 72, size: 48 };
+      const stepX = Math.min(80, Math.floor((width - 24) / cols));
+      return { width, height, cols, rows, stepX, stepY: 76, size: 52 };
     }
-    const radius = Math.min(88, Math.floor(width / 2) - 36);
-    return { width, height, cols: total, rows: 1, stepX: 68, stepY: 68, size: 48, radius };
+    const radius = Math.min(94, Math.floor(width / 2) - 34);
+    return { width, height, cols: total, rows: 1, stepX: 72, stepY: 72, size: 54, radius };
   }
 
   function getNodePosition(idx, total) {
@@ -1416,7 +1419,7 @@
       };
     }
 
-    const radius = layout.radius || (total <= 5 ? 82 : 88);
+    const radius = layout.radius || (total <= 5 ? 88 : 94);
     const angle = (idx / total) * Math.PI * 2 - Math.PI / 2;
     return {
       x: Math.round(cx + radius * Math.cos(angle)),
@@ -1430,7 +1433,7 @@
     const layout = getNodeLayout(total);
     els.wheelWrap.style.height = layout.height + "px";
     const half = Math.round(layout.size / 2);
-    const fontSize = layout.size <= 38 ? 14 : 17;
+    const fontSize = layout.size <= 38 ? 15 : layout.size <= 46 ? 17 : 19;
     state.letters.forEach((ch, idx) => {
       const pos = getNodePosition(idx, total);
       const node = document.createElement("div");

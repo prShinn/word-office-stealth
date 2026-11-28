@@ -34,7 +34,7 @@ html, body {
   padding: 0;
   height: 100%;
   font-family: "Segoe UI", Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-main);
   background: var(--bg-app);
   overflow: hidden;
@@ -53,7 +53,7 @@ html, body {
 
 /* Titlebar */
 .app-titlebar {
-  height: 36px;
+  height: 38px;
   background: var(--accent);
   color: #fff;
   display: flex;
@@ -77,21 +77,21 @@ html, body {
 }
 
 .app-badge {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 3px;
   background: rgba(255, 255, 255, 0.2);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 12px;
+  font-size: 13px;
   flex-shrink: 0;
 }
 
 .doc-name {
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -164,7 +164,7 @@ html, body {
 
 /* Ribbon tabs */
 .ribbon-tabs {
-  height: 28px;
+  height: 30px;
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border-light);
   display: flex;
@@ -175,8 +175,8 @@ html, body {
 }
 
 .ribbon-tab {
-  padding: 4px 10px;
-  font-size: 12px;
+  padding: 5px 12px;
+  font-size: 13px;
   color: var(--text-muted);
   border-bottom: 2px solid transparent;
 }
@@ -305,32 +305,32 @@ html, body {
 }
 
 .tool-label {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--accent);
 }
 
 .office-select {
-  height: 26px;
+  height: 28px;
   border: 1px solid var(--accent-border);
   background: #fff;
   border-radius: 3px;
   padding: 0 8px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-main);
-  max-width: 235px;
+  max-width: 250px;
   cursor: pointer;
 }
 
 #tier-select {
-  max-width: 135px;
+  max-width: 145px;
 }
 
 .hud-pill {
   font-family: Consolas, monospace;
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-weight: 700;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 3px;
   background: #fff;
   border: 1px solid var(--border);
@@ -367,7 +367,7 @@ html, body {
 
 /* Formula Bar */
 .formula-bar {
-  height: 30px;
+  height: 32px;
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border);
   display: flex;
@@ -376,19 +376,19 @@ html, body {
 }
 
 .cell-ref {
-  width: 64px;
+  width: 68px;
   height: 100%;
   border-right: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   background: var(--bg-subtle);
 }
 
 .fx-sign {
-  width: 34px;
+  width: 36px;
   height: 100%;
   border-right: 1px solid var(--border-light);
   display: flex;
@@ -397,6 +397,7 @@ html, body {
   font-style: italic;
   font-family: Georgia, serif;
   color: var(--text-muted);
+  font-size: 14px;
 }
 
 .formula-input-wrap {
@@ -413,7 +414,7 @@ html, body {
   border: none;
   outline: none;
   font-family: Consolas, "Courier New", monospace;
-  font-size: 12.5px;
+  font-size: 13.5px;
   color: var(--text-main);
   background: transparent;
   user-select: text;
@@ -481,9 +482,9 @@ body.theme-docs .connections-view {
 }
 
 .excel-col-headers {
-  height: 22px;
+  height: 24px;
   display: grid;
-  grid-template-columns: 36px 95px 95px 95px 95px 180px 110px 1fr;
+  grid-template-columns: 38px 95px 95px 95px 95px 180px 110px 1fr;
   background: var(--bg-subtle);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -494,7 +495,7 @@ body.theme-docs .connections-view {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
 }
 
@@ -505,7 +506,7 @@ body.theme-docs .connections-view {
 }
 
 .excel-row-headers {
-  width: 36px;
+  width: 38px;
   background: var(--bg-subtle);
   border-right: 1px solid var(--border);
   display: flex;
@@ -515,12 +516,12 @@ body.theme-docs .connections-view {
 }
 
 .row-h {
-  height: 26px;
+  height: 28px;
   border-bottom: 1px solid var(--border-light);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   flex-shrink: 0;
 }
@@ -562,12 +563,12 @@ body.theme-docs .connections-view {
 
 .panel-title {
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14.5px;
   color: var(--text-main);
 }
 
 .panel-sub {
-  font-size: 11.5px;
+  font-size: 12.5px;
   color: var(--text-muted);
 }
 
@@ -577,9 +578,9 @@ body.theme-docs .connections-view {
 }
 
 .tier-badge {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  padding: 2px 7px;
+  padding: 3px 8px;
   border-radius: 2px;
   background: var(--accent-light);
   color: var(--accent);
@@ -628,29 +629,29 @@ body.theme-docs .connections-view {
   justify-content: space-between;
   background: #fff;
   border: 1px solid var(--border);
-  padding: 6px 10px;
+  padding: 6px 12px;
   border-radius: 2px;
   margin-bottom: 10px;
-  min-height: 34px;
+  min-height: 38px;
 }
 
 .draft-label {
-  font-size: 11.5px;
+  font-size: 12.5px;
   color: var(--text-muted);
 }
 
 .draft-word {
   font-family: Consolas, monospace;
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: 2.5px;
   color: var(--accent);
 }
 
 .wheel-wrap {
   position: relative;
-  width: 300px;
-  height: 244px;
+  width: 320px;
+  height: 255px;
   flex-shrink: 0;
   margin: 4px auto 10px;
   background: #fff;
@@ -674,15 +675,15 @@ body.theme-docs .connections-view {
 
 .letter-node {
   position: absolute;
-  width: 48px;
-  height: 48px;
-  margin-left: -24px;
-  margin-top: -24px;
+  width: 52px;
+  height: 52px;
+  margin-left: -26px;
+  margin-top: -26px;
   border-radius: 4px;
   border: 1px solid var(--border);
   background: var(--bg-subtle);
   color: var(--text-main);
-  font-size: 17px;
+  font-size: 18.5px;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -713,8 +714,8 @@ body.theme-docs .connections-view {
   border: 1px solid var(--accent);
   background: var(--accent);
   color: #fff;
-  padding: 5px 14px;
-  font-size: 12px;
+  padding: 6px 16px;
+  font-size: 13px;
   font-weight: 700;
   border-radius: 3px;
   cursor: pointer;
@@ -752,9 +753,9 @@ body.theme-docs .connections-view {
 .merge-tile {
   border: 1px solid var(--border);
   background: #fff;
-  padding: 8px 4px;
+  padding: 8px 6px;
   text-align: center;
-  font-size: 12.5px;
+  font-size: 13.5px;
   font-weight: 600;
   border-radius: 2px;
   cursor: pointer;
@@ -781,7 +782,7 @@ body.theme-docs .connections-view {
 
 .footnote-box {
   margin-top: 12px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   background: #fff;
   border: 1px solid var(--border-light);
@@ -807,8 +808,8 @@ body.theme-docs .connections-view {
   display: block;
   text-align: center;
   overflow: auto;
-  height: 245px;
-  min-height: 140px;
+  height: 275px;
+  min-height: 160px;
   max-height: 60vh;
   resize: vertical;
   flex-shrink: 0;
@@ -821,14 +822,14 @@ body.theme-docs .connections-view {
 }
 
 .cw-cell {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   font-family: Consolas, monospace;
-  font-size: 12.5px;
+  font-size: 15px;
   font-weight: 700;
 }
 
@@ -873,9 +874,9 @@ body.theme-docs .connections-view {
 .cw-cell.box.golden::after {
   content: "★";
   position: absolute;
-  top: 1px;
-  right: 1px;
-  font-size: 7px;
+  top: 2px;
+  right: 2px;
+  font-size: 9px;
   color: #f59e0b;
   line-height: 1;
   pointer-events: none;
@@ -921,7 +922,7 @@ body.theme-docs .connections-view {
   position: absolute;
   top: 1px;
   left: 2px;
-  font-size: 8px;
+  font-size: 9.5px;
   font-weight: 600;
   color: var(--text-light);
   line-height: 1;
@@ -941,7 +942,7 @@ body.theme-docs .connections-view {
 .office-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12.5px;
+  font-size: 13.5px;
 }
 
 .office-table th {
@@ -950,17 +951,17 @@ body.theme-docs .connections-view {
   background: var(--bg-subtle);
   border-bottom: 1px solid var(--border);
   border-right: 1px solid var(--border-light);
-  padding: 5px 8px;
+  padding: 7px 10px;
   text-align: left;
   font-weight: 600;
   color: var(--text-muted);
-  font-size: 11.5px;
+  font-size: 12.5px;
 }
 
 .office-table td {
   border-bottom: 1px solid var(--border-light);
   border-right: 1px solid var(--border-light);
-  padding: 5px 8px;
+  padding: 7px 10px;
   color: var(--text-main);
 }
 
@@ -983,21 +984,23 @@ body.theme-docs .connections-view {
 .masked-word {
   font-family: Consolas, monospace;
   letter-spacing: 1.5px;
+  font-size: 14px;
   color: var(--text-light);
 }
 
 .solved-word {
   font-weight: 700;
+  font-size: 14.5px;
   color: var(--accent);
 }
 
 .solved-meta {
   display: inline-block;
-  font-size: 10px;
+  font-size: 11px;
   font-family: Consolas, monospace;
   color: var(--accent);
   background: var(--accent-light);
-  padding: 1px 5px;
+  padding: 2px 6px;
   border-radius: 2px;
   margin-right: 6px;
 }
@@ -1008,30 +1011,30 @@ body.theme-docs .connections-view {
 
 .meaning-chip {
   display: inline-block;
-  font-size: 11px;
+  font-size: 12px;
   background: var(--bg-subtle);
   border: 1px solid var(--border);
   border-radius: 3px;
-  padding: 0 6px;
+  padding: 1px 7px;
   margin-right: 4px;
   color: var(--text-main);
 }
 
 .solved-formula {
   font-family: Consolas, monospace;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   background: var(--bg-subtle);
-  padding: 1px 5px;
+  padding: 2px 6px;
   border-radius: 2px;
   margin-right: 6px;
 }
 
 .badge-status {
   display: inline-block;
-  padding: 1px 6px;
+  padding: 2px 7px;
   border-radius: 2px;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .badge-pending {
@@ -1558,7 +1561,7 @@ body.theme-docs .sheet-tab:hover {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   white-space: nowrap;
 }
@@ -1594,17 +1597,79 @@ body.theme-docs .sheet-tab:hover {
   }
 }
 
-/* ===== 3 sao mỗi Phiên ===== */
+/* ===== 3 sao mỗi Phiên (Nổi bật & Bắt mắt) ===== */
 .star-goals {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 12px;
-  padding: 4px 10px;
-  font-size: 11.5px;
-  color: #605e5c;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 6px 12px;
+  background: linear-gradient(180deg, #fffdf2, #fff9e6);
+  border: 1px solid #fde68a;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 4px rgba(245, 158, 11, 0.12);
 }
-.star-goal.got { color: #8a6100; font-weight: 700; }
-.star-goal.missed { opacity: 0.5; text-decoration: line-through; }
+
+.star-badge-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #92400e;
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  padding: 3px 10px;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(245, 158, 11, 0.25);
+  margin-right: 4px;
+}
+
+.star-goal {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #78716c;
+  padding: 3px 10px;
+  background: #fff;
+  border: 1px solid #e7e5e4;
+  border-radius: 14px;
+  transition: all 0.2s ease;
+}
+
+.star-goal .star-icon {
+  font-size: 15px;
+  color: #d6d3d1;
+  line-height: 1;
+}
+
+.star-goal.got {
+  color: #92400e;
+  background: #fef3c7;
+  border-color: #f59e0b;
+  box-shadow: 0 1px 4px rgba(245, 158, 11, 0.25);
+}
+
+.star-goal.got .star-icon {
+  color: #d97706;
+  text-shadow: 0 0 4px rgba(245, 158, 11, 0.6);
+  animation: starPop 0.3s ease-out;
+}
+
+.star-goal.missed {
+  opacity: 0.45;
+  text-decoration: line-through;
+  background: #fafaf9;
+}
+
+@keyframes starPop {
+  0% { transform: scale(0.8); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
 
 /* ===== Giờ cao điểm ===== */
 .hud-pill.hud-fever {
