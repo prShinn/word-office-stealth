@@ -1697,43 +1697,351 @@ window.VI_DATA = (function () {
     }
   ];
 
-  // Đồng bộ toàn bộ từ ghép từ MERGE_LEVELS vào DICT để hỗ trợ cả Nối chữ & từ thưởng
-  MERGE_LEVELS.forEach((lvl) => {
-    lvl.pairs.forEach(([, , combined, meaning]) => {
-      const k = stripTones(combined);
-      if (k && !DICT[k]) {
-        DICT[k] = { word: combined, meaning };
-      }
-    });
+  // Kho cặp mở rộng Ghép Từ theo đúng chủ đề phiên (gộp với pairs gốc để bốc ngẫu nhiên)
+  const MERGE_EXTRA = {
+    "VI-M01": [
+      ["giao", "việc", "giao việc", "phân nhiệm vụ"],
+      ["chấm", "công", "chấm công", "ghi nhận ngày làm"],
+      ["tăng", "ca", "tăng ca", "làm thêm giờ"],
+      ["lịch", "họp", "lịch họp", "thời gian cuộc họp"],
+      ["trình", "ký", "trình ký", "đưa văn bản lên duyệt"],
+      ["soạn", "thảo", "soạn thảo", "viết văn bản"],
+      ["nhiệm", "vụ", "nhiệm vụ", "việc được giao"],
+      ["sắp", "xếp", "sắp xếp", "bố trí thứ tự"],
+      ["ưu", "tiên", "ưu tiên", "làm trước"],
+      ["hoàn", "thành", "hoàn thành", "làm xong"],
+      ["đúng", "giờ", "đúng giờ", "không trễ"],
+      ["công", "văn", "công văn", "văn bản hành chính"]
+    ],
+    "VI-M02": [
+      ["phở", "bò", "phở bò", "món sợi nước dùng"],
+      ["bún", "chả", "bún chả", "món Hà Nội nướng than"],
+      ["cơm", "tấm", "cơm tấm", "món cơm Sài Gòn"],
+      ["bánh", "bao", "bánh bao", "bánh hấp có nhân"],
+      ["xôi", "xéo", "xôi xéo", "món xôi đậu hành phi"],
+      ["trà", "đá", "trà đá", "nước uống mát"],
+      ["sinh", "tố", "sinh tố", "nước xay hoa quả"],
+      ["bánh", "cuốn", "bánh cuốn", "bánh hấp cuộn nhân"],
+      ["hủ", "tiếu", "hủ tiếu", "món sợi Nam Bộ"],
+      ["nước", "mía", "nước mía", "nước ép thân cây ngọt"],
+      ["gỏi", "cuốn", "gỏi cuốn", "món cuốn rau tôm"],
+      ["bánh", "xèo", "bánh xèo", "bánh đổ chảo giòn"]
+    ],
+    "VI-M03": [
+      ["vợ", "chồng", "vợ chồng", "đôi bạn đời"],
+      ["anh", "em", "anh em", "ruột thịt"],
+      ["ông", "bà", "ông bà", "thế hệ trước"],
+      ["con", "cháu", "con cháu", "thế hệ sau"],
+      ["họ", "hàng", "họ hàng", "bà con thân thích"],
+      ["sum", "họp", "sum họp", "quây quần"],
+      ["quê", "hương", "quê hương", "nơi sinh ra"],
+      ["nhà", "cửa", "nhà cửa", "chỗ ở"],
+      ["đoàn", "viên", "đoàn viên", "đoàn tụ"],
+      ["hiếu", "thảo", "hiếu thảo", "kính trọng cha mẹ"],
+      ["êm", "ấm", "êm ấm", "yên vui"],
+      ["bữa", "cơm", "bữa cơm", "bữa ăn gia đình"]
+    ],
+    "VI-M04": [
+      ["chiết", "khấu", "chiết khấu", "giảm cho đại lý"],
+      ["bán", "lẻ", "bán lẻ", "bán từng món"],
+      ["bán", "sỉ", "bán sỉ", "bán số lượng lớn"],
+      ["báo", "giá", "báo giá", "đưa ra mức giá"],
+      ["chốt", "đơn", "chốt đơn", "xác nhận mua"],
+      ["giảm", "giá", "giảm giá", "bớt tiền"],
+      ["cửa", "hàng", "cửa hàng", "nơi bày bán"],
+      ["đại", "lý", "đại lý", "điểm phân phối"],
+      ["thương", "lượng", "thương lượng", "đàm phán giá"],
+      ["hài", "lòng", "hài lòng", "vừa ý"],
+      ["phản", "hồi", "phản hồi", "ý kiến khách"],
+      ["nhập", "hàng", "nhập hàng", "lấy hàng về kho"]
+    ],
+    "VI-M05": [
+      ["giao", "tiếp", "giao tiếp", "trò chuyện trao đổi"],
+      ["thuyết", "trình", "thuyết trình", "trình bày trước đám đông"],
+      ["lắng", "nghe", "lắng nghe", "chú ý nghe"],
+      ["sáng", "tạo", "sáng tạo", "nghĩ ra cái mới"],
+      ["đàm", "phán", "đàm phán", "thương lượng"],
+      ["lãnh", "đạo", "lãnh đạo", "dẫn dắt"],
+      ["tư", "duy", "tư duy", "cách suy nghĩ"],
+      ["thích", "nghi", "thích nghi", "hòa nhập hoàn cảnh"],
+      ["chủ", "động", "chủ động", "tự giác làm"],
+      ["hỗ", "trợ", "hỗ trợ", "giúp đỡ"],
+      ["đoàn", "kết", "đoàn kết", "gắn bó"],
+      ["trách", "nhiệm", "trách nhiệm", "bổn phận"]
+    ],
+    "VI-M06": [
+      ["bảo", "hiểm", "bảo hiểm", "chế độ an sinh"],
+      ["phụ", "cấp", "phụ cấp", "khoản cộng thêm"],
+      ["trợ", "cấp", "trợ cấp", "tiền hỗ trợ"],
+      ["thăng", "tiến", "thăng tiến", "lên chức"],
+      ["ứng", "viên", "ứng viên", "người dự tuyển"],
+      ["phỏng", "vấn", "phỏng vấn", "buổi hỏi tuyển dụng"],
+      ["nghỉ", "việc", "nghỉ việc", "thôi làm"],
+      ["kỷ", "luật", "kỷ luật", "xử lý vi phạm"],
+      ["thai", "sản", "thai sản", "chế độ sinh con"],
+      ["lương", "hưu", "lương hưu", "tiền nhận khi nghỉ hưu"],
+      ["chấm", "công", "chấm công", "ghi nhận ngày làm"],
+      ["tạm", "ứng", "tạm ứng", "nhận trước tiền"]
+    ],
+    "VI-M07": [
+      ["phần", "cứng", "phần cứng", "thiết bị vật lý"],
+      ["bàn", "phím", "bàn phím", "thiết bị gõ chữ"],
+      ["màn", "hình", "màn hình", "thiết bị hiển thị"],
+      ["trình", "duyệt", "trình duyệt", "phần mềm xem web"],
+      ["thư", "mục", "thư mục", "nơi chứa tệp"],
+      ["cài", "đặt", "cài đặt", "thiết lập phần mềm"],
+      ["sao", "lưu", "sao lưu", "tạo bản dự phòng"],
+      ["mật", "khẩu", "mật khẩu", "chuỗi bí mật đăng nhập"],
+      ["đăng", "nhập", "đăng nhập", "vào tài khoản"],
+      ["kết", "nối", "kết nối", "liên kết thiết bị"],
+      ["dung", "lượng", "dung lượng", "sức chứa"],
+      ["điện", "thoại", "điện thoại", "thiết bị liên lạc"]
+    ],
+    "VI-M08": [
+      ["hộ", "chiếu", "hộ chiếu", "giấy tờ xuất cảnh"],
+      ["sân", "bay", "sân bay", "nơi máy bay cất cánh"],
+      ["đặt", "vé", "đặt vé", "giữ chỗ trước"],
+      ["tham", "quan", "tham quan", "đi xem nơi mới"],
+      ["đặc", "sản", "đặc sản", "món ngon địa phương"],
+      ["lưu", "niệm", "lưu niệm", "quà kỷ niệm"],
+      ["cắm", "trại", "cắm trại", "dựng lều ngoài trời"],
+      ["leo", "núi", "leo núi", "trèo lên cao"],
+      ["du", "khách", "du khách", "người đi chơi xa"],
+      ["danh", "lam", "danh lam", "cảnh đẹp nổi tiếng"],
+      ["tắm", "biển", "tắm biển", "bơi ở bãi"],
+      ["ngày", "lễ", "ngày lễ", "ngày nghỉ kỷ niệm"]
+    ],
+    "VI-M09": [
+      ["sổ", "sách", "sổ sách", "ghi chép kế toán"],
+      ["công", "nợ", "công nợ", "khoản còn phải thu trả"],
+      ["phiếu", "thu", "phiếu thu", "chứng từ nhận tiền"],
+      ["phiếu", "chi", "phiếu chi", "chứng từ xuất tiền"],
+      ["số", "dư", "số dư", "tiền còn lại"],
+      ["tài", "khoản", "tài khoản", "nơi quản lý tiền"],
+      ["đối", "soát", "đối soát", "so khớp số liệu"],
+      ["kê", "khai", "kê khai", "khai báo chi tiết"],
+      ["lãi", "suất", "lãi suất", "tỷ lệ tiền lời"],
+      ["tín", "dụng", "tín dụng", "vay dựa trên uy tín"],
+      ["tồn", "kho", "tồn kho", "hàng còn lại"],
+      ["báo", "giá", "báo giá", "bảng giá gửi khách"]
+    ],
+    "VI-M10": [
+      ["kế", "hoạch", "kế hoạch", "dự kiến công việc"],
+      ["cột", "mốc", "cột mốc", "điểm đánh dấu tiến độ"],
+      ["giai", "đoạn", "giai đoạn", "một chặng dự án"],
+      ["nguồn", "lực", "nguồn lực", "người và tài nguyên"],
+      ["phân", "bổ", "phân bổ", "chia nguồn lực"],
+      ["tiến", "độ", "tiến độ", "mức hoàn thành theo thời gian"],
+      ["ưu", "tiên", "ưu tiên", "việc làm trước"],
+      ["lộ", "trình", "lộ trình", "đường đi từng bước"],
+      ["điều", "chỉnh", "điều chỉnh", "sửa cho phù hợp"],
+      ["dự", "án", "dự án", "công việc có mục tiêu"],
+      ["phạm", "vi", "phạm vi", "giới hạn công việc"],
+      ["báo", "cáo", "báo cáo", "trình bày kết quả"]
+    ],
+    "VI-M11": [
+      ["nghị", "định", "nghị định", "văn bản Chính phủ ban hành"],
+      ["thông", "tư", "thông tư", "văn bản hướng dẫn của Bộ"],
+      ["quyết", "định", "quyết định", "văn bản chỉ đạo"],
+      ["khiếu", "nại", "khiếu nại", "đề nghị xem xét lại"],
+      ["tranh", "chấp", "tranh chấp", "bất đồng quyền lợi"],
+      ["ủy", "quyền", "ủy quyền", "giao quyền thay mặt"],
+      ["giấy", "phép", "giấy phép", "văn bản cho phép"],
+      ["cam", "kết", "cam kết", "hứa chịu trách nhiệm"],
+      ["điều", "khoản", "điều khoản", "mục quy định trong văn bản"],
+      ["công", "chứng", "công chứng", "xác nhận văn bản hợp lệ"],
+      ["luật", "sư", "luật sư", "người hành nghề pháp luật"],
+      ["con", "dấu", "con dấu", "dấu xác nhận"]
+    ],
+    "VI-M12": [
+      ["bóng", "rổ", "bóng rổ", "ném vào vành"],
+      ["bóng", "bàn", "bóng bàn", "đánh trên bàn có lưới"],
+      ["bóng", "chuyền", "bóng chuyền", "đánh qua lưới cao"],
+      ["võ", "thuật", "võ thuật", "môn chiến đấu"],
+      ["tập", "luyện", "tập luyện", "rèn luyện thân thể"],
+      ["giảm", "cân", "giảm cân", "bớt trọng lượng"],
+      ["đạp", "xe", "đạp xe", "đi xe hai bánh"],
+      ["nhảy", "dây", "nhảy dây", "bật qua sợi dây"],
+      ["khám", "bệnh", "khám bệnh", "kiểm tra sức khỏe"],
+      ["ngủ", "trưa", "ngủ trưa", "nghỉ giữa ngày"],
+      ["trọng", "tài", "trọng tài", "người phân xử"],
+      ["huy", "chương", "huy chương", "phần thưởng thi đấu"]
+    ],
+    "VI-M13": [
+      ["chiến", "dịch", "chiến dịch", "đợt quảng bá"],
+      ["khẩu", "hiệu", "khẩu hiệu", "câu nói thương hiệu"],
+      ["xu", "hướng", "xu hướng", "trào lưu"],
+      ["chia", "sẻ", "chia sẻ", "lan truyền nội dung"],
+      ["phân", "phối", "phân phối", "đưa hàng ra thị trường"],
+      ["định", "vị", "định vị", "chỗ đứng thương hiệu"],
+      ["lan", "tỏa", "lan tỏa", "truyền đi rộng"],
+      ["khảo", "sát", "khảo sát", "thăm dò ý kiến"],
+      ["nội", "dung", "nội dung", "bài đăng tải"],
+      ["sự", "kiện", "sự kiện", "chương trình tổ chức"],
+      ["truyền", "thông", "truyền thông", "đưa thông tin tới công chúng"],
+      ["doanh", "số", "doanh số", "lượng bán ra"]
+    ],
+    "VI-M14": [
+      ["định", "giá", "định giá", "xác định giá trị"],
+      ["chiến", "lược", "chiến lược", "kế hoạch dài hạn"],
+      ["sáng", "lập", "sáng lập", "người lập công ty"],
+      ["ươm", "tạo", "ươm tạo", "hỗ trợ giai đoạn đầu"],
+      ["rủi", "ro", "rủi ro", "khả năng thất bại"],
+      ["hoàn", "vốn", "hoàn vốn", "thu lại tiền bỏ ra"],
+      ["ý", "tưởng", "ý tưởng", "sáng kiến ban đầu"],
+      ["kinh", "doanh", "kinh doanh", "hoạt động buôn bán"],
+      ["mô", "hình", "mô hình", "cách thức vận hành"],
+      ["đột", "phá", "đột phá", "vượt bậc"],
+      ["thị", "phần", "thị phần", "phần trăm thị trường nắm giữ"],
+      ["cổ", "đông", "cổ đông", "người nắm cổ phần"]
+    ],
+    "VI-M15": [
+      ["biệt", "thự", "biệt thự", "nhà riêng có sân vườn"],
+      ["chung", "cư", "chung cư", "tòa nhà nhiều căn hộ"],
+      ["nhà", "phố", "nhà phố", "nhà liền kề mặt đường"],
+      ["diện", "tích", "diện tích", "độ rộng mặt sàn"],
+      ["mặt", "tiền", "mặt tiền", "phần giáp đường"],
+      ["thổ", "cư", "thổ cư", "đất để ở"],
+      ["môi", "giới", "môi giới", "người làm trung gian"],
+      ["pháp", "lý", "pháp lý", "giấy tờ hợp lệ"],
+      ["nhà", "trọ", "nhà trọ", "phòng thuê giá rẻ"],
+      ["phòng", "ngủ", "phòng ngủ", "phòng nghỉ đêm"],
+      ["ban", "công", "ban công", "phần nhô ra ngoài"],
+      ["tiện", "ích", "tiện ích", "dịch vụ đi kèm"]
+    ],
+    "VI-M16": [
+      ["ngôn", "ngữ", "ngôn ngữ", "mô hình hiểu chữ viết"],
+      ["nhận", "dạng", "nhận dạng", "nhận biết hình ảnh"],
+      ["huấn", "luyện", "huấn luyện", "dạy mô hình"],
+      ["suy", "luận", "suy luận", "rút ra kết quả"],
+      ["dự", "báo", "dự báo", "đoán trước"],
+      ["phân", "loại", "phân loại", "chia nhóm"],
+      ["gợi", "ý", "gợi ý", "đề xuất phù hợp"],
+      ["tham", "số", "tham số", "giá trị điều chỉnh"],
+      ["dữ", "liệu", "dữ liệu", "thông tin số"],
+      ["số", "hóa", "số hóa", "chuyển sang dạng số"],
+      ["trợ", "lý", "trợ lý", "người máy hỗ trợ"],
+      ["thị", "giác", "thị giác", "máy nhìn hiểu ảnh"]
+    ],
+    "VI-M17": [
+      ["đối", "tượng", "đối tượng", "thực thể trong lập trình"],
+      ["phương", "thức", "phương thức", "hàm thuộc lớp"],
+      ["thư", "viện", "thư viện", "tập mã dùng lại"],
+      ["mô", "đun", "mô đun", "khối chức năng"],
+      ["tham", "số", "tham số", "giá trị truyền vào"],
+      ["biên", "dịch", "biên dịch", "chuyển sang mã máy"],
+      ["đệ", "quy", "đệ quy", "hàm tự gọi lại"],
+      ["kế", "thừa", "kế thừa", "lớp con dùng lại lớp cha"],
+      ["đóng", "gói", "đóng gói", "che giấu chi tiết bên trong"],
+      ["đa", "hình", "đa hình", "một giao diện nhiều cách chạy"],
+      ["trừu", "tượng", "trừu tượng", "ẩn chi tiết cài đặt"],
+      ["phụ", "thuộc", "phụ thuộc", "liên kết giữa các thành phần"]
+    ],
+    "VI-M18": [
+      ["bản", "ghi", "bản ghi", "một dòng dữ liệu"],
+      ["lược", "đồ", "lược đồ", "cấu trúc bảng"],
+      ["sắp", "xếp", "sắp xếp", "xếp theo thứ tự"],
+      ["truy", "xuất", "truy xuất", "lấy dữ liệu ra"],
+      ["lưu", "trữ", "lưu trữ", "cất giữ dữ liệu"],
+      ["nhân", "bản", "nhân bản", "sao chép dữ liệu sang máy khác"],
+      ["toàn", "vẹn", "toàn vẹn", "dữ liệu đúng đủ"],
+      ["ràng", "buộc", "ràng buộc", "điều kiện dữ liệu"],
+      ["hiệu", "năng", "hiệu năng", "tốc độ xử lý"],
+      ["độ", "trễ", "độ trễ", "thời gian chờ phản hồi"],
+      ["bảng", "tạm", "bảng tạm", "bảng dữ liệu trung gian"],
+      ["chỉ", "số", "chỉ số", "thước đo"]
+    ],
+    "VI-M19": [
+      ["phiên", "bản", "phiên bản", "số hiệu bản phát hành"],
+      ["kịch", "bản", "kịch bản", "chuỗi bước tự động"],
+      ["thử", "nghiệm", "thử nghiệm", "chạy thử"],
+      ["vá", "lỗi", "vá lỗi", "sửa lỗi phần mềm"],
+      ["nâng", "cấp", "nâng cấp", "lên bản mới"],
+      ["cấu", "hình", "cấu hình", "thiết lập thông số"],
+      ["môi", "trường", "môi trường", "nơi chạy ứng dụng"],
+      ["máy", "ảo", "máy ảo", "máy chạy giả lập"],
+      ["vùng", "chứa", "vùng chứa", "đóng gói ứng dụng chạy độc lập"],
+      ["nhật", "ký", "nhật ký", "ghi lại sự kiện"],
+      ["khôi", "phục", "khôi phục", "đưa về trạng thái cũ"],
+      ["tích", "hợp", "tích hợp", "gộp mã liên tục"]
+    ],
+    "VI-M20": [
+      ["mã", "độc", "mã độc", "phần mềm gây hại"],
+      ["lừa", "đảo", "lừa đảo", "gian lận chiếm đoạt"],
+      ["giả", "mạo", "giả mạo", "mạo danh"],
+      ["đăng", "nhập", "đăng nhập", "vào hệ thống"],
+      ["bảo", "mật", "bảo mật", "giữ an toàn thông tin"],
+      ["mật", "khẩu", "mật khẩu", "chuỗi bí mật"],
+      ["chứng", "thư", "chứng thư", "chứng chỉ số"],
+      ["tên", "miền", "tên miền", "địa chỉ trang web"],
+      ["ngăn", "chặn", "ngăn chặn", "chặn truy cập trái phép"],
+      ["giám", "sát", "giám sát", "theo dõi hoạt động"],
+      ["sao", "lưu", "sao lưu", "tạo bản dự phòng"],
+      ["cảnh", "báo", "cảnh báo", "thông báo nguy cơ"]
+    ]
+  };
+
+  // Đồng bộ toàn bộ từ ghép (gốc + kho mở rộng) vào DICT để hỗ trợ cả Nối chữ & từ thưởng
+  [...MERGE_LEVELS.flatMap((l) => l.pairs), ...Object.values(MERGE_EXTRA).flat()].forEach(([, , combined, meaning]) => {
+    const k = stripTones(combined);
+    if (k && !DICT[k]) DICT[k] = { word: combined, meaning };
   });
 
-  // Tăng độ khó Ghép Từ Tiếng Việt: nâng mỗi phiên lên 8–10 mảnh bẫy (decoys) không tạo thành từ hợp lệ với mảnh thật
-  (function enrichMergeDecoys() {
-    const allPieces = Array.from(
-      new Set(MERGE_LEVELS.flatMap((l) => l.pairs.flatMap(([a, b]) => [a, b])))
-    );
-    MERGE_LEVELS.forEach((lvl) => {
-      const targetDecoyCount = lvl.tier === "Nâng cao" ? 10 : 8;
-      const ownPieces = new Set(lvl.pairs.flatMap(([a, b]) => [a, b]));
-      const existing = new Set(lvl.decoys || []);
-      const candidates = shuffleArray(allPieces);
-      for (const cand of candidates) {
-        if (existing.size >= targetDecoyCount) break;
-        if (ownPieces.has(cand) || existing.has(cand)) continue;
-        const candNorm = stripTones(cand);
-        let createsValid = false;
-        for (const p of ownPieces) {
-          const pNorm = stripTones(p);
-          if (DICT[pNorm + candNorm] || DICT[candNorm + pNorm]) {
-            createsValid = true;
-            break;
-          }
-        }
-        if (!createsValid) existing.add(cand);
-      }
-      lvl.decoys = Array.from(existing);
+  const normMergeText = (s) => stripTones(s);
+  const MERGE_POOLS = {};
+  MERGE_LEVELS.forEach((lvl) => {
+    const seen = new Set();
+    const all = [...lvl.pairs, ...(MERGE_EXTRA[lvl.id] || [])].filter((p) => {
+      const k = normMergeText(p[2]);
+      if (!k || seen.has(k)) return false;
+      seen.add(k);
+      return true;
     });
-  })();
+    MERGE_POOLS[lvl.id] = { size: lvl.pairs.length, baseDecoys: (lvl.decoys || []).slice(), all };
+  });
+  const ALL_MERGE_PIECES = Array.from(
+    new Set(Object.values(MERGE_POOLS).flatMap((p) => p.all.flatMap(([a, b]) => [a, b])))
+  );
+  const KNOWN_MERGE_WORDS = new Set(
+    Object.values(MERGE_POOLS).flatMap((p) => p.all.map((x) => normMergeText(x[2])))
+  );
+  function formsKnownWord(a, b) {
+    const x = normMergeText(a) + normMergeText(b);
+    const y = normMergeText(b) + normMergeText(a);
+    return Boolean(DICT[x] || DICT[y] || KNOWN_MERGE_WORDS.has(x) || KNOWN_MERGE_WORDS.has(y));
+  }
+
+  // Mảnh bẫy (decoys): không trùng mảnh thật, không ghép với mảnh thật thành từ hợp lệ
+  function fillMergeDecoys(lvl, baseDecoys) {
+    const targetDecoyCount = lvl.tier === "Nâng cao" ? 10 : 8;
+    const ownPieces = new Set(lvl.pairs.flatMap(([a, b]) => [a, b]));
+    const isSafe = (cand) => {
+      if (ownPieces.has(cand)) return false;
+      for (const p of ownPieces) if (formsKnownWord(p, cand)) return false;
+      return true;
+    };
+    const decoys = new Set((baseDecoys || []).filter(isSafe));
+    for (const cand of shuffleArray(ALL_MERGE_PIECES)) {
+      if (decoys.size >= targetDecoyCount) break;
+      if (!decoys.has(cand) && isSafe(cand)) decoys.add(cand);
+    }
+    lvl.decoys = Array.from(decoys);
+  }
+
+  // Mỗi lần vào phiên: bốc ngẫu nhiên đúng số cặp gốc từ kho của phiên, ưu tiên cặp chưa gặp lượt trước
+  function reshuffleMergeLevel(id, avoidWords = []) {
+    const lvl = MERGE_LEVELS.find((l) => l.id === id);
+    const pool = MERGE_POOLS[id];
+    if (!lvl || !pool) return null;
+    const avoid = new Set((avoidWords || []).map(normMergeText));
+    const fresh = shuffleArray(pool.all.filter((p) => !avoid.has(normMergeText(p[2]))));
+    const old = shuffleArray(pool.all.filter((p) => avoid.has(normMergeText(p[2]))));
+    lvl.pairs = [...fresh, ...old].slice(0, pool.size);
+    fillMergeDecoys(lvl, pool.baseDecoys);
+    return lvl;
+  }
+
+  MERGE_LEVELS.forEach((lvl) => reshuffleMergeLevel(lvl.id));
 
   function shuffleArray(arr) {
     const copy = arr.slice();
@@ -1797,5 +2105,5 @@ window.VI_DATA = (function () {
     return CONNECT_LEVELS[rawIdx];
   }
 
-  return { DICT, CONNECT_LEVELS, MERGE_LEVELS, stripTones, reshuffleLevel };
+  return { DICT, CONNECT_LEVELS, MERGE_LEVELS, reshuffleMergeLevel, stripTones, reshuffleLevel };
 })();

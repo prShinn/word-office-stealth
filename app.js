@@ -1038,6 +1038,14 @@
         // Khi thất bại ở chế độ Ghép từ / Phân nhóm, chuyển sang phiên khác tránh làm bài dò lại đề cũ
         state.levelIndex = (state.levelIndex + 1) % levels.length;
       }
+      if (state.mode === "merge") {
+        // Bốc lại bộ cặp mới từ kho mở rộng của phiên, ưu tiên cặp chưa gặp lượt trước
+        const mergePack = state.lang === "en" ? window.EN_DATA : window.VI_DATA;
+        const curMerge = levels[state.levelIndex];
+        if (curMerge && mergePack && typeof mergePack.reshuffleMergeLevel === "function") {
+          mergePack.reshuffleMergeLevel(curMerge.id, (curMerge.pairs || []).map((p) => p[2]));
+        }
+      }
     }
     const lvl = getCurrentLevel();
     trackEvent("level_start", { level_id: lvl.id, mode: state.mode, lang: state.lang, tier: lvl.tier });
@@ -1599,31 +1607,47 @@
       .replace(/[^a-z0-9]/g, "");
   }
 
-  function sanitizeClueMeaning(meaningText, wordKey, topic) {
-    const targetNorm = normalizeForClueCheck(wordKey);
-    if (!meaningText || !targetNorm) return topic ? `Chủ đề: ${topic}` : "";
-    const parts = meaningText.split(/(\s+|\/|,|;|\(|\))/);
-    const masked = parts
-      .map((part) => {
-        const norm = normalizeForClueCheck(part);
-        return norm && norm === targetNorm ? "___" : part;
-      })
-      .join("")
-      .replace(/\s{2,}/g, " ")
-      .trim();
-    const remainingNorm = normalizeForClueCheck(masked);
-    if (!remainingNorm || remainingNorm.length < 3 || (targetNorm.length >= 4 && remainingNorm.includes(targetNorm))) {
-      return `Chủ đề: ${topic}`;
-    }
-    return masked;
-  }
+  function sanitizeClueMeaning(meaningText, wordKey, topic, entryWord) {
+    if (!meaningText) return topic ? `Chủ đề: ${topic}` : "";
+    const firstSense = String(meaningText).split(/[\/;]/)[0].trim().replace(/\([^\)]*\)/g, "").trim();
 
-  // Mỗi lượt vào Phiên chỉ gợi ý đúng 1 dòng, chọn theo mã Phiên.
-  // Giải xong dòng đó thì không chuyển gợi ý sang dòng nào nữa.
-  function getClueIndex(lvl, count) {
-    let hash = 0;
-    for (const ch of String(lvl.id)) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
-    return count > 0 ? hash % count : -1;
+    const normKey = normalizeForClueCheck(wordKey);
+    const syllables = new Set();
+    if (entryWord) {
+      String(entryWord).split(/\s+/).forEach((p) => {
+        const np = normalizeForClueCheck(p);
+        if (np && np.length >= 2) syllables.add(np);
+      });
+    }
+    if (normKey) syllables.add(normKey);
+
+    const tokens = firstSense.split(/\s+/).filter(Boolean);
+    const cleaned = [];
+    for (const tok of tokens) {
+      const n = normalizeForClueCheck(tok);
+      let isMatch = false;
+      for (const syl of syllables) {
+        if (syl.length >= 2 && (n === syl || (syl.length >= 4 && n.includes(syl)))) {
+          isMatch = true;
+          break;
+        }
+      }
+      if (!isMatch) {
+        cleaned.push(tok);
+      }
+    }
+
+    if (cleaned.length === 0) {
+      return topic ? `Chủ đề: ${topic}` : "Gợi mở liên quan";
+    }
+
+    // Rút gọn gợi ý vừa vặn, gợi mở ngữ cảnh nhưng không lộ đáp án
+    const maxWords = cleaned.length >= 4 ? 2 : (cleaned.length >= 3 ? 2 : cleaned.length);
+    let slice = cleaned.slice(0, maxWords).join(" ").trim();
+    if (tokens.length > maxWords && !slice.endsWith("...")) {
+      slice += "...";
+    }
+    return slice;
   }
 
   function renderTargetsTable() {
@@ -1632,7 +1656,6 @@
 
     if (state.mode === "connect") {
       const dict = state.lang === "en" ? window.EN_DATA.DICT : window.VI_DATA.DICT;
-      const clueIdx = getClueIndex(lvl, lvl.targets.length);
       lvl.targets.forEach((wordKey, idx) => {
         const solved = state.solvedTargets.has(wordKey);
         const hintCount = state.revealedHints[wordKey] || 0;
@@ -1683,12 +1706,10 @@
             .join(" ");
           wordCellHtml = `<span class="masked-word">${chars}</span>`;
           const lenUnit = state.lang === "en" ? "ký tự" : "chữ";
-          let clueText = "";
-          if (idx === clueIdx) {
-            const meaningText = state.lang === "en" ? entry : entry.meaning;
-            // Che bớt từ trùng đáp án qua sanitizeClueMeaning
-            clueText = ` · Gợi ý: ${escapeHtml(sanitizeClueMeaning(meaningText, wordKey, lvl.topic))}`;
-          }
+          const meaningText = state.lang === "en" ? entry : entry?.meaning;
+          const entryWord = state.lang === "en" ? wordKey : entry?.word;
+          const subtleClue = sanitizeClueMeaning(meaningText, wordKey, lvl.topic, entryWord);
+          const clueText = subtleClue ? ` · Gợi ý: ${escapeHtml(subtleClue)}` : "";
           meaningHtml = `<span class="masked-word">${dirLabel} · ${wordKey.length} ${lenUnit}${clueText}</span>`;
         }
 
@@ -1715,9 +1736,10 @@
         const statusHtml = solved
           ? `<span class="badge-status badge-ok">Matched</span>`
           : `<span class="badge-status badge-pending">Pending</span>`;
+        const subtleClue = sanitizeClueMeaning(pair[3], pair[2], lvl.topic, pair[2]);
         const meaningHtml = solved
           ? pair[3]
-          : `<span class="masked-word">—</span>`;
+          : `<span class="masked-word">Gợi ý: ${escapeHtml(subtleClue || "—")}</span>`;
 
         tr.innerHTML = `
           <td>${idx + 1}</td>

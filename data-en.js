@@ -1250,32 +1250,347 @@ window.EN_DATA = (function () {
     }
   ];
 
-  // Tăng độ khó Ghép Từ: nâng mỗi phiên lên tối thiểu 9 mảnh bẫy (decoys) an toàn (không trùng mảnh thật, không ghép thành từ có trong DICT)
-  (function enrichMergeDecoys() {
-    const allPieces = Array.from(
-      new Set(MERGE_LEVELS.flatMap((l) => l.pairs.flatMap(([a, b]) => [a, b])))
-    );
-    MERGE_LEVELS.forEach((lvl) => {
-      const targetDecoyCount = lvl.tier === "Nâng cao" ? 10 : 8;
-      const ownPieces = new Set(lvl.pairs.flatMap(([a, b]) => [a, b]));
-      const existing = new Set(lvl.decoys || []);
-      const candidates = shuffleArray(allPieces);
-      for (const cand of candidates) {
-        if (existing.size >= targetDecoyCount) break;
-        if (ownPieces.has(cand) || existing.has(cand)) continue;
-        // Đảm bảo mảnh bẫy không vô tình ghép với mảnh thật nào thành từ hợp lệ trong DICT
-        let createsValid = false;
-        for (const p of ownPieces) {
-          if (DICT[p + cand] || DICT[cand + p]) {
-            createsValid = true;
-            break;
-          }
-        }
-        if (!createsValid) existing.add(cand);
-      }
-      lvl.decoys = Array.from(existing);
-    });
-  })();
+  // Kho cặp mở rộng Ghép Từ theo đúng chủ đề phiên (gộp với pairs gốc để bốc ngẫu nhiên)
+  const MERGE_EXTRA = {
+    "EN-M01": [
+      ["work", "load", "workload", "khối lượng công việc"],
+      ["work", "day", "workday", "ngày làm việc"],
+      ["desk", "top", "desktop", "màn hình nền / máy để bàn"],
+      ["note", "pad", "notepad", "sổ ghi chép"],
+      ["break", "room", "breakroom", "phòng nghỉ giải lao"],
+      ["head", "quarters", "headquarters", "trụ sở chính"],
+      ["clip", "board", "clipboard", "bìa kẹp giấy"],
+      ["paper", "clip", "paperclip", "ghim kẹp giấy"],
+      ["time", "sheet", "timesheet", "bảng chấm công"],
+      ["co", "worker", "coworker", "đồng nghiệp"],
+      ["out", "source", "outsource", "thuê ngoài"],
+      ["up", "date", "update", "cập nhật"]
+    ],
+    "EN-M02": [
+      ["lap", "top", "laptop", "máy tính xách tay"],
+      ["web", "cam", "webcam", "camera máy tính"],
+      ["touch", "screen", "touchscreen", "màn hình cảm ứng"],
+      ["screen", "shot", "screenshot", "ảnh chụp màn hình"],
+      ["up", "grade", "upgrade", "nâng cấp"],
+      ["head", "phone", "headphone", "tai nghe"],
+      ["micro", "chip", "microchip", "vi mạch"],
+      ["mother", "board", "motherboard", "bo mạch chủ"],
+      ["flash", "drive", "flashdrive", "ổ nhớ di động"],
+      ["spread", "sheet", "spreadsheet", "bảng tính"],
+      ["log", "in", "login", "đăng nhập"],
+      ["desk", "top", "desktop", "máy để bàn"]
+    ],
+    "EN-M03": [
+      ["dash", "board", "dashboard", "bảng điều khiển số liệu"],
+      ["time", "line", "timeline", "dòng thời gian"],
+      ["head", "count", "headcount", "tổng số nhân sự"],
+      ["out", "come", "outcome", "kết quả đầu ra"],
+      ["guide", "line", "guideline", "hướng dẫn quy chuẩn"],
+      ["bench", "mark", "benchmark", "chuẩn so sánh"],
+      ["break", "down", "breakdown", "bảng phân tích chi tiết"],
+      ["down", "time", "downtime", "thời gian ngừng hoạt động"],
+      ["over", "head", "overhead", "chi phí chung"],
+      ["time", "frame", "timeframe", "khung thời gian"],
+      ["work", "load", "workload", "khối lượng công việc"],
+      ["up", "side", "upside", "mặt tích cực"]
+    ],
+    "EN-M04": [
+      ["sign", "up", "signup", "đăng ký tài khoản"],
+      ["log", "out", "logout", "đăng xuất"],
+      ["web", "page", "webpage", "trang web"],
+      ["chat", "room", "chatroom", "phòng trò chuyện"],
+      ["web", "mail", "webmail", "thư điện tử trên web"],
+      ["news", "feed", "newsfeed", "bảng tin"],
+      ["pop", "up", "popup", "cửa sổ bật lên"],
+      ["inter", "net", "internet", "mạng toàn cầu"],
+      ["web", "inar", "webinar", "hội thảo trực tuyến"],
+      ["out", "box", "outbox", "hộp thư đi"],
+      ["hot", "spot", "hotspot", "điểm phát sóng"],
+      ["log", "in", "login", "đăng nhập"]
+    ],
+    "EN-M05": [
+      ["sun", "set", "sunset", "hoàng hôn"],
+      ["sun", "shine", "sunshine", "ánh nắng"],
+      ["snow", "flake", "snowflake", "bông tuyết"],
+      ["thunder", "storm", "thunderstorm", "giông bão"],
+      ["mid", "day", "midday", "giữa trưa"],
+      ["over", "night", "overnight", "qua đêm"],
+      ["day", "break", "daybreak", "rạng đông"],
+      ["sea", "shore", "seashore", "bờ biển"],
+      ["rain", "drop", "raindrop", "giọt mưa"],
+      ["star", "light", "starlight", "ánh sao"],
+      ["after", "noon", "afternoon", "buổi chiều"],
+      ["week", "day", "weekday", "ngày trong tuần"],
+      ["sun", "flower", "sunflower", "hoa hướng dương"]
+    ],
+    "EN-M06": [
+      ["air", "line", "airline", "hãng hàng không"],
+      ["air", "plane", "airplane", "máy bay"],
+      ["free", "way", "freeway", "đường cao tốc"],
+      ["side", "walk", "sidewalk", "vỉa hè"],
+      ["round", "about", "roundabout", "vòng xuyến"],
+      ["land", "mark", "landmark", "địa danh nổi bật"],
+      ["sight", "seeing", "sightseeing", "ngắm cảnh"],
+      ["camp", "site", "campsite", "khu cắm trại"],
+      ["guide", "book", "guidebook", "sách hướng dẫn du lịch"],
+      ["motor", "bike", "motorbike", "xe máy"],
+      ["life", "jacket", "lifejacket", "áo phao"],
+      ["sea", "port", "seaport", "cảng biển"],
+      ["over", "seas", "overseas", "nước ngoài"]
+    ],
+    "EN-M07": [
+      ["kitchen", "ware", "kitchenware", "đồ dùng nhà bếp"],
+      ["bed", "sheet", "bedsheet", "ga trải giường"],
+      ["door", "bell", "doorbell", "chuông cửa"],
+      ["wall", "paper", "wallpaper", "giấy dán tường"],
+      ["stair", "case", "staircase", "cầu thang"],
+      ["fire", "place", "fireplace", "lò sưởi"],
+      ["back", "yard", "backyard", "sân sau"],
+      ["house", "work", "housework", "việc nhà"],
+      ["dish", "washer", "dishwasher", "máy rửa bát"],
+      ["court", "yard", "courtyard", "sân trong"],
+      ["cup", "board", "cupboard", "tủ chén"],
+      ["light", "bulb", "lightbulb", "bóng đèn"]
+    ],
+    "EN-M08": [
+      ["lunch", "box", "lunchbox", "hộp cơm trưa"],
+      ["hot", "dog", "hotdog", "bánh mì kẹp xúc xích"],
+      ["pine", "apple", "pineapple", "quả dứa"],
+      ["straw", "berry", "strawberry", "quả dâu tây"],
+      ["egg", "plant", "eggplant", "quả cà tím"],
+      ["meat", "ball", "meatball", "thịt viên"],
+      ["cheese", "cake", "cheesecake", "bánh phô mai"],
+      ["sauce", "pan", "saucepan", "nồi nấu sốt"],
+      ["table", "spoon", "tablespoon", "thìa canh"],
+      ["home", "made", "homemade", "tự làm tại nhà"],
+      ["milk", "shake", "milkshake", "sữa lắc"],
+      ["oat", "meal", "oatmeal", "cháo yến mạch"]
+    ],
+    "EN-M09": [
+      ["pay", "check", "paycheck", "phiếu lương"],
+      ["pay", "roll", "payroll", "bảng lương"],
+      ["share", "holder", "shareholder", "cổ đông"],
+      ["stock", "holder", "stockholder", "người nắm cổ phiếu"],
+      ["book", "keeping", "bookkeeping", "ghi sổ kế toán"],
+      ["cash", "flow", "cashflow", "dòng tiền"],
+      ["over", "draft", "overdraft", "thấu chi"],
+      ["mark", "up", "markup", "phần giá cộng thêm"],
+      ["whole", "sale", "wholesale", "bán buôn"],
+      ["bar", "code", "barcode", "mã vạch"],
+      ["take", "over", "takeover", "thâu tóm"],
+      ["buy", "back", "buyback", "mua lại"]
+    ],
+    "EN-M10": [
+      ["name", "space", "namespace", "không gian tên"],
+      ["work", "space", "workspace", "không gian làm việc"],
+      ["hot", "fix", "hotfix", "bản sửa nóng"],
+      ["read", "only", "readonly", "chỉ đọc"],
+      ["call", "stack", "callstack", "ngăn xếp lời gọi"],
+      ["file", "name", "filename", "tên tệp"],
+      ["boiler", "plate", "boilerplate", "mã khung lặp lại"],
+      ["play", "ground", "playground", "môi trường thử nghiệm"],
+      ["up", "stream", "upstream", "nhánh nguồn phía trên"],
+      ["down", "stream", "downstream", "phía tiêu thụ dữ liệu"],
+      ["over", "flow", "overflow", "tràn bộ nhớ"],
+      ["data", "type", "datatype", "kiểu dữ liệu"]
+    ],
+    "EN-M11": [
+      ["school", "bag", "schoolbag", "cặp sách"],
+      ["class", "mate", "classmate", "bạn cùng lớp"],
+      ["work", "book", "workbook", "sách bài tập"],
+      ["hand", "book", "handbook", "sổ tay hướng dẫn"],
+      ["school", "yard", "schoolyard", "sân trường"],
+      ["head", "master", "headmaster", "hiệu trưởng"],
+      ["year", "book", "yearbook", "kỷ yếu"],
+      ["sketch", "book", "sketchbook", "sổ phác họa"],
+      ["chalk", "board", "chalkboard", "bảng phấn"],
+      ["book", "store", "bookstore", "hiệu sách"],
+      ["hand", "writing", "handwriting", "chữ viết tay"],
+      ["life", "long", "lifelong", "suốt đời"]
+    ],
+    "EN-M12": [
+      ["self", "care", "selfcare", "tự chăm sóc bản thân"],
+      ["mind", "map", "mindmap", "sơ đồ tư duy"],
+      ["out", "look", "outlook", "triển vọng"],
+      ["view", "point", "viewpoint", "quan điểm"],
+      ["key", "note", "keynote", "bài phát biểu chính"],
+      ["up", "skill", "upskill", "nâng cao kỹ năng"],
+      ["hind", "sight", "hindsight", "nhìn lại sau sự việc"],
+      ["fore", "sight", "foresight", "tầm nhìn xa"],
+      ["hard", "work", "hardwork", "chăm chỉ"],
+      ["self", "made", "selfmade", "tự lập thân"],
+      ["game", "changer", "gamechanger", "nhân tố thay đổi cuộc chơi"],
+      ["eye", "opener", "eyeopener", "điều mở mang tầm mắt"]
+    ],
+    "EN-M13": [
+      ["cash", "flow", "cashflow", "dòng tiền"],
+      ["spin", "off", "spinoff", "công ty tách ra"],
+      ["buy", "out", "buyout", "mua lại toàn bộ"],
+      ["co", "founder", "cofounder", "đồng sáng lập"],
+      ["crowd", "fund", "crowdfund", "gọi vốn cộng đồng"],
+      ["boot", "strap", "bootstrap", "tự thân vận động không gọi vốn"],
+      ["game", "plan", "gameplan", "kế hoạch hành động"],
+      ["work", "force", "workforce", "lực lượng lao động"],
+      ["deal", "flow", "dealflow", "luồng thương vụ đầu tư"],
+      ["pay", "back", "payback", "hoàn vốn"],
+      ["share", "holder", "shareholder", "cổ đông"],
+      ["head", "count", "headcount", "số lượng nhân sự"]
+    ],
+    "EN-M14": [
+      ["click", "through", "clickthrough", "lượt nhấp chuyển trang"],
+      ["fan", "page", "fanpage", "trang người hâm mộ"],
+      ["head", "line", "headline", "dòng tiêu đề"],
+      ["tag", "line", "tagline", "câu khẩu hiệu ngắn"],
+      ["out", "reach", "outreach", "tiếp cận đối tác"],
+      ["call", "out", "callout", "lời kêu gọi chú ý"],
+      ["give", "away", "giveaway", "quà tặng miễn phí"],
+      ["cross", "sell", "crosssell", "bán chéo"],
+      ["eye", "catcher", "eyecatcher", "điểm thu hút ánh nhìn"],
+      ["blog", "ger", "blogger", "người viết nhật ký mạng"],
+      ["pop", "up", "popup", "cửa sổ bật lên"],
+      ["by", "line", "byline", "dòng ghi tên tác giả"]
+    ],
+    "EN-M15": [
+      ["auto", "pilot", "autopilot", "chế độ lái tự động"],
+      ["auto", "complete", "autocomplete", "tự hoàn thành"],
+      ["auto", "correct", "autocorrect", "tự sửa lỗi"],
+      ["over", "fit", "overfit", "học quá khớp"],
+      ["under", "fit", "underfit", "học chưa đủ khớp"],
+      ["back", "prop", "backprop", "lan truyền ngược"],
+      ["deep", "fake", "deepfake", "video giả mạo bằng AI"],
+      ["check", "point", "checkpoint", "điểm lưu mô hình"],
+      ["data", "lake", "datalake", "hồ dữ liệu"],
+      ["key", "point", "keypoint", "điểm mấu chốt"],
+      ["hand", "off", "handoff", "chuyển giao"],
+      ["hyper", "parameter", "hyperparameter", "siêu tham số"]
+    ],
+    "EN-M16": [
+      ["hot", "line", "hotline", "đường dây nóng"],
+      ["help", "line", "helpline", "đường dây hỗ trợ"],
+      ["walk", "in", "walkin", "khách đến trực tiếp"],
+      ["call", "center", "callcenter", "tổng đài"],
+      ["head", "set", "headset", "tai nghe có micro"],
+      ["fall", "back", "fallback", "phương án dự phòng"],
+      ["pick", "up", "pickup", "nhận hàng"],
+      ["drop", "off", "dropoff", "điểm trả hàng"],
+      ["thank", "you", "thankyou", "lời cảm ơn"],
+      ["self", "service", "selfservice", "tự phục vụ"],
+      ["touch", "point", "touchpoint", "điểm chạm khách hàng"],
+      ["life", "time", "lifetime", "trọn đời"]
+    ],
+    "EN-M17": [
+      ["java", "script", "javascript", "ngôn ngữ kịch bản web"],
+      ["view", "port", "viewport", "vùng hiển thị"],
+      ["life", "cycle", "lifecycle", "vòng đời thành phần"],
+      ["break", "point", "breakpoint", "điểm dừng gỡ lỗi"],
+      ["side", "bar", "sidebar", "thanh bên"],
+      ["drop", "down", "dropdown", "danh sách thả xuống"],
+      ["tool", "tip", "tooltip", "chú thích nổi"],
+      ["boot", "strap", "bootstrap", "khởi tạo ứng dụng"],
+      ["pre", "fetch", "prefetch", "tải trước"],
+      ["key", "frame", "keyframe", "khung hình chính"],
+      ["name", "space", "namespace", "không gian tên"],
+      ["hot", "reload", "hotreload", "tải lại nóng"]
+    ],
+    "EN-M18": [
+      ["through", "put", "throughput", "thông lượng"],
+      ["back", "pressure", "backpressure", "áp lực ngược"],
+      ["spin", "lock", "spinlock", "khóa quay vòng"],
+      ["sub", "process", "subprocess", "tiến trình con"],
+      ["multi", "thread", "multithread", "đa luồng"],
+      ["lock", "free", "lockfree", "không dùng khóa"],
+      ["back", "off", "backoff", "lùi thời gian thử lại"],
+      ["over", "load", "overload", "quá tải"],
+      ["bottle", "neck", "bottleneck", "điểm nghẽn"],
+      ["time", "slice", "timeslice", "lát thời gian CPU"],
+      ["stack", "trace", "stacktrace", "vết ngăn xếp lỗi"],
+      ["work", "load", "workload", "tải công việc"]
+    ],
+    "EN-M19": [
+      ["side", "car", "sidecar", "tiến trình đi kèm"],
+      ["up", "time", "uptime", "thời gian hoạt động"],
+      ["down", "time", "downtime", "thời gian ngừng"],
+      ["cron", "job", "cronjob", "tác vụ định kỳ"],
+      ["back", "up", "backup", "sao lưu"],
+      ["data", "center", "datacenter", "trung tâm dữ liệu"],
+      ["change", "log", "changelog", "nhật ký thay đổi"],
+      ["life", "cycle", "lifecycle", "vòng đời"],
+      ["git", "ops", "gitops", "vận hành bằng kho mã"],
+      ["post", "mortem", "postmortem", "phân tích sau sự cố"],
+      ["on", "call", "oncall", "trực sự cố"],
+      ["dash", "board", "dashboard", "bảng giám sát"]
+    ],
+    "EN-M20": [
+      ["pass", "phrase", "passphrase", "cụm mật khẩu"],
+      ["mal", "ware", "malware", "phần mềm độc hại"],
+      ["spy", "ware", "spyware", "phần mềm gián điệp"],
+      ["ransom", "ware", "ransomware", "mã độc tống tiền"],
+      ["key", "logger", "keylogger", "phần mềm ghi phím"],
+      ["brute", "force", "bruteforce", "tấn công dò mật khẩu"],
+      ["two", "factor", "twofactor", "xác thực hai lớp"],
+      ["hand", "shake", "handshake", "bắt tay kết nối"],
+      ["key", "chain", "keychain", "chuỗi khóa"],
+      ["finger", "print", "fingerprint", "vân tay"],
+      ["safe", "guard", "safeguard", "biện pháp bảo vệ"],
+      ["watch", "dog", "watchdog", "cơ chế giám sát"]
+    ]
+  };
 
-  return { DICT, CONNECT_LEVELS, MERGE_LEVELS, reshuffleLevel };
+  const normMergeText = (s) => (s || "").toLowerCase().replace(/[^a-z]/g, "");
+  const MERGE_POOLS = {};
+  MERGE_LEVELS.forEach((lvl) => {
+    const seen = new Set();
+    const all = [...lvl.pairs, ...(MERGE_EXTRA[lvl.id] || [])].filter((p) => {
+      const k = normMergeText(p[2]);
+      if (!k || seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+    MERGE_POOLS[lvl.id] = { size: lvl.pairs.length, baseDecoys: (lvl.decoys || []).slice(), all };
+  });
+  const ALL_MERGE_PIECES = Array.from(
+    new Set(Object.values(MERGE_POOLS).flatMap((p) => p.all.flatMap(([a, b]) => [a, b])))
+  );
+  const KNOWN_MERGE_WORDS = new Set(
+    Object.values(MERGE_POOLS).flatMap((p) => p.all.map((x) => normMergeText(x[2])))
+  );
+  function formsKnownWord(a, b) {
+    const x = normMergeText(a) + normMergeText(b);
+    const y = normMergeText(b) + normMergeText(a);
+    return Boolean(DICT[x] || DICT[y] || KNOWN_MERGE_WORDS.has(x) || KNOWN_MERGE_WORDS.has(y));
+  }
+
+  // Mảnh bẫy (decoys): không trùng mảnh thật, không ghép với mảnh thật thành từ hợp lệ
+  function fillMergeDecoys(lvl, baseDecoys) {
+    const targetDecoyCount = lvl.tier === "Nâng cao" ? 10 : 8;
+    const ownPieces = new Set(lvl.pairs.flatMap(([a, b]) => [a, b]));
+    const isSafe = (cand) => {
+      if (ownPieces.has(cand)) return false;
+      for (const p of ownPieces) if (formsKnownWord(p, cand)) return false;
+      return true;
+    };
+    const decoys = new Set((baseDecoys || []).filter(isSafe));
+    for (const cand of shuffleArray(ALL_MERGE_PIECES)) {
+      if (decoys.size >= targetDecoyCount) break;
+      if (!decoys.has(cand) && isSafe(cand)) decoys.add(cand);
+    }
+    lvl.decoys = Array.from(decoys);
+  }
+
+  // Mỗi lần vào phiên: bốc ngẫu nhiên đúng số cặp gốc từ kho của phiên, ưu tiên cặp chưa gặp lượt trước
+  function reshuffleMergeLevel(id, avoidWords = []) {
+    const lvl = MERGE_LEVELS.find((l) => l.id === id);
+    const pool = MERGE_POOLS[id];
+    if (!lvl || !pool) return null;
+    const avoid = new Set((avoidWords || []).map(normMergeText));
+    const fresh = shuffleArray(pool.all.filter((p) => !avoid.has(normMergeText(p[2]))));
+    const old = shuffleArray(pool.all.filter((p) => avoid.has(normMergeText(p[2]))));
+    lvl.pairs = [...fresh, ...old].slice(0, pool.size);
+    fillMergeDecoys(lvl, pool.baseDecoys);
+    return lvl;
+  }
+
+  MERGE_LEVELS.forEach((lvl) => reshuffleMergeLevel(lvl.id));
+
+  return { DICT, CONNECT_LEVELS, MERGE_LEVELS, reshuffleMergeLevel, reshuffleLevel };
 })();
