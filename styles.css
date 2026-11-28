@@ -483,7 +483,7 @@ body.theme-docs .connections-view {
 .excel-col-headers {
   height: 22px;
   display: grid;
-  grid-template-columns: 36px 90px 90px 90px 90px 180px 110px 1fr;
+  grid-template-columns: 36px 95px 95px 95px 95px 180px 110px 1fr;
   background: var(--bg-subtle);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -528,9 +528,10 @@ body.theme-docs .connections-view {
 .content-grid {
   flex: 1;
   display: grid;
-  grid-template-columns: clamp(310px, 28vw, 420px) 1fr;
+  grid-template-columns: 380px 1fr;
   overflow: hidden;
   background: var(--bg-surface);
+  width: 100%;
 }
 
 .panel {
@@ -648,8 +649,7 @@ body.theme-docs .connections-view {
 
 .wheel-wrap {
   position: relative;
-  width: 100%;
-  max-width: 320px;
+  width: 300px;
   height: 244px;
   flex-shrink: 0;
   margin: 4px auto 10px;
@@ -780,14 +780,14 @@ body.theme-docs .connections-view {
 }
 
 .footnote-box {
-  margin-top: auto;
+  margin-top: 12px;
   font-size: 11px;
   color: var(--text-muted);
   background: #fff;
   border: 1px solid var(--border-light);
-  padding: 7px 9px;
+  padding: 8px 10px;
   border-radius: 2px;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 .footnote-box code {
@@ -804,12 +804,11 @@ body.theme-docs .connections-view {
   border: 1px solid var(--border);
   padding: 10px;
   margin-bottom: 8px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: block;
+  text-align: center;
   overflow: auto;
-  height: clamp(180px, 28vh, 320px);
-  min-height: 130px;
+  height: 245px;
+  min-height: 140px;
   max-height: 60vh;
   resize: vertical;
   flex-shrink: 0;
@@ -934,6 +933,9 @@ body.theme-docs .connections-view {
   overflow-y: auto;
   border: 1px solid var(--border);
   min-height: 110px;
+  background-color: #fff;
+  background-image: linear-gradient(to bottom, #ffffff 25px, #f3f2f1 26px);
+  background-size: 100% 26px;
 }
 
 .office-table {
@@ -1691,61 +1693,9 @@ body.fever .connections-view {
   .troll-toast { animation: none; }
 }
 
-/* ================= RESPONSIVE ENHANCEMENTS (MÀN TO & MÀN NHỎ) ================= */
+/* ================= RESPONSIVE ENHANCEMENTS (TỐI ƯU CHIỀU CAO & MOBILE) ================= */
 
-/* 1. Màn hình lớn / 2K Desktop (>= 1440px) */
-@media (min-width: 1440px) {
-  .content-grid {
-    grid-template-columns: minmax(360px, 24vw) 1fr;
-  }
-  .wheel-wrap {
-    max-width: 360px;
-    height: 260px;
-  }
-  .cw-cell {
-    width: 27px;
-    height: 27px;
-    font-size: 13.5px;
-  }
-  .crossword-wrap {
-    height: clamp(250px, 32vh, 380px);
-  }
-  .office-table {
-    font-size: 13px;
-  }
-  .office-table th, .office-table td {
-    padding: 7px 10px;
-  }
-}
-
-/* 2. Màn hình siêu rộng / Ultrawide (>= 1800px) */
-@media (min-width: 1800px) {
-  .content-grid {
-    grid-template-columns: 420px minmax(0, 1400px);
-    justify-content: center;
-  }
-  .output-panel {
-    border-right: 1px solid var(--border);
-  }
-}
-
-/* 3. Màn hình Laptop vừa / Split screen (861px - 1100px) */
-@media (max-width: 1100px) and (min-width: 861px) {
-  .content-grid {
-    grid-template-columns: 310px 1fr;
-  }
-  .wheel-wrap {
-    max-width: 290px;
-  }
-  .office-table {
-    font-size: 11.5px;
-  }
-  .office-table th, .office-table td {
-    padding: 4px 6px;
-  }
-}
-
-/* 4. Laptop văn phòng & Màn hình chiều cao thấp (max-height: 820px) */
+/* Laptop văn phòng & Màn hình chiều cao thấp (max-height: 820px) */
 @media (max-height: 820px) {
   .titlebar {
     height: 28px;
