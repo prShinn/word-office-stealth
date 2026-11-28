@@ -1764,9 +1764,9 @@ body.fever .connections-view {
 /* ===== Thông báo troll ===== */
 .troll-toast {
   position: fixed;
-  right: 12px;
-  bottom: 56px;
-  z-index: 40;
+  right: 14px;
+  bottom: 82px;
+  z-index: 95;
   width: min(300px, calc(100vw - 24px));
   padding: 8px 10px 10px;
   background: #fff;
@@ -2113,9 +2113,9 @@ body.fever .connections-view {
 /* ================= NÚT GÓC: LẤY CỦA MỌI NGƯỜI CHIA CHO NGƯỜI LÀM ================= */
 .corner-donate-btn {
   position: fixed;
-  bottom: 46px;
+  bottom: 38px;
   right: 14px;
-  z-index: 95;
+  z-index: 90;
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -2178,7 +2178,7 @@ body.fever .connections-view {
 
 @media (max-width: 640px) {
   .corner-donate-btn {
-    bottom: 44px;
+    bottom: 36px;
     right: 8px;
     padding: 5px 9px 5px 7px;
     font-size: 10.5px;
