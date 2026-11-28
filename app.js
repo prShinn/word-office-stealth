@@ -1283,8 +1283,19 @@
     }
 
     const dict = state.lang === "en" ? window.EN_DATA.DICT : window.VI_DATA.DICT;
-    // Chỉ nhận từ có trong từ điển: không tự ghép tiếng, vì sẽ ra cụm vô nghĩa. Thiếu từ thì bổ sung vào data
-    const entry = dict[wordKey];
+    let entry = dict[wordKey];
+
+    // Với Tiếng Việt: nếu từ ghép chưa có sẵn trong DICT nhưng tách được thành 2 tiếng đơn hợp lệ trong DICT -> vẫn nhận Extra Ref
+    if (!entry && state.lang === "vi" && wordKey.length >= 4) {
+      for (let i = 2; i <= wordKey.length - 2; i++) {
+        const p1 = wordKey.slice(0, i);
+        const p2 = wordKey.slice(i);
+        if (dict[p1] && dict[p2]) {
+          entry = { word: `${p1} ${p2}`, meaning: "Từ ghép Tiếng Việt hợp lệ" };
+          break;
+        }
+      }
+    }
 
     if (!entry) {
       registerMistake(`"${wordKey.toUpperCase()}" sai từ điển`);

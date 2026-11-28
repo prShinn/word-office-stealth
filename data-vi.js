@@ -315,6 +315,7 @@ window.VI_DATA = (function () {
 
     // Từ ghép 2 tiếng viết liền cho các Phiên Trung bình & Nâng cao
     ["banghe", "bàn ghế", "nội thất bàn ghế làm việc"],
+    ["banthao", "bản thảo", "tài liệu nháp chưa hoàn chỉnh"],
     ["ghexoay", "ghế xoay", "ghế xoay làm việc văn phòng"],
     ["sotay", "sổ tay", "sổ ghi chép công việc"],
     ["butbi", "bút bi", "bút bi viết văn phòng"],
@@ -1337,7 +1338,7 @@ window.VI_DATA = (function () {
 
   // 32 Phiên Nối Chữ Tiếng Việt thuần TỪ GHÉP (pool 9–14 từ/phiên, xáo trộn chọn 6–8 từ <= 16 chữ cái mỗi lần load)
   const RAW_CONNECT = [
-    { id: "VI-01", tier: "Cơ bản", topic: "Công việc Văn phòng", targets: ["baocao", "banhang", "banghe", "congno", "donhang", "hoadon", "phancong", "bangiao", "hopdong", "kehoach", "ghichu", "congviec", "hophanh", "email", "mayin", "tailieu", "vanphong", "lichhop", "kyduyet", "congvan", "dongdau", "soanthao", "chamcong", "tangca", "giaoviec", "trinhky", "nghiphep", "sotay", "butbi", "butky", "kepgiay", "mucin"] },
+    { id: "VI-01", tier: "Cơ bản", topic: "Công việc Văn phòng", targets: ["baocao", "banhang", "banghe", "banthao", "congno", "donhang", "hoadon", "phancong", "bangiao", "hopdong", "kehoach", "ghichu", "congviec", "hophanh", "email", "mayin", "tailieu", "vanphong", "lichhop", "kyduyet", "congvan", "dongdau", "soanthao", "chamcong", "tangca", "giaoviec", "trinhky", "nghiphep", "sotay", "butbi", "butky", "kepgiay", "mucin"] },
     { id: "VI-02", tier: "Cơ bản", topic: "Báo cáo & Sổ sách", targets: ["baocao", "hoso", "bienban", "ghichu", "ngansach", "congno", "bangiao", "kiemtoan", "chungtu", "tongket", "sosach", "thuchi", "doanhso", "saoke", "phieuthu", "soquy", "socai", "phieuchi", "bangke", "tonkho", "doisoat", "sodu", "bieumau", "thongke", "kekhai", "quyettoan"] },
     { id: "VI-03", tier: "Cơ bản", topic: "Ẩm thực & Bữa ăn", targets: ["banhmi", "comtam", "anvat", "datmon", "comtrua", "banhbao", "bundau", "nuocep", "trasua", "caphe", "pho", "xoi", "chao", "buncha", "miga", "bunbo", "banhcuon", "goicuon", "chagio", "nemran", "hutieu", "banhxeo", "lau", "comga", "miquang", "banhcanh", "trungran"] },
     { id: "VI-04", tier: "Cơ bản", topic: "Đồ uống Văn phòng", targets: ["caphe", "trasua", "tradao", "cacao", "nuocep", "sinhto", "nuocloc", "tratac", "suachua", "nuocdua", "traxanh", "suadau", "bacxiu", "sodachanh", "nuoccam", "trachanh", "caphesua", "nuocmia", "trada", "nuocsuoi", "suatuoi", "nuocchanh", "nuocngot"] },
