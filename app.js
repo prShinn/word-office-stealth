@@ -2744,12 +2744,18 @@
     });
 
     const legalModal = $("legal-modal");
+    $("btn-corner-donate")?.addEventListener("click", () => {
+      legalModal?.classList.remove("hidden");
+    });
     $("btn-open-legal")?.addEventListener("click", () => {
       els.achModal.classList.add("hidden");
       legalModal?.classList.remove("hidden");
     });
     $("btn-close-legal")?.addEventListener("click", () => {
       legalModal?.classList.add("hidden");
+    });
+    legalModal?.addEventListener("click", (e) => {
+      if (e.target === legalModal) legalModal.classList.add("hidden");
     });
     $("btn-share-kpi")?.addEventListener("click", async () => {
       const lvl = getCurrentLevel();
