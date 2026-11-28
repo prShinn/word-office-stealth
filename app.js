@@ -859,8 +859,11 @@
 
       put(orderedWords[0], 0, 0, "H");
       let remaining = orderedWords.slice(1);
-      // Chạy 2 pass để từ trước chưa khớp có cơ hội cắt từ mới đặt sau
-      for (let pass = 0; pass < 2; pass++) {
+      let totalInter = 0;
+      // Lặp đến khi không móc nối thêm được từ nào nữa
+      let progress = true;
+      while (progress && remaining.length > 0) {
+        progress = false;
         const nextRemaining = [];
         for (const w of remaining) {
           let best = null;
@@ -882,8 +885,13 @@
               }
             }
           }
-          if (best) put(w, best.r, best.c, best.dir);
-          else nextRemaining.push(w);
+          if (best) {
+            put(w, best.r, best.c, best.dir);
+            totalInter += best.inter;
+            progress = true;
+          } else {
+            nextRemaining.push(w);
+          }
         }
         remaining = nextRemaining;
       }

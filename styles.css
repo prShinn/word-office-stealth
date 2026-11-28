@@ -801,8 +801,12 @@ body.theme-docs .connections-view {
   margin-bottom: 8px;
   display: flex;
   justify-content: center;
+  align-items: flex-start;
   overflow: auto;
-  max-height: 245px;
+  height: 245px;
+  min-height: 140px;
+  max-height: 60vh;
+  resize: vertical;
   flex-shrink: 0;
 }
 
