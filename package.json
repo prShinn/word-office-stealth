@@ -1,0 +1,11 @@
+{
+  "name": "word-office-stealth",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Word Office Stealth - Tro choi noi chu & Thuật toán IT gia lap van phong",
+  "scripts": {
+    "build": "node scripts/build-production.js",
+    "test": "node scripts/build-production.js",
+    "start": "node server/server.js"
+  }
+}
