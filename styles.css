@@ -926,6 +926,42 @@ body.theme-docs .connections-view {
   color: var(--accent);
 }
 
+.solved-meta {
+  display: inline-block;
+  font-size: 10px;
+  font-family: Consolas, monospace;
+  color: var(--accent);
+  background: var(--accent-light);
+  padding: 1px 5px;
+  border-radius: 2px;
+  margin-right: 6px;
+}
+
+.solved-meaning {
+  color: var(--text-main);
+}
+
+.meaning-chip {
+  display: inline-block;
+  font-size: 11px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0 6px;
+  margin-right: 4px;
+  color: var(--text-main);
+}
+
+.solved-formula {
+  font-family: Consolas, monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+  padding: 1px 5px;
+  border-radius: 2px;
+  margin-right: 6px;
+}
+
 .badge-status {
   display: inline-block;
   padding: 1px 6px;

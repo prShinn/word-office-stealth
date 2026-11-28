@@ -1143,35 +1143,36 @@
   }
 
   // ================= CONNECT MODE =================
-  function getNodePosition(idx, total) {
+  function getNodeLayout(total) {
     const width = 300;
     const height = 244;
-    const cx = width / 2;
-    const cy = height / 2;
-
     if (total >= 10) {
-      const cols = 4;
+      const cols = total > 16 ? 5 : 4;
       const rows = Math.ceil(total / cols);
-      const col = idx % cols;
-      const row = Math.floor(idx / cols);
-      const stepX = 68;
-      const stepY = total > 12 ? 55 : 68;
-      return {
-        x: Math.round(cx - ((cols - 1) * stepX) / 2 + col * stepX),
-        y: Math.round(cy - ((rows - 1) * stepY) / 2 + row * stepY)
-      };
+      const stepX = Math.min(68, Math.floor((width - 20) / cols));
+      const stepY = Math.min(total > 12 ? 55 : 68, Math.floor((height - 16) / rows));
+      const size = Math.max(32, Math.min(48, Math.min(stepX, stepY) - 8));
+      return { width, height, cols, rows, stepX, stepY, size };
     }
-
     if (total >= 7) {
       const cols = 3;
       const rows = Math.ceil(total / cols);
-      const col = idx % cols;
-      const row = Math.floor(idx / cols);
-      const stepX = 76;
-      const stepY = 72;
+      return { width, height, cols, rows, stepX: 76, stepY: 72, size: 48 };
+    }
+    return { width, height, cols: total, rows: 1, stepX: 68, stepY: 68, size: 48 };
+  }
+
+  function getNodePosition(idx, total) {
+    const layout = getNodeLayout(total);
+    const cx = layout.width / 2;
+    const cy = layout.height / 2;
+
+    if (total >= 7) {
+      const col = idx % layout.cols;
+      const row = Math.floor(idx / layout.cols);
       return {
-        x: Math.round(cx - ((cols - 1) * stepX) / 2 + col * stepX),
-        y: Math.round(cy - ((rows - 1) * stepY) / 2 + row * stepY)
+        x: Math.round(cx - ((layout.cols - 1) * layout.stepX) / 2 + col * layout.stepX),
+        y: Math.round(cy - ((layout.rows - 1) * layout.stepY) / 2 + row * layout.stepY)
       };
     }
 
@@ -1186,6 +1187,9 @@
   function renderConnectWheel() {
     els.nodesLayer.innerHTML = "";
     const total = state.letters.length;
+    const layout = getNodeLayout(total);
+    const half = Math.round(layout.size / 2);
+    const fontSize = layout.size <= 38 ? 14 : 17;
     state.letters.forEach((ch, idx) => {
       const pos = getNodePosition(idx, total);
       const node = document.createElement("div");
@@ -1194,6 +1198,11 @@
       node.textContent = ch;
       node.style.left = pos.x + "px";
       node.style.top = pos.y + "px";
+      node.style.width = layout.size + "px";
+      node.style.height = layout.size + "px";
+      node.style.marginLeft = -half + "px";
+      node.style.marginTop = -half + "px";
+      node.style.fontSize = fontSize + "px";
       els.nodesLayer.appendChild(node);
     });
     redrawConnectLines();
@@ -1718,9 +1727,16 @@
         if (solved) {
           const displayWord = state.lang === "en" ? wordKey.toUpperCase() : entry.word;
           const meaningText = state.lang === "en" ? entry : entry.meaning;
-          wordCellHtml = `<span class="solved-word">${displayWord}</span>`;
+          const senses = String(meaningText || "")
+            .split("/")
+            .map((s) => s.trim())
+            .filter(Boolean);
+          const meaningTags = senses.length > 1
+            ? senses.map((s) => `<span class="meaning-chip">${escapeHtml(s)}</span>`).join("")
+            : `<span class="solved-meaning">${escapeHtml(meaningText)}</span>`;
+          wordCellHtml = `<span class="solved-word">✓ ${escapeHtml(displayWord)}</span>`;
           statusHtml = `<span class="badge-status badge-ok">Verified</span>`;
-          meaningHtml = escapeHtml(meaningText);
+          meaningHtml = `<span class="solved-meta">${dirLabel} · ${wordKey.length}c</span> ${meaningTags}`;
         } else {
           // Hiển thị các ô đã lộ từ gợi ý HOẶC từ giao điểm Crossword đã mở!
           const coords = placement?.coords || [];
@@ -1766,14 +1782,14 @@
         if (solved) tr.className = "row-solved";
 
         const wordCellHtml = solved
-          ? `<span class="solved-word">${pair[2]}</span>`
+          ? `<span class="solved-word">✓ ${escapeHtml(pair[2])}</span>`
           : `<span class="masked-word">[ ? ] + [ ? ]</span>`;
         const statusHtml = solved
           ? `<span class="badge-status badge-ok">Matched</span>`
           : `<span class="badge-status badge-pending">Pending</span>`;
         const subtleClue = sanitizeClueMeaning(pair[3], pair[2], lvl.topic, pair[2]);
         const meaningHtml = solved
-          ? pair[3]
+          ? `<span class="solved-formula">${escapeHtml(pair[0])} + ${escapeHtml(pair[1])}</span> <span class="solved-meaning">${escapeHtml(pair[3])}</span>`
           : `<span class="masked-word">Gợi ý: ${escapeHtml(subtleClue || "—")}</span>`;
 
         tr.innerHTML = `
