@@ -1618,9 +1618,29 @@
       .replace(/[^a-z0-9]/g, "");
   }
 
-  function sanitizeClueMeaning(meaningText, wordKey, topic, entryWord) {
+  function sanitizeClueMeaning(meaningText, wordKey, topic, entryWord, forbiddenWords = []) {
     if (!meaningText) return topic ? `Chủ đề: ${topic}` : "";
-    const firstSense = String(meaningText).split(/[\/;]/)[0].trim().replace(/\([^\)]*\)/g, "").trim();
+    let firstSense = String(meaningText).split(/[\/;]/)[0].trim().replace(/\([^\)]*\)/g, "").trim();
+
+    // Loại bỏ cụm từ trùng với bất kỳ đáp án nào đang có trong đề bài
+    if (Array.isArray(forbiddenWords) && forbiddenWords.length > 0) {
+      for (const fw of forbiddenWords) {
+        if (!fw || fw.length < 2) continue;
+        const fwNorm = normalizeForClueCheck(fw);
+        if (!fwNorm) continue;
+        const words = firstSense.split(/\s+/);
+        for (let len = Math.min(3, words.length); len >= 1; len--) {
+          for (let start = 0; start <= words.length - len; start++) {
+            const sub = words.slice(start, start + len).join(" ");
+            if (normalizeForClueCheck(sub) === fwNorm) {
+              words.splice(start, len);
+              start--;
+            }
+          }
+        }
+        firstSense = words.join(" ").trim();
+      }
+    }
 
     const normKey = normalizeForClueCheck(wordKey);
     const syllables = new Set();
@@ -1667,6 +1687,10 @@
 
     if (state.mode === "connect") {
       const dict = state.lang === "en" ? window.EN_DATA.DICT : window.VI_DATA.DICT;
+      const forbiddenWords = lvl.targets.flatMap((w) => {
+        const e = dict[w];
+        return e && e.word ? [w, e.word] : [w];
+      });
       lvl.targets.forEach((wordKey, idx) => {
         const solved = state.solvedTargets.has(wordKey);
         const hintCount = state.revealedHints[wordKey] || 0;
@@ -1719,7 +1743,7 @@
           const lenUnit = state.lang === "en" ? "ký tự" : "chữ";
           const meaningText = state.lang === "en" ? entry : entry?.meaning;
           const entryWord = state.lang === "en" ? wordKey : entry?.word;
-          const subtleClue = sanitizeClueMeaning(meaningText, wordKey, lvl.topic, entryWord);
+          const subtleClue = sanitizeClueMeaning(meaningText, wordKey, lvl.topic, entryWord, forbiddenWords);
           const clueText = subtleClue ? ` · Gợi ý: ${escapeHtml(subtleClue)}` : "";
           meaningHtml = `<span class="masked-word">${dirLabel} · ${wordKey.length} ${lenUnit}${clueText}</span>`;
         }
