@@ -676,8 +676,8 @@
       els.btnHintText.textContent = `Gợi ý: ${state.hintQuota} (F2)`;
       els.btnHint.title = `Còn ${state.hintQuota} lượt gợi ý (F2) · Mỗi ngày thêm ${DAILY_HINT_GRANT} lượt`;
     } else {
-      els.btnHintText.textContent = "Xem quảng cáo +1 gợi ý";
-      els.btnHint.title = "Hết lượt gợi ý. Chỉ mở quảng cáo khi bạn bấm nút này";
+      els.btnHintText.textContent = "fx Tra cứu +1 gợi ý";
+      els.btnHint.title = "Hết lượt gợi ý có sẵn · Bấm để tra cứu thêm gợi ý";
     }
   }
 
@@ -699,7 +699,7 @@
     trackEvent("ad_hint_click", { mode: state.mode, lang: state.lang });
     const rewarded = await window.RewardedAd.show();
     if (!rewarded) {
-      setStatus("Chưa hoàn tất xem quảng cáo để nhận gợi ý", "warn");
+      setStatus("Chưa hoàn tất tra cứu dữ liệu", "warn");
       return;
     }
     state.hintQuota += 1;
@@ -1337,7 +1337,8 @@
 
   // ================= CONNECT MODE =================
   function getNodeLayout(total) {
-    const width = 300;
+    const rawW = els.wheelWrap ? els.wheelWrap.clientWidth : 300;
+    const width = Math.max(260, Math.min(360, rawW || 300));
     if (total >= 10) {
       const cols = total > 24 ? 6 : (total > 16 ? 5 : 4);
       const rows = Math.ceil(total / cols);
@@ -1351,9 +1352,11 @@
     if (total >= 7) {
       const cols = 3;
       const rows = Math.ceil(total / cols);
-      return { width, height, cols, rows, stepX: 76, stepY: 72, size: 48 };
+      const stepX = Math.min(76, Math.floor((width - 24) / cols));
+      return { width, height, cols, rows, stepX, stepY: 72, size: 48 };
     }
-    return { width, height, cols: total, rows: 1, stepX: 68, stepY: 68, size: 48 };
+    const radius = Math.min(88, Math.floor(width / 2) - 36);
+    return { width, height, cols: total, rows: 1, stepX: 68, stepY: 68, size: 48, radius };
   }
 
   function getNodePosition(idx, total) {
@@ -1370,7 +1373,7 @@
       };
     }
 
-    const radius = total <= 5 ? 82 : 88;
+    const radius = layout.radius || (total <= 5 ? 82 : 88);
     const angle = (idx / total) * Math.PI * 2 - Math.PI / 2;
     return {
       x: Math.round(cx + radius * Math.cos(angle)),
@@ -2071,8 +2074,8 @@
       state.hintQuota -= 1;
       return true;
     }
-    // F2 không tự mở quảng cáo, tránh bật nhầm
-    setStatus('Hết lượt gợi ý · Bấm nút "Xem quảng cáo" nếu muốn thêm', "warn");
+    // F2 không tự mở modal, tránh bật nhầm
+    setStatus('Hết lượt gợi ý · Bấm nút "Tra cứu +1 gợi ý" trên thanh công cụ', "warn");
     return false;
   }
 
@@ -2531,7 +2534,7 @@
         }
         return;
       }
-      // Đang mở quảng cáo: Esc đóng ngay và ẩn màn hình, phím khác không tác động vào game
+      // Đang mở popup tra cứu dữ liệu: Esc đóng ngay và ẩn màn hình, phím khác không tác động vào game
       if (window.RewardedAd.isOpen()) {
         if (e.key === "Escape") {
           e.preventDefault();
@@ -2672,6 +2675,14 @@
       applyPendingUpdate();
     } catch (_) {}
   }
+
+  let resizeTimer = null;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (state.mode === "connect") renderConnectWheel();
+    }, 120);
+  });
 
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") checkAppVersionUpdate();

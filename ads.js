@@ -79,12 +79,16 @@ window.RewardedAd = (function () {
       const overlay = document.createElement("div");
       overlay.className = "modal-backdrop";
       overlay.innerHTML = `
-        <div class="office-modal ad-modal" role="dialog" aria-label="Quảng cáo">
-          <div class="modal-head"><strong>QUẢNG CÁO NHẬN GỢI Ý</strong></div>
+        <div class="office-modal ad-modal" role="dialog" aria-label="Tra cứu cơ sở dữ liệu tham chiếu">
+          <div class="modal-head"><strong>TRA CỨU CƠ SỞ DỮ LIỆU THAM CHIẾU</strong></div>
           <div class="modal-body">
-            <div class="ad-placeholder">Đang phát quảng cáo thử nghiệm (chưa gắn AdSense/SDK thật)</div>
+            <div class="ad-placeholder doc-sync-placeholder">
+              <div class="doc-sync-icon">📁</div>
+              <div class="doc-sync-title">Đang đồng bộ dữ liệu tham chiếu từ máy chủ nội bộ...</div>
+              <div class="doc-sync-desc">Vui lòng chờ xác thực danh mục nghiệp vụ để nhận thêm gợi ý giải trình.</div>
+            </div>
             <div class="ad-actions">
-              <button class="office-btn ghost" data-ad="close">Đóng (không nhận)</button>
+              <button class="office-btn ghost" data-ad="close">Hủy bỏ</button>
               <button class="office-btn" data-ad="claim" disabled></button>
             </div>
           </div>
@@ -92,7 +96,7 @@ window.RewardedAd = (function () {
       const claim = overlay.querySelector('[data-ad="claim"]');
       let left = watchSeconds;
       const render = () => {
-        claim.textContent = left > 0 ? `Chờ ${left}s` : "Nhận +1 Gợi ý";
+        claim.textContent = left > 0 ? `Đang đồng bộ ${left}s...` : "Xác nhận (+1 Gợi ý)";
         claim.disabled = left > 0;
       };
       render();

@@ -35,9 +35,9 @@ files["leaderboard.js"] = "window.Leaderboard = { open() {}, close() {}, isOpen:
 files["ads.js"] = "window.RewardedAd = { show: () => Promise.resolve(false), cancel() {}, isOpen: () => false };\n";
 
 let app = read("app.js");
-app = replaceOnce(app, '"Xem quảng cáo +1 gợi ý"', '"Hết gợi ý · mai +1"', "app.js");
-app = replaceOnce(app, '"Hết lượt gợi ý. Chỉ mở quảng cáo khi bạn bấm nút này"', '"Hết lượt gợi ý. Mỗi ngày được thêm lượt mới"', "app.js");
-app = replaceOnce(app, `'Hết lượt gợi ý · Bấm nút "Xem quảng cáo" nếu muốn thêm'`, '"Hết lượt gợi ý · Mỗi ngày được thêm lượt mới"', "app.js");
+app = replaceOnce(app, '"fx Tra cứu +1 gợi ý"', '"Hết gợi ý · mai +1"', "app.js");
+app = replaceOnce(app, '"Hết lượt gợi ý có sẵn · Bấm để tra cứu thêm gợi ý"', '"Hết lượt gợi ý. Mỗi ngày được thêm lượt mới"', "app.js");
+app = replaceOnce(app, `'Hết lượt gợi ý · Bấm nút "Tra cứu +1 gợi ý" trên thanh công cụ'`, '"Hết lượt gợi ý · Mỗi ngày được thêm lượt mới"', "app.js");
 files["app.js"] = app;
 
 let html = read("index.html");
