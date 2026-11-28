@@ -2072,36 +2072,43 @@ window.VI_DATA = (function () {
     return copy;
   }
 
-  function buildConnectLevel(lvl, avoidWords) {
+  function buildConnectLevel(lvl, avoidWords, rawIdx = 0) {
     const allValid = lvl.targets.filter((w) => DICT[w]);
     const avoidSet = new Set(Array.isArray(avoidWords) ? avoidWords : []);
     const freshWords = shuffleArray(allValid.filter((w) => !avoidSet.has(w)));
     const oldWords = shuffleArray(allValid.filter((w) => avoidSet.has(w)));
     const pool = [...freshWords, ...oldWords];
+
+    // Quy định số từ: phiên 1 có 8 từ -> mỗi phiên tăng 1-2 từ, tối đa không quá 15 từ
+    let targetCount = 8 + Math.floor(rawIdx * 0.35);
+    if (lvl.tier === "Trung bình") targetCount = Math.max(targetCount, 10);
+    if (lvl.tier === "Nâng cao") targetCount = Math.max(targetCount, 12);
+    targetCount = Math.min(15, targetCount);
+
+    const maxLetters = lvl.tier === "Nâng cao" ? 20 : (lvl.tier === "Trung bình" ? 18 : 16);
     let best = [];
-    for (let attempt = 0; attempt < 60; attempt++) {
-      const candidatePool = attempt === 0 ? pool : [...shuffleArray(freshWords), ...shuffleArray(oldWords)];
+    for (let attempt = 0; attempt < 80; attempt++) {
+      const candidatePool = attempt === 0 ? pool : shuffleArray(pool);
       const picked = [];
       for (const w of candidatePool) {
-        if (picked.length >= 7) break;
+        if (picked.length >= targetCount) break;
         const candidate = [...picked, w];
-        if (buildUnionLetters(candidate).length <= 16) {
+        if (buildUnionLetters(candidate).length <= maxLetters) {
           picked.push(w);
         }
       }
       if (picked.length > best.length) best = picked;
-      if (best.length >= 6) break;
+      if (best.length >= targetCount) break;
     }
-    // Fallback an toàn nếu random chưa đủ 5 từ
-    if (best.length < 5) {
+
+    if (best.length < targetCount) {
       for (const w of pool) {
-        if (!best.includes(w) && buildUnionLetters([...best, w]).length <= 16) {
-          best.push(w);
-        }
-        if (best.length >= 6) break;
+        if (!best.includes(w)) best.push(w);
+        if (best.length >= targetCount) break;
       }
     }
-    const validTargets = best.sort((a, b) => a.length - b.length || a.localeCompare(b));
+
+    const validTargets = best.slice(0, targetCount).sort((a, b) => a.length - b.length || a.localeCompare(b));
     const baseLetters = buildUnionLetters(validTargets);
     if (lvl.tier === "Nâng cao" && baseLetters.length < 16) {
       const filler = ["K", "P", "S", "B", "R", "V"].find((c) => !baseLetters.includes(c));
@@ -2116,12 +2123,12 @@ window.VI_DATA = (function () {
     };
   }
 
-  const CONNECT_LEVELS = RAW_CONNECT.map((lvl) => buildConnectLevel(lvl));
+  const CONNECT_LEVELS = RAW_CONNECT.map((lvl, idx) => buildConnectLevel(lvl, [], idx));
 
   function reshuffleLevel(id, avoidWords = []) {
     const rawIdx = RAW_CONNECT.findIndex((l) => l.id === id);
     if (rawIdx === -1) return null;
-    CONNECT_LEVELS[rawIdx] = buildConnectLevel(RAW_CONNECT[rawIdx], avoidWords);
+    CONNECT_LEVELS[rawIdx] = buildConnectLevel(RAW_CONNECT[rawIdx], avoidWords, rawIdx);
     return CONNECT_LEVELS[rawIdx];
   }
 

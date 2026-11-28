@@ -859,6 +859,59 @@ body.theme-docs .connections-view {
   z-index: 1;
 }
 
+/* Ô chữ vàng (Giao điểm giữa các từ) */
+.cw-cell.box.golden {
+  border-color: #d97706;
+  background: #fffbeb;
+}
+
+.cw-cell.box.golden::after {
+  content: "★";
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  font-size: 7px;
+  color: #f59e0b;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.cw-cell.box.golden.solved {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #92400e;
+  border-color: #f59e0b;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.45);
+  animation: goldenPulse 0.4s ease-out;
+}
+
+@keyframes goldenPulse {
+  0% { transform: scale(0.9); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* Sếp đi tuần banner */
+.boss-inspection-banner {
+  position: fixed;
+  top: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #dc2626;
+  color: #fff;
+  padding: 6px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.45);
+  z-index: 9999;
+  animation: bannerPulse 0.4s infinite alternate;
+}
+
+@keyframes bannerPulse {
+  from { transform: translateX(-50%) scale(0.98); }
+  to { transform: translateX(-50%) scale(1.02); }
+}
+
 .cw-num {
   position: absolute;
   top: 1px;
@@ -1573,4 +1626,32 @@ body.fever .connections-view {
   .fx-shake,
   .fx-flash,
   .fx-flash > td { animation: none; }
+}
+
+/* ===== Thông báo troll ===== */
+.troll-toast {
+  position: fixed;
+  right: 12px;
+  bottom: 56px;
+  z-index: 40;
+  width: min(300px, calc(100vw - 24px));
+  padding: 8px 10px 10px;
+  background: #fff;
+  border: 1px solid var(--accent-border);
+  border-left: 4px solid var(--accent);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  font-size: 12.5px;
+  color: #323130;
+  animation: troll-in 0.25s ease-out;
+}
+.troll-head { display: flex; justify-content: space-between; gap: 8px; color: var(--accent); }
+.troll-close { border: 0; background: none; cursor: pointer; color: #605e5c; padding: 0 2px; }
+.troll-body { margin-top: 4px; line-height: 1.45; }
+.troll-extra { margin-top: 4px; font-size: 11.5px; color: #605e5c; }
+.troll-action { margin-top: 8px; }
+@keyframes troll-in {
+  from { opacity: 0; transform: translateY(12px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .troll-toast { animation: none; }
 }

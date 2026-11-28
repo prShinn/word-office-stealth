@@ -788,6 +788,37 @@
     });
   }
 
+  // ================= LỜI NHẮC CHƠI TIẾP =================
+  function cheerCompletion(lvl) {
+    const allStars = (state.stars[lvl.id] || 0) === 7;
+    const levels = getLevels();
+    const nextIdx = (state.levelIndex + 1) % levels.length;
+    const quests = window.Engagement.getSummary().quests;
+    const questLeft = quests.filter((q) => !q.done).length;
+    const extra = [
+      `Tiếp theo: ${levels[nextIdx].topic}`,
+      questLeft ? `còn ${questLeft} nhiệm vụ ngày` : ""
+    ].filter(Boolean).join(" · ");
+    window.Troll.say(allStars ? "done" : "doneNoStar", {
+      extra,
+      action: allStars
+        ? { label: "Làm phiên tiếp ▶", run: () => loadLevel(nextIdx, true) }
+        : { label: "Làm lại lấy đủ sao ↻", run: () => loadLevel(state.levelIndex, true) }
+    });
+  }
+
+  // Gọi sau khi giải đúng 1 mục: báo khi chỉ còn đúng 1 mục
+  function nudgeNearDone(lvl) {
+    const total = state.mode === "connect" ? lvl.targets.length : state.mode === "merge" ? lvl.pairs.length : 4;
+    const done =
+      state.mode === "connect"
+        ? state.solvedTargets.size
+        : state.mode === "merge"
+          ? state.solvedPairs.size
+          : state.connSolvedLevels.length;
+    if (total - done === 1) window.Troll.say("nearDone");
+  }
+
   // ================= GIỜ CAO ĐIỂM =================
   // Gọi sau khi đã đánh dấu mục vừa giải, trước khi tính KPI
   function bumpCombo() {
@@ -798,6 +829,7 @@
       state.fever = FEVER_SECONDS;
       document.body.classList.add("fever");
       state.notices.push(`🔥 Giờ cao điểm: x2 KPI trong ${FEVER_SECONDS}s`);
+      window.Troll.say("fever");
     }
   }
 
@@ -937,6 +969,7 @@
     if (state.mistakes >= state.maxMistakes) {
       failCurrentBatch(`${msg} — Đã quá giới hạn ${state.maxMistakes} lỗi!`);
     } else {
+      window.Troll.say(state.mistakes === state.maxMistakes - 1 ? "danger" : "mistake");
       setStatus(`${msg} (Lỗi ${state.mistakes}/${state.maxMistakes})`, "err");
       saveProgress();
     }
@@ -947,6 +980,7 @@
     state.streak = 0;
     stopTimer();
     endFever();
+    window.Troll.say(state.timeLeft <= 0 ? "timeout" : "fail");
     setStatus(reason, "err");
     showRetryButtons();
     if (state.mode === "connections") {
@@ -1130,6 +1164,7 @@
           continue;
         }
 
+        const isGolden = cellData.owners && cellData.owners.length >= 2;
         const solvedOwner = cellData.owners.find((o) => state.solvedTargets.has(o.word));
         const hintedOwner = cellData.owners.find(
           (o) => (state.revealedHints[o.word] || 0) > o.charIndex
@@ -1137,6 +1172,7 @@
         const focusedOwner = cellData.owners.find((o) => o.word === state.focusedTargetKey);
 
         div.className = "cw-cell box";
+        if (isGolden) div.classList.add("golden");
         if (solvedOwner) div.classList.add("solved");
         else if (hintedOwner) div.classList.add("hinted");
         if (focusedOwner && !solvedOwner) div.classList.add("focused");
@@ -1211,6 +1247,11 @@
     state.revealedHints = {};
     state.focusedTargetKey = null;
     state.bonusWords = [];
+    state.claimedGoldenCells = new Set();
+    state.hadBossInspection = false;
+    state.bossAlertActive = false;
+    const oldBossBanner = $("boss-inspection-banner");
+    if (oldBossBanner) oldBossBanner.remove();
     state.selectedTileId = null;
     state.solvedPairs = new Set();
     state.connSelected = [];
@@ -1220,6 +1261,7 @@
     state.batchFailed = false;
     state.usedHintInBatch = false;
     endFever();
+    window.Troll.dismiss();
     els.keyboardInput.value = "";
     els.btnRetryBatch.classList.add("hidden");
     els.btnRetryMerge.classList.add("hidden");
@@ -1473,12 +1515,33 @@
       if (state.focusedTargetKey === wordKey) state.focusedTargetKey = null;
       bumpCombo();
 
+      // Thưởng Ô Chữ Vàng (Giao điểm giữa các từ)
+      state.claimedGoldenCells = state.claimedGoldenCells || new Set();
+      let goldenBonus = 0;
+      const coords = state.crossword?.placements?.[wordKey]?.coords || [];
+      coords.forEach(([r, c]) => {
+        const cell = state.crossword.cells[r]?.[c];
+        if (cell && cell.owners.length >= 2) {
+          const k = `${r},${c}`;
+          if (!state.claimedGoldenCells.has(k)) {
+            state.claimedGoldenCells.add(k);
+            goldenBonus += 25;
+          }
+        }
+      });
+      if (goldenBonus > 0) {
+        state.score += goldenBonus;
+      }
+
       const pts = awardOnce(lvl, wordKey, wordKey.length * 10);
-      setStatus(`OK: ${kpiNote(pts)} (Combo ${state.combo})`, "ok");
+      const goldenNote = goldenBonus > 0 ? ` · ✨ Ô Vàng +${goldenBonus} KPI!` : "";
+      setStatus(`OK: ${kpiNote(pts)}${goldenNote} (Combo ${state.combo})`, "ok");
       trackEngagement("answer", { combo: state.combo });
       renderCrosswordGrid();
       renderTargetsTable();
       celebrate(els.draftWord, els.targetsTbody.children[lvl.targets.indexOf(wordKey)], wordKey.toUpperCase(), pts);
+      nudgeNearDone(lvl);
+      checkBossInspection();
       checkBatchCompletion(lvl);
       updateStatsUI();
       return;
@@ -1550,6 +1613,7 @@
     populateLevelDropdown();
     showRetryButtons();
     setStatus(`${msg} · ${roundStars}`, "ok");
+    cheerCompletion(lvl);
     trackEngagement("batch", {
       clean: state.mistakes === 0 && !state.usedHintInBatch,
       isDaily: isCurrentDaily()
@@ -1650,6 +1714,7 @@
     renderMergeTiles();
     renderTargetsTable();
     celebrate(els.mergePreview, els.targetsTbody.children[pairIdx], pair[2], pts);
+    if (!byHint) nudgeNearDone(lvl);
     checkBatchCompletion(lvl);
     updateStatsUI();
   }
@@ -1750,6 +1815,7 @@
       renderConnections();
       const banner = els.connSolvedList.lastElementChild;
       celebrate(els.btnConnSubmit, banner, `Nhóm ${state.connSolvedLevels.length}/4`, pts);
+      nudgeNearDone(lvl);
       checkBatchCompletion(lvl);
       updateStatsUI();
       return;
@@ -2023,6 +2089,7 @@
 
       if (!consumeHint()) return;
       state.usedHintInBatch = true;
+      window.Troll.say("hint");
 
       const cur = state.revealedHints[targetWord] || 0;
       const costNote = ` (còn ${state.hintQuota} lượt)`;
@@ -2045,6 +2112,7 @@
       if (idx === -1) return;
       if (!consumeHint()) return;
       state.usedHintInBatch = true;
+      window.Troll.say("hint");
 
       state.selectedTileId = null;
       markPairSolved(idx, lvl, true);
@@ -2112,11 +2180,71 @@
     }).join("");
   }
 
+  // ================= BOSS INSPECTION EVENT (SẾP ĐI TUẦN) =================
+  function checkBossInspection() {
+    if (state.bossAlertActive || state.bossMode || state.batchFailed || isBatchDone() || state.hadBossInspection) return;
+    if (state.solvedTargets.size >= 2 && Math.random() < 0.45) {
+      state.hadBossInspection = true;
+      triggerBossInspection();
+    }
+  }
+
+  function triggerBossInspection() {
+    state.bossAlertActive = true;
+    const banner = document.createElement("div");
+    banner.id = "boss-inspection-banner";
+    banner.className = "boss-inspection-banner";
+    banner.innerHTML = `<span>🚨 <strong>SẾP ĐI TUẦN!</strong> Nhấn <strong>Esc</strong> (Xem Báo Cáo) ngay: <strong id="boss-countdown">4</strong>s</span>`;
+    document.body.appendChild(banner);
+
+    let left = 4;
+    const cd = banner.querySelector("#boss-countdown");
+    const interval = setInterval(() => {
+      left--;
+      if (cd) cd.textContent = String(left);
+      if (left <= 0 || state.bossMode) {
+        clearInterval(interval);
+        state.bossAlertActive = false;
+        banner.remove();
+        if (state.bossMode) {
+          state.escapedBoss = true;
+        } else {
+          setStatus("👁 Sếp vừa liếc qua bàn làm việc! Nhớ tập trung nhé!", "warn");
+        }
+      }
+    }, 1000);
+  }
+
   function toggleBossMode(force) {
     state.bossMode = typeof force === "boolean" ? force : !state.bossMode;
     els.bossScreen.classList.toggle("hidden", !state.bossMode);
     els.mainWorkspace.classList.toggle("hidden", state.bossMode);
     $("btn-panic").textContent = state.bossMode ? "Quay lại (Esc)" : "Xem Báo Cáo (Esc)";
+    if (state.bossMode) {
+      window.Troll.dismiss();
+      if (state.bossAlertActive) {
+        state.escapedBoss = true;
+        state.bossAlertActive = false;
+        const b = $("boss-inspection-banner");
+        if (b) b.remove();
+      }
+    } else {
+      window.Troll.say("bossBack");
+      if (state.escapedBoss) {
+        state.escapedBoss = false;
+        state.score += 50;
+        setStatus("✓ Đã né Sếp thành công! Thưởng: +50 KPI (Nhân viên gương mẫu)", "ok");
+        updateStatsUI();
+      }
+    }
+  }
+
+  function updateTrollButtonUI() {
+    const on = window.Troll.isEnabled();
+    const btn = $("btn-troll");
+    btn.textContent = on ? "😜 Troll: Bật" : "😶 Troll: Tắt";
+    btn.classList.toggle("active", on);
+    btn.setAttribute("aria-pressed", String(on));
   }
 
   // ================= POINTER EVENTS CHO WHEEL =================
@@ -2255,6 +2383,11 @@
     };
     document.addEventListener("pointerdown", resumeTimer, true);
     document.addEventListener("keydown", resumeTimer, true);
+
+    $("btn-troll").addEventListener("click", () => {
+      window.Troll.setEnabled(!window.Troll.isEnabled());
+      updateTrollButtonUI();
+    });
 
     els.btnDeadlineMode.addEventListener("click", () => {
       state.deadlineMode = !state.deadlineMode;
@@ -2475,8 +2608,18 @@
   setupEvents();
   loadLevel(state.levelIndex);
 
+  const isModalOpen = () => Boolean(document.querySelector(".modal-backdrop:not(.hidden)"));
+  window.Troll.init({
+    isBlocked: () => state.bossMode || document.hidden || isModalOpen() || Boolean(window.RewardedAd?.isOpen?.()) || Boolean(window.Leaderboard?.isOpen?.()),
+    canIdle: () => !state.batchFailed && !isBatchDone()
+  });
+  updateTrollButtonUI();
+
   // Nhắc giữ chuỗi khi mở game mà hôm nay chưa chơi
   const daily = window.Engagement.getSummary();
+  window.Troll.say("welcome", {
+    extra: daily.streak > 0 ? `Chuỗi ${daily.streak} ngày · kỷ lục ${daily.best} ngày` : ""
+  });
   if (daily.streak > 0 && !daily.checkedIn) {
     // Không đè thông báo quà gợi ý vừa hiện lúc mở game
     const shown = els.formulaStatus.textContent;

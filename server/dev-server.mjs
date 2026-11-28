@@ -15,7 +15,7 @@ const port = Number(process.env.PORT) || 8787;
 
 // WHITELIST: chỉ phục vụ đúng các file này, để đề thi trong server/ không bao giờ lộ ra web
 const STATIC_FILES = new Set([
-  "index.html", "styles.css", "app.js", "engagement.js", "ads.js", "leaderboard.js",
+  "index.html", "styles.css", "app.js", "engagement.js", "troll.js", "ads.js", "leaderboard.js",
   "data-en.js", "data-vi.js", "data-connections.js"
 ]);
 const TYPES = { ".html": "text/html", ".css": "text/css", ".js": "text/javascript" };

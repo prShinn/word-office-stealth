@@ -26,7 +26,7 @@ function replaceOnce(source, from, to, file) {
 }
 
 const files = {};
-for (const name of ["styles.css", "data-en.js", "data-vi.js", "data-connections.js", "engagement.js"]) {
+for (const name of ["styles.css", "data-en.js", "data-vi.js", "data-connections.js", "engagement.js", "troll.js"]) {
   files[name] = read(name);
 }
 
