@@ -155,8 +155,7 @@ const staticFiles = [
   "version.json",
   "it-exam-sample.json",
   "it-quiz-bank.json",
-  "_headers",
-  "_redirects"
+  "_headers"
 ];
 
 for (const name of staticFiles) {
