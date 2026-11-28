@@ -801,6 +801,443 @@ console.log(c2.getCount());`,
       expectedAnswers: ["2", "2\n"],
       explanation: "Lần require('./counter') đầu tiên thực thi file và lưu kết quả vào require.cache. Lần require thứ hai lấy thẳng đối tượng đã cache trong bộ nhớ (singleton), chia sẻ chung biến 'count'. Do c1.getCount() đã tăng count từ 0 lên 1, nên c2.getCount() tiếp tục tăng count lên 2.",
       hint: "Node.js cache module sau lần require đầu tiên, cả c1 và c2 đều trỏ tới chung 1 instance."
+    },
+
+    // ================= VŨ TRỤ CHỊ EM CÔNG SỞ: CUNG HOÀNG ĐẠO & TAROT =================
+    {
+      id: "LADY-01",
+      domain: "zodiac",
+      domainLabel: "Cung Hoàng Đạo & Tarot",
+      tier: "Cơ bản",
+      topic: "Bốn nhóm nguyên tố Hoàng Đạo",
+      type: "choice",
+      problem: "Chiêm tinh học 12 cung hoàng đạo phân chia các chòm sao thành 4 nhóm nguyên tố đại diện cho tính cách: Lửa, Nước, Khí và Đất.",
+      question: "Bộ 3 cung hoàng đạo nào sau đây cùng thuộc nhóm nguyên tố Lửa (Fire Signs) - nổi tiếng nhiệt huyết, thẳng thắn, tràn đầy năng lượng nhưng đôi khi nóng tính?",
+      options: [
+        "A. Bạch Dương (Aries) · Sư Tử (Leo) · Nhân Mã (Sagittarius)",
+        "B. Kim Ngưu (Taurus) · Xử Nữ (Virgo) · Ma Kết (Capricorn)",
+        "C. Song Tử (Gemini) · Thiên Bình (Libra) · Bảo Bình (Aquarius)",
+        "D. Cự Giải (Cancer) · Bọ Cạp (Scorpio) · Song Ngư (Pisces)"
+      ],
+      correctIndex: 0,
+      explanation: "Nhóm Lửa gồm Bạch Dương, Sư Tử, Nhân Mã. Nhóm Đất gồm Kim Ngưu, Xử Nữ, Ma Kết. Nhóm Khí gồm Song Tử, Thiên Bình, Bảo Bình. Nhóm Nước gồm Cự Giải, Bọ Cạp, Song Ngư.",
+      hint: "Nhóm nguyên tố này tượng trưng cho ngọn lửa bùng cháy, đam mê và tính cách hướng ngoại bộc trực."
+    },
+    {
+      id: "LADY-02",
+      domain: "zodiac",
+      domainLabel: "Cung Hoàng Đạo & Tarot",
+      tier: "Cơ bản",
+      topic: "Đoán tính cách cung hoàng đạo qua công việc",
+      type: "choice",
+      problem: "Trong môi trường công sở, mỗi cung hoàng đạo có một phong cách giải quyết công việc và deadline rất riêng biệt.",
+      question: "Cung hoàng đạo nào được mệnh danh là 'chúa tể cầu toàn', hay soi từng dấu chấm phẩy, chuẩn bị báo cáo hoàn hảo đến từng pixel và ghét sự bừa bộn nhất văn phòng?",
+      options: [
+        "A. Xử Nữ (Virgo)",
+        "B. Song Ngư (Pisces)",
+        "C. Nhân Mã (Sagittarius)",
+        "D. Song Tử (Gemini)"
+      ],
+      correctIndex: 0,
+      explanation: "Xử Nữ (Virgo) nổi tiếng là cung hoàng đạo tỉ mỉ, chu đáo, có tiêu chuẩn cực kỳ cao và khả năng phân tích chi tiết sắc bén nhất trong 12 chòm sao.",
+      hint: "Biểu tượng của cung này là một trinh nữ cầm bó lúa, luôn theo đuổi sự hoàn mỹ tuyệt đối."
+    },
+    {
+      id: "LADY-03",
+      domain: "zodiac",
+      domainLabel: "Cung Hoàng Đạo & Tarot",
+      tier: "Trung bình",
+      topic: "Ý nghĩa lá bài Tarot khởi đầu",
+      type: "input",
+      problem: "Bộ bài Tarot truyền thống chuẩn Rider-Waite gồm 78 lá (22 lá Ẩn chính Major Arcana và 56 lá Ẩn phụ Minor Arcana).",
+      question: "Lá bài số 0 trong bộ Ẩn chính tượng trưng cho bước chân vô tư, sự khởi đầu ngây thơ và hành trình phiêu lưu mới có tên tiếng Anh là gì? (Gợi ý: The F...)",
+      expectedAnswers: ["The Fool", "Fool", "the fool"],
+      explanation: "The Fool (Chàng Khờ) mang số 0, là biểu tượng của sự thuần khiết, can đảm bước về phía trước vào thế giới vô định với niềm tin lạc quan.",
+      hint: "Người đứng ở mép vách đá với chú cún trắng trung thành."
+    },
+    {
+      id: "LADY-04",
+      domain: "zodiac",
+      domainLabel: "Cung Hoàng Đạo & Tarot",
+      tier: "Cơ bản",
+      topic: "Lá bài The Empress trong Tarot",
+      type: "choice",
+      problem: "Lá bài The Empress (Lá số III) là một trong những lá bài tích cực nhất về cảm xúc và sáng tạo.",
+      question: "Trong một trải bài công việc và cuộc sống, lá bài The Empress thường báo hiệu điều gì nổi bật nhất?",
+      options: [
+        "A. Sự màu mỡ, tài lộc trù phú, năng lượng sáng tạo và thấu cảm được nuôi dưỡng dồi dào",
+        "B. Một sự đổ vỡ đột ngột đòi hỏi xây dựng lại từ đầu",
+        "C. Bẫy cám dỗ vật chất và sự trói buộc tâm lý",
+        "D. Sự lưỡng lự chưa đưa ra được quyết định dứt khoát"
+      ],
+      correctIndex: 0,
+      explanation: "The Empress đại diện cho Nữ Hoàng Mẹ Thiên Nhiên, mang năng lượng của sự nuôi nấng, sung túc, đón nhận thành quả ngọt ngào và hòa hợp cảm xúc.",
+      hint: "Hình ảnh một người phụ nữ quyền quý ngồi giữa cánh đồng lúa chín và thiên nhiên tươi tốt."
+    },
+    {
+      id: "LADY-05",
+      domain: "zodiac",
+      domainLabel: "Cung Hoàng Đạo & Tarot",
+      tier: "Cơ bản",
+      topic: "Thần số học: Tính Con số chủ đạo (Life Path)",
+      type: "input",
+      problem: "Theo trường phái Thần số học Pitago, con số chủ đạo được tính bằng cách cộng tất cả các con số trong ngày tháng năm sinh (rút gọn về từ 2 đến 11).",
+      question: "Một bạn nữ sinh ngày 15/08/1998 có Con số chủ đạo là bao nhiêu? (Cách tính: 1+5 + 0+8 + 1+9+9+8 = 6 + 8 + 27 = 41 -> 4+1 = ?)",
+      expectedAnswers: ["5", "số 5", "so 5"],
+      explanation: "Ngày 15 (1+5=6), Tháng 8, Năm 1998 (1+9+9+8=27 -> 2+7=9). Tổng: 6 + 8 + 9 = 23 -> 2+3 = 5 (hoặc 41 -> 4+1=5). Người mang số 5 là người yêu tự do, thích dịch chuyển và sáng tạo.",
+      hint: "4 + 1 bằng mấy?"
+    },
+
+    // ================= VŨ TRỤ CHỊ EM CÔNG SỞ: SKINCARE & MỸ PHẨM =================
+    {
+      id: "LADY-06",
+      domain: "skincare",
+      domainLabel: "Skincare & Mỹ Phẩm",
+      tier: "Cơ bản",
+      topic: "Phân biệt tẩy tế bào chết hóa học AHA và BHA",
+      type: "choice",
+      problem: "Trong routine chăm sóc da của dân văn phòng ngồi máy lạnh thường xuyên bị bít tắc lỗ chân lông và mụn đầu đen.",
+      question: "Hoạt chất nào tan trong dầu (lipid-soluble), có khả năng thấm sâu vào lỗ chân lông để hòa tan bã nhờn, trị mụn đầu đen và mụn ẩn hiệu quả?",
+      options: [
+        "A. BHA (Salicylic Acid)",
+        "B. AHA (Glycolic Acid)",
+        "C. Hyaluronic Acid (HA)",
+        "D. L-Ascorbic Acid (Vitamin C)"
+      ],
+      correctIndex: 0,
+      explanation: "BHA (Salicylic Acid) tan trong dầu nên làm sạch sâu trong lỗ chân lông. Trong khi đó AHA tan trong nước, chủ yếu hoạt động trên bề mặt da để tẩy da chết và làm sáng đều màu da.",
+      hint: "Chữ 'B' viết tắt của Beta Hydroxy Acid."
+    },
+    {
+      id: "LADY-07",
+      domain: "skincare",
+      domainLabel: "Skincare & Mỹ Phẩm",
+      tier: "Cơ bản",
+      topic: "Quy tắc thoa dưỡng da buổi tối chuẩn",
+      type: "choice",
+      problem: "Một routine dưỡng da buổi tối gồm nhiều sản phẩm: Nước hoa hồng (Toner), Tinh chất (Serum), Kem dưỡng ẩm (Cream), Tẩy trang và Sữa rửa mặt.",
+      question: "Nguyên tắc vàng về kết cấu khi thoa các bước dưỡng da (Skincare Layering) là gì để dưỡng chất hấp thụ tốt nhất?",
+      options: [
+        "A. Lỏng trước · Đặc sau (Từ lỏng như nước, dạng gel rồi đến kem đặc khóa ẩm)",
+        "B. Đặc trước · Lỏng sau (Bôi kem đặc trước rồi mới vỗ toner)",
+        "C. Thoa dầu dưỡng ẩm (Face Oil) đầu tiên rồi mới thoa serum gốc nước",
+        "D. Trộn lẫn tất cả các loại vào lòng bàn tay rồi thoa một lượt"
+      ],
+      correctIndex: 0,
+      explanation: "Quy tắc chuẩn luôn là 'Lỏng trước - Đặc sau': Sản phẩm mỏng nhẹ thấm sâu trước, sản phẩm đậm đặc giàu chất dưỡng và khóa ẩm ở bước cuối cùng.",
+      hint: "Sản phẩm dạng nước như toner/lotion luôn đi trước kem đặc."
+    },
+    {
+      id: "LADY-08",
+      domain: "skincare",
+      domainLabel: "Skincare & Mỹ Phẩm",
+      tier: "Cơ bản",
+      topic: "Cấp cứu và phục hồi hàng rào bảo vệ da (Skin Barrier)",
+      type: "choice",
+      problem: "Khi da bị kích ứng, đỏ rát hoặc bong tróc do dùng hoạt chất treatment nồng độ cao (Retinol, BHA...).",
+      question: "Bộ đôi thành phần lành tính nào sau đây được coi là 'vị cứu tinh' hàng đầu để làm dịu và củng cố màng lipid bảo vệ da?",
+      options: [
+        "A. Vitamin B5 (Panthenol) & Ceramide",
+        "B. Cồn khô (Alcohol Denat) & Hương liệu nồng độ cao",
+        "C. Tretinoin 0.1% & Tẩy da chết hạt scrub to",
+        "D. Tinh dầu tràm trà nguyên chất chưa pha loãng"
+      ],
+      correctIndex: 0,
+      explanation: "B5 (Panthenol) giúp làm dịu, giảm đỏ rát tức thì, kết hợp cùng Ceramide tái tạo và lấp đầy các liên kết lipid của hàng rào bảo vệ da.",
+      hint: "Vitamin B5 và thành phần màng lipid tự nhiên của tế bào da."
+    },
+    {
+      id: "LADY-09",
+      domain: "skincare",
+      domainLabel: "Skincare & Mỹ Phẩm",
+      tier: "Cơ bản",
+      topic: "Chỉ số bảo vệ tia UVA văn phòng",
+      type: "input",
+      problem: "Dù ngồi trong phòng làm việc, tia UVA từ ánh sáng mặt trời vẫn có thể xuyên qua cửa kính gây lão hóa, nhăn nheo và đứt gãy collagen.",
+      question: "Chỉ số trên kem chống nắng thể hiện khả năng lọc tia UVA (gây lão hóa) được ký hiệu bằng 2 chữ cái nào kèm theo các dấu cộng (ví dụ: +++)?",
+      expectedAnswers: ["PA", "pa", "PA+++", "PA++++"],
+      explanation: "PA (Protection Grade of UVA) là chỉ số đo lường khả năng chống tia UVA theo thang điểm từ PA+ đến PA++++ của Hiệp hội Mỹ phẩm Nhật Bản.",
+      hint: "Chữ cái P đứng trước, chữ A đứng sau."
+    },
+    {
+      id: "LADY-10",
+      domain: "skincare",
+      domainLabel: "Skincare & Mỹ Phẩm",
+      tier: "Trung bình",
+      topic: "Lưu ý sống còn khi dùng Retinol",
+      type: "choice",
+      problem: "Retinol là tiêu chuẩn vàng chống lão hóa nhưng cũng là con dao hai lưỡi nếu dùng sai cách.",
+      question: "Nguyên tắc quan trọng nhất cho người mới bắt đầu đưa Retinol vào routine dưỡng da là gì?",
+      options: [
+        "A. Bắt đầu từ nồng độ thấp (0.1% - 0.3%), dùng 1-2 lần/tuần kèm dưỡng ẩm kỹ và BẮT BUỘC dùng kem chống nắng phổ rộng ban ngày",
+        "B. Thoa ngay Retinol 1.0% mỗi tối liên tục để nhanh bong da",
+        "C. Ban ngày không cần bôi kem chống nắng vì Retinol chỉ thoa buổi tối",
+        "D. Thoa Retinol trực tiếp lên vùng da mắt ướt để tăng độ thẩm thấu"
+      ],
+      correctIndex: 0,
+      explanation: "Retinol làm tăng tốc độ chu chuyển tế bào khiến da nhạy cảm hơn với tia cực tím, do đó phải làm quen từ từ (low & slow), cấp ẩm phục hồi và bôi kem chống nắng nghiêm ngặt vào ban ngày.",
+      hint: "Chậm mà chắc, bắt đầu từ nồng độ thấp và chống nắng cẩn thận."
+    },
+
+    // ================= VŨ TRỤ CHỊ EM CÔNG SỞ: TRÀ SỮA & ẨM THỰC =================
+    {
+      id: "LADY-11",
+      domain: "food",
+      domainLabel: "Trà Sữa & Ẩm Thực",
+      tier: "Cơ bản",
+      topic: "Công thức order trà sữa 'chuẩn healthy' của chị em",
+      type: "choice",
+      problem: "Chị em văn phòng thèm trà sữa lúc 3h chiều nhưng vẫn muốn giữ dáng và tránh quá ngọt ngấy.",
+      question: "Tỉ lệ mức đường và đá nào sau đây được coi là công thức 'order quốc dân' quen thuộc nhất của chị em?",
+      options: [
+        "A. 50% đường · 70% đá",
+        "B. 100% đường · 0% đá",
+        "C. 150% đường · Nóng",
+        "D. 0% đường · 0% đá"
+      ],
+      correctIndex: 0,
+      explanation: "Mức 50% đường giúp giảm bớt vị ngọt gắt và lượng calo, trong khi 70% đá giữ độ lạnh vừa đủ mà không làm nhạt mất hương thơm đậm đà của trà.",
+      hint: "Nửa đường và đá vừa phải mát lạnh."
+    },
+    {
+      id: "LADY-12",
+      domain: "food",
+      domainLabel: "Trà Sữa & Ẩm Thực",
+      tier: "Cơ bản",
+      topic: "Topping trà sữa giòn ngọt tự nhiên",
+      type: "input",
+      problem: "Trong các loại topping trà sữa, có một loại topping được làm từ củ gọt vỏ cắt hạt lựu, áo một lớp bột năng mỏng rồi luộc chín, ăn giòn sần sật mọng nước.",
+      question: "Loại thạch giòn sần sật này được làm từ củ gì? (Gợi ý: Củ N...)",
+      expectedAnswers: ["củ năng", "thạch củ năng", "cu nang", "thach cu nang"],
+      explanation: "Thạch củ năng giòn rụm bên trong, dai dẻo lớp bột năng bên ngoài là topping cực kỳ được ưa chuộng trong các món trà trái cây và trà sữa truyền thống.",
+      hint: "Củ có ruột màu trắng ngà, vỏ đen sẫm, hay trồng ở miền Tây."
+    },
+    {
+      id: "LADY-13",
+      domain: "food",
+      domainLabel: "Trà Sữa & Ẩm Thực",
+      tier: "Cơ bản",
+      topic: "Món ăn trưa 'chia rẽ nội bộ' công sở",
+      type: "choice",
+      problem: "Trưa nay ăn gì luôn là câu hỏi gây đau đầu nhất cho hội chị em công sở.",
+      question: "Món ăn trưa nào siêu ngon và đậm đà nhưng thường bị 'cấm mang vào phòng họp máy lạnh kín' vì mùi hương bám dai dẳng suốt buổi chiều?",
+      options: [
+        "A. Bún đậu mắm tôm",
+        "B. Salad ức gà sốt mè rang",
+        "C. Cơm cuộn Kimbap rong biển",
+        "D. Sandwich bơ trứng"
+      ],
+      correctIndex: 0,
+      explanation: "Bún đậu mắm tôm là món ăn quốc dân gây nghiện cực độ, nhưng chén mắm tôm thơm lừng sẽ lan tỏa khắp không gian phòng kín nếu ăn tại bàn làm việc!",
+      hint: "Món ăn kèm chả cốm, nem rán, thịt luộc và chén nước chấm màu tím than."
+    },
+    {
+      id: "LADY-14",
+      domain: "food",
+      domainLabel: "Trà Sữa & Ẩm Thực",
+      tier: "Cơ bản",
+      topic: "Món ăn vặt cứu đói 3h chiều của văn phòng",
+      type: "choice",
+      problem: "Tầm 3h - 3h30 chiều là lúc năng lượng tụt giảm và các hội nhóm bắt đầu mở app đặt đồ ăn vặt.",
+      question: "Món ăn vặt đặc sản có nguồn gốc từ Tây Ninh làm mưa làm gió trong các hộc bàn của chị em công sở là món gì?",
+      options: [
+        "A. Bánh tráng phơi sương cuộn muối tôm nhuyễn và bơ hành phi",
+        "B. Kẹo cu đơ Hà Tĩnh",
+        "C. Bánh cáy Thái Bình",
+        "D. Chè lam Bắc Giang"
+      ],
+      correctIndex: 0,
+      explanation: "Bánh tráng phơi sương dẻo quánh chấm cùng sốt bơ béo ngậy và muối tôm nhuyễn cay nồng là món ăn vặt 'gây nghiện' hàng đầu của các bạn nữ văn phòng.",
+      hint: "Bánh tráng để qua đêm ngoài sương sớm Trảng Bàng."
+    },
+    {
+      id: "LADY-15",
+      domain: "food",
+      domainLabel: "Trà Sữa & Ẩm Thực",
+      tier: "Cơ bản",
+      topic: "Cà phê trend đập tan cơn buồn ngủ",
+      type: "input",
+      problem: "Một thức uống cà phê nổi tiếng bắt nguồn từ cố đô Huế, kết hợp giữa vị đắng của cà phê phin và lớp kem mặn béo ngậy phía trên, tạo nên cơn sốt khắp các văn phòng.",
+      question: "Thức uống cà phê này có tên gọi là Cà phê gì?",
+      expectedAnswers: ["cà phê muối", "muối", "ca phe muoi", "cafe muoi", "muoi"],
+      explanation: "Cà phê muối với lớp kem béo mằn mặn hòa quyện vị đắng ngọt giúp cân bằng vị giác hoàn hảo, là thức uống 'ruột' buổi sáng của rất nhiều bạn trẻ.",
+      hint: "Vị mặn của biển cả hòa cùng cà phê."
+    },
+
+    // ================= VŨ TRỤ CHỊ EM CÔNG SỞ: DRAMA & TIẾNG LÓNG GEN Z =================
+    {
+      id: "LADY-16",
+      domain: "office_life",
+      domainLabel: "Drama & Tiếng Lóng Công Sở",
+      tier: "Cơ bản",
+      topic: "Dấu hiệu 'Red Flag' trong môi trường làm việc",
+      type: "choice",
+      problem: "Chọn công ty văn minh là ưu tiên hàng đầu để bảo vệ sức khỏe tinh thần (Mental Health) của chị em.",
+      question: "Câu nói nào của nhà tuyển dụng được cộng đồng mạng coi là 'Red Flag' (báo động đỏ) điển hình nhất của văn hóa bóc lột?",
+      options: [
+        "A. 'Ở đây chúng tôi xem nhân viên như một gia đình' (kèm yêu cầu OT không lương và cống hiến hết mình)",
+        "B. 'Công ty có chính sách làm việc linh hoạt Hybrid và hỗ trợ trang thiết bị'",
+        "C. 'Bảo hiểm và phúc lợi được đóng đầy đủ trên 100% lương thực nhận'",
+        "D. 'Mỗi năm có 14-16 ngày phép và review lương định kỳ 2 lần/năm'"
+      ],
+      correctIndex: 0,
+      explanation: "Khái niệm 'coi nhau như gia đình' thường bị lạm dụng để xóa nhòa ranh giới công việc - đời sống cá nhân, bắt nhân viên làm thêm giờ không lương hoặc làm những việc ngoài phạm vi trách nhiệm.",
+      hint: "Gia đình thì không tính tiền công làm việc."
+    },
+    {
+      id: "LADY-17",
+      domain: "office_life",
+      domainLabel: "Drama & Tiếng Lóng Công Sở",
+      tier: "Cơ bản",
+      topic: "Tiếng lóng Gen Z: Khoe thành tích",
+      type: "input",
+      problem: "Từ lóng tiếng Anh gồm 4 chữ cái, vốn xuất phát từ giới hip-hop nhưng nay được dùng để chỉ hành vi khoe khoang của cải, thành tích học tập hoặc sự may mắn một cách đầy tự tin.",
+      question: "Từ lóng này là gì? (Gợi ý: F...)",
+      expectedAnswers: ["flex", "Flex", "FLEX"],
+      explanation: "Flex là từ lóng chỉ hành động khoe mẽ khéo léo hoặc trực diện, từng tạo nên trào lưu 'Flex đến hơi thở cuối cùng' trên mạng xã hội.",
+      hint: "Bắt đầu bằng chữ F, kết thúc bằng chữ X."
+    },
+    {
+      id: "LADY-18",
+      domain: "office_life",
+      domainLabel: "Drama & Tiếng Lóng Công Sở",
+      tier: "Cơ bản",
+      topic: "Tiếng lóng kiểm tra tính xác thực",
+      type: "choice",
+      problem: "Khi có một tin đồn hoặc phát ngôn chưa được kiểm chứng lan truyền trong hội hóng drama công sở.",
+      question: "Cụm từ nào bắt nguồn từ công nghệ video hỗ trợ trọng tài bóng đá được giới trẻ dùng với nghĩa 'yêu cầu đưa bằng chứng xác thực lời nói'?",
+      options: [
+        "A. Check VAR",
+        "B. Penalty",
+        "C. Việt vị (Off-side)",
+        "D. Ném biên (Throw-in)"
+      ],
+      correctIndex: 0,
+      explanation: "'Check VAR' là hành động soi xét lại bằng chứng, tin nhắn, hình ảnh hoặc camera để xác định sự thật một vụ việc.",
+      hint: "Công nghệ hỗ trợ trọng tài xem lại video quay chậm."
+    },
+    {
+      id: "LADY-19",
+      domain: "office_life",
+      domainLabel: "Drama & Tiếng Lóng Công Sở",
+      tier: "Trung bình",
+      topic: "Nghệ thuật từ chối nhận thêm task ngoài giờ",
+      type: "choice",
+      problem: "Sếp hoặc đồng nghiệp gửi thêm một task gấp vào lúc 5h45 chiều trong khi bạn đã có lịch trình cá nhân quan trọng.",
+      question: "Cách phản hồi nào sau đây vừa thể hiện tính chuyên nghiệp, khéo léo vừa bảo vệ được ranh giới cá nhân?",
+      options: [
+        "A. 'Dạ em đã nhận được thông tin. Vì hiện tại đã hết giờ làm việc và em đang có lịch trình cố định, em sẽ ưu tiên xử lý task này vào đầu giờ sáng mai lúc 8h30 để đảm bảo kết quả tốt nhất ạ.'",
+        "B. 'Seen không trả lời, tắt máy về thẳng.'",
+        "C. 'Sao lúc nào cũng dí việc muộn thế, ai rảnh mà làm!'",
+        "D. 'Cứ nhận lời bừa rồi để đó không làm.'"
+      ],
+      correctIndex: 0,
+      explanation: "Xác nhận đã nhận thông tin, nêu rõ mốc thời gian sẽ xử lý và cam kết chất lượng vào ca làm việc tiếp theo là kỹ năng giao tiếp công sở đỉnh cao giúp giữ vững sự tôn trọng hai chiều.",
+      hint: "Lịch sự, rõ ràng về mốc thời gian hoàn thành vào ngày hôm sau."
+    },
+    {
+      id: "LADY-20",
+      domain: "office_life",
+      domainLabel: "Drama & Tiếng Lóng Công Sở",
+      tier: "Trung bình",
+      topic: "Thuật ngữ tâm lý độc hại nơi công sở",
+      type: "choice",
+      problem: "Một hiện tượng tâm lý độc hại khi một người liên tục bóp méo sự thật, nói rằng 'Tôi có nói thế đâu' hoặc 'Em nhạy cảm quá đấy' khiến nạn nhân nghi ngờ chính trí nhớ và năng lực của mình.",
+      question: "Thuật ngữ tâm lý học phổ biến này được gọi là gì?",
+      options: [
+        "A. Gaslighting (Thao túng tâm lý)",
+        "B. Micromanagement (Quản lý vi mô)",
+        "C. Brainstorming (Động não sáng tạo)",
+        "D. Team building (Gắn kết đội ngũ)"
+      ],
+      correctIndex: 0,
+      explanation: "Gaslighting là hành vi thao túng tâm lý tinh vi làm cho đối phương nghi ngờ sự tỉnh táo, khả năng phán đoán hoặc ký ức của chính mình.",
+      hint: "Thuật ngữ bắt nguồn từ một vở kịch và bộ phim cổ điển về chiếc đèn ga bị chỉnh sáng tối."
+    },
+
+    // ================= VŨ TRỤ CHỊ EM CÔNG SỞ: KỸ NĂNG HR & KẾ TOÁN & MKT =================
+    {
+      id: "LADY-21",
+      domain: "workplace",
+      domainLabel: "Kỹ Năng HR & Kế Toán & MKT",
+      tier: "Cơ bản",
+      topic: "Luật Lao động: Thời gian thử việc tối đa",
+      type: "choice",
+      problem: "Mọi bạn nữ khi bắt đầu nhận việc mới tại các công ty đều cần nắm vững quyền lợi thử việc của mình.",
+      question: "Theo Bộ luật Lao động Việt Nam hiện hành, thời gian thử việc tối đa đối với công việc có chức danh nghề nghiệp cần trình độ chuyên môn, kỹ thuật từ cao đẳng trở lên là bao nhiêu ngày?",
+      options: [
+        "A. Không quá 60 ngày",
+        "B. Không quá 30 ngày",
+        "C. Không quá 90 ngày",
+        "D. Không quá 180 ngày"
+      ],
+      correctIndex: 0,
+      explanation: "Theo Điều 25 Bộ luật Lao động 2019: Thời gian thử việc tối đa là 60 ngày đối với công việc có chức danh nghề nghiệp cần trình độ từ cao đẳng trở lên (chỉ người quản lý doanh nghiệp mới thử việc tới 180 ngày).",
+      hint: "Tương đương với khoảng 2 tháng làm việc."
+    },
+    {
+      id: "LADY-22",
+      domain: "workplace",
+      domainLabel: "Kỹ Năng HR & Kế Toán & MKT",
+      tier: "Cơ bản",
+      topic: "Quyền lợi nghỉ phép năm hưởng nguyên lương",
+      type: "input",
+      problem: "Ngày phép năm là quyền lợi thiết yếu để chị em nghỉ ngơi, đi du lịch hoặc chăm sóc gia đình.",
+      question: "Người lao động làm việc đủ 12 tháng cho một người sử dụng lao động trong điều kiện bình thường được nghỉ tối thiểu bao nhiêu ngày phép năm hưởng nguyên lương? (Điền số)",
+      expectedAnswers: ["12", "12 ngày", "12 ngay"],
+      explanation: "Theo Điều 113 Bộ luật Lao động, người làm việc đủ 12 tháng trong điều kiện bình thường được nghỉ 12 ngày làm việc hưởng nguyên lương (cứ 5 năm làm việc lại được cộng thêm 1 ngày).",
+      hint: "Mỗi tháng tích lũy được 1 ngày phép."
+    },
+    {
+      id: "LADY-23",
+      domain: "workplace",
+      domainLabel: "Kỹ Năng HR & Kế Toán & MKT",
+      tier: "Trung bình",
+      topic: "Kế toán: Tiêu chí hóa đơn điện tử hợp lệ",
+      type: "choice",
+      problem: "Chị em kế toán hoặc nhân viên khi đi ăn uống tiếp khách, mua sắm văn phòng phẩm cần lấy hóa đơn về thanh toán chi phí công ty.",
+      question: "Khi nhận hóa đơn điện tử có mã của Cơ quan Thuế, điều kiện bắt buộc để hóa đơn có giá trị pháp lý kê khai thuế là gì?",
+      options: [
+        "A. Hóa đơn có đầy đủ định dạng file XML gốc và đã được cấp 'Mã của cơ quan thuế' cùng chữ ký số của người bán",
+        "B. Chỉ cần bản in PDF chụp ảnh lại lưu vào điện thoại",
+        "C. Có dấu mộc đỏ tròn đóng bằng tay lên bản giấy in ra",
+        "D. Chỉ cần biên lai thu tiền viết tay từ quán ăn"
+      ],
+      correctIndex: 0,
+      explanation: "Theo Nghị định 123/2020/NĐ-CP, hóa đơn điện tử hợp pháp phải lưu trữ file dữ liệu gốc XML, chứa chữ ký số và được hệ thống Cơ quan Thuế tiếp nhận cấp mã.",
+      hint: "Định dạng dữ liệu gốc chuẩn của hóa đơn điện tử là file XML có chữ ký số."
+    },
+    {
+      id: "LADY-24",
+      domain: "workplace",
+      domainLabel: "Kỹ Năng HR & Kế Toán & MKT",
+      tier: "Cơ bản",
+      topic: "Marketing: Mô hình AIDA kinh điển trong viết Content",
+      type: "choice",
+      problem: "Khi viết bài PR, caption bán hàng hoặc kịch bản video TikTok cho thương hiệu, công thức AIDA luôn là kim chỉ nam.",
+      question: "Các chữ cái trong công thức AIDA đại diện cho quy trình tâm lý khách hàng theo thứ tự nào?",
+      options: [
+        "A. Attention (Gây chú ý) -> Interest (Tạo hứng thú) -> Desire (Khơi gợi khao khát) -> Action (Kêu gọi hành động)",
+        "B. Analyze (Phân tích) -> Implement (Thực thi) -> Design (Thiết kế) -> Approve (Duyệt)",
+        "C. Awareness (Nhận biết) -> Interaction (Tương tác) -> Demand (Nhu cầu) -> Agreement (Đồng thuận)",
+        "D. Action (Hành động) -> Interest (Hứng thú) -> Desire (Khao khát) -> Attention (Chú ý)"
+      ],
+      correctIndex: 0,
+      explanation: "AIDA là mô hình phễu marketing kinh điển: Bắt đầu bằng việc giật tít gây chú ý (Attention), giữ chân bằng nội dung thú vị (Interest), kích thích ham muốn sở hữu (Desire) và kết thúc bằng lời kêu gọi mua hàng (Action).",
+      hint: "Đầu tiên phải làm người ta 'chú ý' trước rồi mới thuyết phục hành động."
+    },
+    {
+      id: "LADY-25",
+      domain: "workplace",
+      domainLabel: "Kỹ Năng HR & Kế Toán & MKT",
+      tier: "Cơ bản",
+      topic: "Chỉ số hiệu quả quảng cáo ROAS",
+      type: "input",
+      problem: "Trong Digital Marketing, ROAS (Return On Ad Spend) là thước đo hiệu quả của chiến dịch quảng cáo được tính bằng: Doanh thu tạo ra chia cho Chi phí quảng cáo đã tiêu.",
+      question: "Nếu một chiến dịch quảng cáo trên TikTok Shop chi hết 10 triệu tiền ads và mang về trực tiếp 50 triệu doanh thu, chỉ số ROAS đạt bao nhiêu lần? (Điền số)",
+      expectedAnswers: ["5", "5x", "5 lần", "5 lan"],
+      explanation: "ROAS = Doanh thu / Chi phí = 50.000.000 / 10.000.000 = 5 (tức cứ bỏ ra 1 đồng quảng cáo mang về 5 đồng doanh thu).",
+      hint: "50 chia cho 10 bằng mấy?"
     }
   ];
 

@@ -26,7 +26,7 @@ window.Engagement = (function () {
     };
   }
 
-  const RANKS = [
+  const RANKS_TECH = [
     { name: "Intern", min: 0 },
     { name: "Junior", min: 200 },
     { name: "Senior", min: 600 },
@@ -34,6 +34,22 @@ window.Engagement = (function () {
     { name: "Manager", min: 2200 },
     { name: "Director", min: 4000 }
   ];
+
+  const RANKS_LADY = [
+    { name: "Thực tập bánh bèo 🌸", min: 0 },
+    { name: "Chiến thần săn Sale 🛍️", min: 200 },
+    { name: "Bà hoàng Trà sữa 🧋", min: 600 },
+    { name: "Trùm Phong thủy bàn 💅", min: 1200 },
+    { name: "Hoa khôi Phòng họp 👑", min: 2200 },
+    { name: "Nữ hoàng Công sở 💎", min: 4000 }
+  ];
+
+  function getRanks() {
+    try {
+      if (localStorage.getItem("stealth_rank_theme") === "lady") return RANKS_LADY;
+    } catch (_) {}
+    return RANKS_TECH;
+  }
 
   const QUEST_POOL = {
     answers: { title: "Giải đúng 12 mục", goal: 12, kpi: 50 },
@@ -160,15 +176,16 @@ window.Engagement = (function () {
   }
 
   function getRankIndex(score) {
+    const list = getRanks();
     let idx = 0;
-    RANKS.forEach((r, i) => {
+    list.forEach((r, i) => {
       if (score >= r.min) idx = i;
     });
     return idx;
   }
 
   function getRankName(score) {
-    return RANKS[getRankIndex(score)].name;
+    return getRanks()[getRankIndex(score)].name;
   }
 
   // Trả về tên cấp mới nếu vừa thăng cấp (mỗi cấp chỉ báo 1 lần)
@@ -178,7 +195,7 @@ window.Engagement = (function () {
     const first = data.topRank === null;
     data.topRank = idx;
     save();
-    return first ? null : RANKS[idx].name;
+    return first ? null : getRanks()[idx].name;
   }
 
   function getSummary() {
@@ -196,9 +213,10 @@ window.Engagement = (function () {
 
   function renderPanel(score) {
     const s = getSummary();
+    const list = getRanks();
     const idx = getRankIndex(score);
-    const cur = RANKS[idx];
-    const next = RANKS[idx + 1];
+    const cur = list[idx];
+    const next = list[idx + 1];
     const pct = next ? Math.round(((score - cur.min) / (next.min - cur.min)) * 100) : 100;
     const rankText = next
       ? `${cur.name} → ${next.name}: còn ${next.min - score} KPI`

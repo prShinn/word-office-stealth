@@ -113,6 +113,7 @@ const jsFiles = [
   "troll.js",
   "ads.js",
   "leaderboard.js",
+  "lady-corner.js",
   "app.js"
 ];
 

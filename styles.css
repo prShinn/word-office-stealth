@@ -2282,3 +2282,57 @@ body.fever .connections-view {
   color: var(--text-muted, #64748b);
   font-style: italic;
 }
+
+/* ================= GÓC CHỊ EM CÔNG SỞ & THEMES ================= */
+.game-btn-lady {
+  background: #fdf2f8 !important;
+  color: #db2777 !important;
+  border-color: #fbcfe8 !important;
+  font-weight: 600;
+}
+.game-btn-lady:hover {
+  background: #fce7f3 !important;
+  border-color: #f472b6 !important;
+  color: #be185d !important;
+  box-shadow: 0 2px 8px rgba(219, 39, 119, 0.2);
+}
+.lady-tab-btn.active {
+  background: #fce7f3 !important;
+  color: #db2777 !important;
+  border-color: #f472b6 !important;
+  font-weight: 700 !important;
+}
+.theme-choice-btn.active-theme,
+.rank-choice-btn.active-theme {
+  border-color: #db2777 !important;
+  background: #fdf2f8 !important;
+  outline: 2px solid #db2777;
+}
+
+/* Theme Word (Xanh dương) */
+body.theme-word {
+  --accent: #185abd;
+  --accent-light: #e8f0fe;
+  --accent-border: #8ab4f8;
+}
+body.theme-word .titlebar {
+  background: #185abd !important;
+}
+body.theme-word .ribbon-tab.active {
+  border-bottom-color: #185abd !important;
+  color: #185abd !important;
+}
+
+/* Theme Pastel (Hồng phấn Rose Gold) */
+body.theme-pastel {
+  --accent: #db2777;
+  --accent-light: #fdf2f8;
+  --accent-border: #fbcfe8;
+}
+body.theme-pastel .titlebar {
+  background: #be185d !important;
+}
+body.theme-pastel .ribbon-tab.active {
+  border-bottom-color: #db2777 !important;
+  color: #db2777 !important;
+}
