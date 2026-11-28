@@ -9,7 +9,7 @@
   <meta property="og:type" content="website" />
   <title id="page-title">Bao_Cao_Kinh_Doanh_Q4 - Bảng Chữ</title>
   <link id="page-favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%230f766e'/%3E%3Crect x='5' y='5' width='6' height='6' rx='1.5' fill='white'/%3E%3Crect x='13' y='5' width='6' height='6' rx='1.5' fill='white' opacity='.55'/%3E%3Crect x='5' y='13' width='6' height='6' rx='1.5' fill='white' opacity='.55'/%3E%3Ccircle cx='16' cy='16' r='3' fill='white'/%3E%3C/svg%3E" />
-  <link rel="stylesheet" href="styles.css?v=20261128-16" />
+  <link rel="stylesheet" href="styles.css?v=20261128-17" />
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5DWNBBMQSX"></script>
   <script>
@@ -302,6 +302,58 @@
           <button class="office-btn ghost hidden" id="btn-conn-retry">Làm lại Phiên</button>
         </div>
       </div>
+
+      <!-- Layout riêng cho Giải đố Thuật toán IT -->
+      <div class="algo-view hidden" id="algo-view">
+        <div class="algo-header-bar">
+          <div>
+            <span class="panel-title" id="algo-topic-title">Thuật toán: Two Pointers · Cặp số có tổng đích</span>
+            <span class="tier-badge" id="algo-tier-badge">Cơ bản</span>
+          </div>
+          <div class="algo-sub">Ôn tập kiến thức cấu trúc dữ liệu, thuật toán &amp; tối ưu hệ thống thực chiến</div>
+        </div>
+
+        <div class="star-goals"></div>
+
+        <div class="algo-content-grid">
+          <!-- Cột trái: Đề bài & Code Snippet -->
+          <div class="algo-left-col">
+            <div class="algo-problem-card">
+              <div class="algo-card-title">📌 ĐẶC TẢ BÀI TOÁN / CA THỰC CHIẾN</div>
+              <p class="algo-problem-desc" id="algo-problem-desc"></p>
+            </div>
+            <div class="algo-code-wrap">
+              <div class="algo-code-header">
+                <span>💻 CODE / MÃ GIẢ THỰC THI</span>
+                <span class="algo-lang-tag">Algorithm</span>
+              </div>
+              <pre class="algo-code" id="algo-code-snippet"></pre>
+            </div>
+          </div>
+
+          <!-- Cột phải: Câu hỏi & 4 Đáp án A, B, C, D -->
+          <div class="algo-right-col">
+            <div class="algo-question-card">
+              <div class="algo-card-title">❓ CÂU HỎI THUẬT TOÁN</div>
+              <div class="algo-question-text" id="algo-question-text"></div>
+            </div>
+
+            <div class="algo-options-list" id="algo-options-list"></div>
+
+            <div class="algo-actions">
+              <button class="office-btn" id="btn-algo-submit" disabled>Xác nhận câu trả lời</button>
+              <button class="office-btn ghost hidden" id="btn-algo-next">Bài tiếp theo ▶</button>
+              <button class="office-btn ghost hidden" id="btn-algo-retry">Làm lại bài này</button>
+            </div>
+
+            <!-- Khung giải thích chi tiết sau khi giải -->
+            <div class="algo-explanation-box hidden" id="algo-explanation-box">
+              <div class="algo-explain-title">💡 PHÂN TÍCH THUẬT TOÁN &amp; ĐỘ PHỨC TẠP</div>
+              <div class="algo-explain-content" id="algo-explain-content"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 
@@ -326,24 +378,47 @@
     </div>
   </div>
 
-  <!-- Modal Đăng nhập Hồ sơ KPI -->
+  <!-- Modal Đăng nhập Hồ sơ KPI & Đồng bộ GitHub Gist -->
   <div class="modal-backdrop hidden" id="auth-modal">
-    <div class="office-modal" style="max-width: 400px;">
+    <div class="office-modal" style="max-width: 440px;">
       <div class="modal-head">
-        <strong>ĐĂNG NHẬP HỒ SƠ KPI</strong>
+        <strong>HỒ SƠ KPI &amp; ĐỒNG BỘ GITHUB GIST</strong>
         <button class="modal-close" id="btn-close-auth">✕</button>
       </div>
       <div class="modal-body">
-        <p style="margin: 0 0 10px; font-size: 13px; color: var(--text-muted);">
-          Đăng nhập để lưu tiến độ phiên chơi, điểm KPI và chuỗi ngày chuyên cần. Chế độ Khách sẽ không lưu dữ liệu khi tải lại trang.
-        </p>
-        <form id="auth-form" style="display: flex; flex-direction: column; gap: 10px;">
-          <input id="auth-username" class="office-select" type="text" placeholder="Tên tài khoản (VD: datnc)" minlength="2" maxlength="24" required style="padding: 8px 10px; width: 100%; box-sizing: border-box;" />
-          <div style="display: flex; gap: 8px; justify-content: flex-end;">
-            <button type="button" class="game-btn hidden" id="btn-logout">Đăng xuất</button>
-            <button type="submit" class="game-btn" style="background: var(--accent); color: #fff; border-color: var(--accent);">Xác nhận</button>
+        <div id="auth-logged-in-view" class="hidden">
+          <div style="display: flex; gap: 12px; align-items: center; background: var(--bg-subtle); padding: 12px; border-radius: 4px; border: 1px solid var(--border); margin-bottom: 12px;">
+            <img id="github-user-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%230f766e'/%3E%3C/svg%3E" alt="Avatar" width="44" height="44" style="border-radius: 50%; border: 2px solid var(--accent); object-fit: cover;" />
+            <div style="flex: 1; overflow: hidden;">
+              <div style="font-weight: 700; font-size: 14px; color: var(--accent);" id="github-user-login">@username</div>
+              <div style="font-size: 11.5px; color: var(--text-muted);" id="github-gist-status">Private Gist: bangchu_data.json</div>
+            </div>
           </div>
-        </form>
+          <div style="display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">
+            <a id="btn-view-gist" href="#" target="_blank" class="game-btn" style="text-decoration: none;">Xem Gist</a>
+            <button type="button" class="game-btn" id="btn-manual-sync">Đồng bộ ngay</button>
+            <button type="button" class="game-btn" id="btn-logout" style="color: #dc2626;">Đăng xuất</button>
+          </div>
+        </div>
+
+        <div id="auth-guest-view">
+          <p style="margin: 0 0 10px; font-size: 13px; color: var(--text-muted); line-height: 1.5;">
+            Đồng bộ KPI, chuỗi chuyên cần và số sao trực tiếp vào <strong>GitHub Private Gist</strong> cá nhân của bạn. Không cần server, không lo mất dữ liệu khi đổi máy tính!
+          </p>
+          <form id="auth-form" style="display: flex; flex-direction: column; gap: 10px;">
+            <div>
+              <label for="github-pat-input" style="display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 4px;">GitHub Personal Access Token (PAT):</label>
+              <input id="github-pat-input" class="office-select" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="padding: 8px 10px; width: 100%; box-sizing: border-box;" autocomplete="off" />
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">
+                💡 <a href="https://github.com/settings/tokens/new?scopes=gist&description=BangChu_Office_Stealth" target="_blank" style="color: var(--accent); text-decoration: underline;">Click đây để tạo nhanh Token GitHub</a> (chỉ cần tích quyền <code>gist</code>).
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px; justify-content: space-between; align-items: center; margin-top: 6px;">
+              <button type="button" class="game-btn" id="btn-continue-guest">Chơi tiếp dạng Khách</button>
+              <button type="submit" class="game-btn" id="btn-submit-auth" style="background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 700;">Kết nối Gist</button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>
@@ -447,6 +522,7 @@
       <button class="sheet-tab" data-lang="vi" data-mode="merge">VI · Ghép từ</button>
       <button class="sheet-tab" data-lang="en" data-mode="connections">EN · Phân nhóm</button>
       <button class="sheet-tab" data-lang="vi" data-mode="connections">VI · Phân nhóm</button>
+      <button class="sheet-tab sheet-tab-algo" data-lang="it" data-mode="algo">⚡ IT · Thuật toán</button>
     </div>
     <div class="status-stats">
       <span id="stat-daily">Chuyên cần: 0 ngày</span>
@@ -459,13 +535,15 @@
     </div>
   </footer>
 
-  <script src="data-en.js?v=20261128-16"></script>
-  <script src="data-vi.js?v=20261128-16"></script>
-  <script src="data-connections.js?v=20261128-16"></script>
-  <script src="engagement.js?v=20261128-16"></script>
-  <script src="troll.js?v=20261128-16"></script>
-  <script src="ads.js?v=20261128-16"></script>
-  <script src="leaderboard.js?v=20261128-16"></script>
-  <script src="app.js?v=20261128-16"></script>
+  <script src="data-en.js?v=20261128-17"></script>
+  <script src="data-vi.js?v=20261128-17"></script>
+  <script src="data-connections.js?v=20261128-17"></script>
+  <script src="data-algo.js?v=20261128-17"></script>
+  <script src="gist-sync.js?v=20261128-17"></script>
+  <script src="engagement.js?v=20261128-17"></script>
+  <script src="troll.js?v=20261128-17"></script>
+  <script src="ads.js?v=20261128-17"></script>
+  <script src="leaderboard.js?v=20261128-17"></script>
+  <script src="app.js?v=20261128-17"></script>
 </body>
 </html>

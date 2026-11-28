@@ -150,6 +150,18 @@
     btnConnSubmit: $("btn-conn-submit"),
     btnConnDeselect: $("btn-conn-deselect"),
     btnConnRetry: $("btn-conn-retry"),
+    algoView: $("algo-view"),
+    algoTopicTitle: $("algo-topic-title"),
+    algoTierBadge: $("algo-tier-badge"),
+    algoProblemDesc: $("algo-problem-desc"),
+    algoCodeSnippet: $("algo-code-snippet"),
+    algoQuestionText: $("algo-question-text"),
+    algoOptionsList: $("algo-options-list"),
+    btnAlgoSubmit: $("btn-algo-submit"),
+    btnAlgoNext: $("btn-algo-next"),
+    btnAlgoRetry: $("btn-algo-retry"),
+    algoExplanationBox: $("algo-explanation-box"),
+    algoExplainContent: $("algo-explain-content"),
     achModal: $("achievements-modal"),
     kpiOverviewCards: $("kpi-overview-cards"),
     achGrid: $("ach-grid"),
@@ -161,6 +173,8 @@
   };
 
   function getAuthUser() {
+    const gistAuth = window.GistSync?.getAuth?.();
+    if (gistAuth && gistAuth.username) return gistAuth.username;
     try {
       const u = (localStorage.getItem(AUTH_KEY) || "").trim();
       return u || null;
@@ -170,23 +184,53 @@
   }
 
   function updateAuthUI() {
-    const user = getAuthUser();
+    const gistAuth = window.GistSync?.getAuth?.();
+    const user = gistAuth?.username || getAuthUser();
     const btnAuth = $("btn-auth");
     const saveStateEl = $("save-state");
-    const btnLogout = $("btn-logout");
-    const inputUser = $("auth-username");
+    const authLoggedInView = $("auth-logged-in-view");
+    const authGuestView = $("auth-guest-view");
+    const avatarImg = $("github-user-avatar");
+    const loginText = $("github-user-login");
+    const gistStatus = $("github-gist-status");
+    const btnViewGist = $("btn-view-gist");
+
     if (btnAuth) {
-      btnAuth.textContent = user ? `👤 ${user}` : "Đăng nhập";
-      btnAuth.classList.toggle("active", Boolean(user));
+      if (gistAuth?.username) {
+        btnAuth.textContent = `🐙 @${gistAuth.username}`;
+        btnAuth.classList.add("active");
+        btnAuth.title = `Đã kết nối GitHub Gist (@${gistAuth.username}) · Click để quản lý`;
+      } else if (user) {
+        btnAuth.textContent = `👤 ${user}`;
+        btnAuth.classList.add("active");
+        btnAuth.title = `Tài khoản: ${user} · Click để kết nối GitHub Gist`;
+      } else {
+        btnAuth.textContent = "Đăng nhập";
+        btnAuth.classList.remove("active");
+        btnAuth.title = "Đăng nhập GitHub Gist để lưu tiến độ đám mây";
+      }
     }
     if (saveStateEl) {
-      saveStateEl.textContent = user ? `Đã lưu (${user})` : "Chế độ Khách (Chưa lưu)";
+      if (gistAuth?.username) {
+        saveStateEl.textContent = `GitHub Gist: @${gistAuth.username} (Sync ✓)`;
+      } else if (user) {
+        saveStateEl.textContent = `Đã lưu (${user})`;
+      } else {
+        saveStateEl.textContent = "Chế độ Khách (Chưa lưu)";
+      }
     }
-    if (btnLogout) {
-      btnLogout.classList.toggle("hidden", !user);
-    }
-    if (inputUser) {
-      inputUser.value = user || "";
+    if (authLoggedInView && authGuestView) {
+      if (gistAuth?.username) {
+        authLoggedInView.classList.remove("hidden");
+        authGuestView.classList.add("hidden");
+        if (avatarImg && gistAuth.avatarUrl) avatarImg.src = gistAuth.avatarUrl;
+        if (loginText) loginText.textContent = `@${gistAuth.username}`;
+        if (gistStatus) gistStatus.textContent = `Private Gist: ${gistAuth.gistId ? gistAuth.gistId.slice(0, 10) + '...' : 'Tự động đồng bộ'}`;
+        if (btnViewGist && gistAuth.gistUrl) btnViewGist.href = gistAuth.gistUrl;
+      } else {
+        authLoggedInView.classList.add("hidden");
+        authGuestView.classList.remove("hidden");
+      }
     }
   }
 
@@ -392,6 +436,9 @@
         } catch (__) {}
       }
       scheduleProfileSync(trimmed);
+      if (window.GistSync?.isLoggedIn?.()) {
+        window.GistSync.syncProgress(trimmed);
+      }
     } catch (_) {}
   }
 
@@ -590,6 +637,9 @@
   }
 
   function getLevels() {
+    if (state.mode === "algo") {
+      return window.ALGO_DATA?.ALGO_LEVELS || [];
+    }
     if (state.mode === "connections") {
       return state.lang === "en" ? window.CONN_DATA.EN_LEVELS : window.CONN_DATA.VI_LEVELS;
     }
@@ -817,6 +867,13 @@
       met: () => (!isTimerOff && state.timeLeft >= limit * ratio),
       locked: isTimerOff
     });
+    if (state.mode === "algo") {
+      return [
+        { bit: 1, label: "Đúng ngay lần đầu", met: () => state.mistakes === 0 },
+        speedGoal(2, 0.5),
+        { bit: 4, label: "Hoàn tất giải đố", met: () => isBatchDone() }
+      ];
+    }
     return [
       { bit: 1, label: "Không sai lần nào", met: () => state.mistakes === 0 },
       speedGoal(2, 0.5),
@@ -1058,6 +1115,8 @@
 
   function isBatchDone() {
     const lvl = getCurrentLevel();
+    if (!lvl) return false;
+    if (state.mode === "algo") return state.completedBatches.has(lvl.id);
     if (state.mode === "connect") return state.solvedTargets.size === lvl.targets.length;
     if (state.mode === "merge") return state.solvedPairs.size === lvl.pairs.length;
     return state.connSolvedLevels.length === 4;
@@ -1308,6 +1367,87 @@
     }
   }
 
+  // ================= ALGORITHM QUIZ MODE =================
+  state.selectedAlgoOption = null;
+
+  function renderAlgoLevel(lvl) {
+    if (!els.algoView || !lvl) return;
+    if (els.algoTopicTitle) els.algoTopicTitle.textContent = `Thuật toán: ${lvl.topic}`;
+    if (els.algoTierBadge) updateTierBadge(els.algoTierBadge, lvl.tier || "Cơ bản");
+    if (els.algoProblemDesc) els.algoProblemDesc.textContent = lvl.problem || "";
+    if (els.algoCodeSnippet) els.algoCodeSnippet.textContent = lvl.snippet || "";
+    if (els.algoQuestionText) els.algoQuestionText.textContent = lvl.question || "";
+    state.selectedAlgoOption = null;
+    if (els.btnAlgoSubmit) els.btnAlgoSubmit.disabled = true;
+
+    const isSolved = state.completedBatches.has(lvl.id);
+    if (els.btnAlgoNext) els.btnAlgoNext.classList.toggle("hidden", !isSolved);
+    if (els.btnAlgoRetry) els.btnAlgoRetry.classList.add("hidden");
+    if (els.algoExplanationBox) els.algoExplanationBox.classList.toggle("hidden", !isSolved);
+    if (els.algoExplainContent) els.algoExplainContent.textContent = lvl.explanation || "";
+
+    if (els.algoOptionsList) {
+      els.algoOptionsList.innerHTML = "";
+      (lvl.options || []).forEach((optText, idx) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "algo-opt-btn";
+        btn.dataset.idx = String(idx);
+        btn.textContent = optText;
+        if (isSolved && idx === lvl.correctIndex) {
+          btn.classList.add("correct");
+        }
+        btn.addEventListener("click", () => {
+          if (state.batchFailed || isBatchDone()) return;
+          document.querySelectorAll(".algo-opt-btn").forEach((b) => b.classList.remove("selected"));
+          btn.classList.add("selected");
+          state.selectedAlgoOption = idx;
+          if (els.btnAlgoSubmit) els.btnAlgoSubmit.disabled = false;
+        });
+        els.algoOptionsList.appendChild(btn);
+      });
+    }
+  }
+
+  function submitAlgoAnswer() {
+    if (state.selectedAlgoOption === null || state.batchFailed) return;
+    const lvl = getCurrentLevel();
+    if (!lvl) return;
+    const idx = state.selectedAlgoOption;
+    const buttons = document.querySelectorAll(".algo-opt-btn");
+
+    if (idx === lvl.correctIndex) {
+      if (buttons[idx]) buttons[idx].classList.add("correct");
+      if (els.btnAlgoSubmit) els.btnAlgoSubmit.disabled = true;
+      if (els.algoExplanationBox) els.algoExplanationBox.classList.remove("hidden");
+      if (els.algoExplainContent) els.algoExplainContent.textContent = lvl.explanation;
+      if (els.btnAlgoNext) els.btnAlgoNext.classList.remove("hidden");
+      if (els.btnAlgoRetry) els.btnAlgoRetry.classList.add("hidden");
+
+      if (!state.completedBatches.has(lvl.id)) {
+        state.completedBatches.add(lvl.id);
+        state.streak += 1;
+        const bonus = lvl.tier === "Nâng cao" ? 120 : lvl.tier === "Trung bình" ? 90 : 60;
+        state.score += bonus;
+        bumpCombo();
+        const roundStars = earnStars(lvl);
+        setStatus(`Chính xác! (+${bonus} KPI) · ${roundStars}`, "ok");
+        saveProgress();
+        populateLevelDropdown();
+        updateStatsUI();
+        cheerCompletion(lvl);
+      } else {
+        setStatus("Chính xác! Bạn đã hoàn thành câu hỏi này trước đó.", "ok");
+      }
+    } else {
+      if (buttons[idx]) buttons[idx].classList.add("wrong");
+      registerMistake(`Đáp án ${String.fromCharCode(65 + idx)} chưa chính xác!`);
+      if (els.btnAlgoRetry) els.btnAlgoRetry.classList.remove("hidden");
+      if (els.algoExplanationBox) els.algoExplanationBox.classList.remove("hidden");
+      if (els.algoExplainContent) els.algoExplainContent.textContent = "💡 Gợi ý: " + (lvl.hint || lvl.explanation);
+    }
+  }
+
   // ================= LOAD LEVEL =================
   function loadLevel(index, fresh) {
     const levels = getLevels();
@@ -1385,9 +1525,15 @@
       setStatus('Phiên đã hoàn tất · "Làm lại Phiên" để luyện lại', "ok");
     }
 
-    if (state.mode === "connections") {
-      els.standardGrid.classList.add("hidden");
-      els.connectionsView.classList.remove("hidden");
+    if (state.mode === "algo") {
+      els.standardGrid?.classList.add("hidden");
+      els.connectionsView?.classList.add("hidden");
+      els.algoView?.classList.remove("hidden");
+      renderAlgoLevel(lvl);
+    } else if (state.mode === "connections") {
+      els.standardGrid?.classList.add("hidden");
+      els.connectionsView?.classList.remove("hidden");
+      els.algoView?.classList.add("hidden");
       els.connTopicTitle.textContent = `Chủ đề: ${lvl.topic}`;
       updateTierBadge(els.connTierBadge, lvl.tier);
       const flat = [];
@@ -1397,8 +1543,9 @@
       state.connTiles = shuffleArray(flat);
       renderConnections();
     } else {
-      els.standardGrid.classList.remove("hidden");
-      els.connectionsView.classList.add("hidden");
+      els.standardGrid?.classList.remove("hidden");
+      els.connectionsView?.classList.add("hidden");
+      els.algoView?.classList.add("hidden");
       els.topicTitle.textContent = `Chủ đề: ${lvl.topic}`;
       updateTierBadge(els.tierBadge, lvl.tier || "Cơ bản");
 
@@ -2194,6 +2341,16 @@
   function triggerHint() {
     if (state.batchFailed || state.mode === "connections") return;
     const lvl = getCurrentLevel();
+    if (!lvl) return;
+
+    if (state.mode === "algo") {
+      if (!consumeHint()) return;
+      state.usedHintInBatch = true;
+      if (els.algoExplanationBox) els.algoExplanationBox.classList.remove("hidden");
+      if (els.algoExplainContent) els.algoExplainContent.textContent = "💡 Gợi ý giải: " + (lvl.hint || lvl.explanation);
+      setStatus(`Đã mở gợi ý giải thuật toán (còn ${state.hintQuota} lượt)`, "warn");
+      return;
+    }
 
     if (state.mode === "connect") {
       const targetWord =
@@ -2255,11 +2412,13 @@
       const enGrp = window.CONN_DATA?.EN_LEVELS || [];
       const viGrp = window.CONN_DATA?.VI_LEVELS || [];
 
+      const itAlgo = window.ALGO_DATA?.ALGO_LEVELS || [];
       const countDone = (list) => list.filter((l) => state.completedBatches.has(l.id)).length;
       const rows = [
         { label: "Nối chữ (EN + VI)", done: countDone(enConn) + countDone(viConn), total: enConn.length + viConn.length },
         { label: "Ghép từ (EN + VI)", done: countDone(enMerge) + countDone(viMerge), total: enMerge.length + viMerge.length },
-        { label: "Phân nhóm 4x4 (EN + VI)", done: countDone(enGrp) + countDone(viGrp), total: enGrp.length + viGrp.length }
+        { label: "Phân nhóm 4x4 (EN + VI)", done: countDone(enGrp) + countDone(viGrp), total: enGrp.length + viGrp.length },
+        { label: "IT Thuật toán", done: countDone(itAlgo), total: itAlgo.length }
       ];
       const viCol = (state.collectedWords?.vi || []).length;
       const enCol = (state.collectedWords?.en || []).length;
@@ -2611,44 +2770,86 @@
 
     const authModal = $("auth-modal");
     const authForm = $("auth-form");
-    const authInput = $("auth-username");
+    const githubPatInput = $("github-pat-input");
+    const btnSubmitAuth = $("btn-submit-auth");
+    const btnContinueGuest = $("btn-continue-guest");
+    const btnManualSync = $("btn-manual-sync");
     const btnLogout = $("btn-logout");
 
     $("btn-auth")?.addEventListener("click", () => {
       updateAuthUI();
       authModal?.classList.remove("hidden");
-      authInput?.focus();
+      if (githubPatInput && !window.GistSync?.getAuthUser?.()) {
+        githubPatInput.focus();
+      }
     });
     $("btn-close-auth")?.addEventListener("click", () => {
       authModal?.classList.add("hidden");
     });
-    authForm?.addEventListener("submit", (e) => {
+    btnContinueGuest?.addEventListener("click", () => {
+      authModal?.classList.add("hidden");
+      setStatus("Tiếp tục ở Chế độ Khách (Chưa đăng nhập)", "ok");
+    });
+
+    authForm?.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const rawName = (authInput?.value || "").trim().replace(/[^a-zA-Z0-9_-]/g, "");
-      if (rawName.length < 2) {
-        setStatus("Tên tài khoản tối thiểu 2 ký tự (chữ/số)", "err");
+      const token = (githubPatInput?.value || "").trim();
+      if (!token) {
+        setStatus("Vui lòng nhập GitHub Personal Access Token (scope gist)", "err");
         return;
       }
+      if (btnSubmitAuth) {
+        btnSubmitAuth.disabled = true;
+        btnSubmitAuth.textContent = "Đang kết nối GitHub...";
+      }
       try {
-        localStorage.setItem(AUTH_KEY, rawName.toLowerCase());
-      } catch (_) {}
-      window.Engagement?.reloadAuth?.();
-      loadProgress();
-      applyTheme(state.theme);
-      loadLevel(state.levelIndex);
-      authModal?.classList.add("hidden");
-      trackEvent("auth_login", { method: "local" });
-      setStatus(`Đã đăng nhập: ${rawName.toLowerCase()} · Tiến độ sẽ được lưu`, "ok");
+        const result = await window.GistSync.connectWithToken(token);
+        if (result && result.remoteData) {
+          const remoteData = result.remoteData;
+          if (typeof remoteData.score === "number") state.score = Math.max(state.score, remoteData.score);
+          if (typeof remoteData.streak === "number") state.streak = Math.max(state.streak, remoteData.streak);
+          if (remoteData.stars && typeof remoteData.stars === "object") state.stars = { ...state.stars, ...remoteData.stars };
+          if (Array.isArray(remoteData.completedBatches)) {
+            remoteData.completedBatches.forEach((b) => state.completedBatches.add(b));
+          }
+        }
+        saveProgress();
+        updateAuthUI();
+        updateStatsUI();
+        populateLevelDropdown();
+        authModal?.classList.add("hidden");
+        setStatus(`Đã kết nối GitHub Gist: @${result.auth.username}! Tự động đồng bộ tiến độ.`, "ok");
+      } catch (err) {
+        setStatus(`Lỗi kết nối GitHub: ${err.message}`, "err");
+      } finally {
+        if (btnSubmitAuth) {
+          btnSubmitAuth.disabled = false;
+          btnSubmitAuth.textContent = "Kết nối Gist";
+        }
+      }
     });
+
+    btnManualSync?.addEventListener("click", async () => {
+      setStatus("Đang đồng bộ lên GitHub Gist...", "");
+      saveProgress();
+      setStatus("Đã gửi yêu cầu đồng bộ lên GitHub Gist thành công!", "ok");
+    });
+
     btnLogout?.addEventListener("click", () => {
-      try {
-        localStorage.removeItem(AUTH_KEY);
-      } catch (_) {}
-      window.Engagement?.reloadAuth?.();
-      loadProgress();
-      loadLevel(0, true);
+      window.GistSync?.logout?.();
+      try { localStorage.removeItem(AUTH_KEY); } catch (_) {}
+      updateAuthUI();
       authModal?.classList.add("hidden");
-      setStatus("Đã chuyển sang chế độ Khách (không lưu tiến độ)", "warn");
+      setStatus("Đã ngắt kết nối GitHub và quay về Chế độ Khách", "warn");
+    });
+
+    // ALGORITHM MODE ACTIONS
+    els.btnAlgoSubmit?.addEventListener("click", submitAlgoAnswer);
+    els.btnAlgoNext?.addEventListener("click", () => {
+      loadLevel(getAdjacentLevelIndex(1), true);
+    });
+    els.btnAlgoRetry?.addEventListener("click", () => {
+      loadLevel(state.levelIndex, true);
     });
     els.achModal.addEventListener("click", (e) => {
       if (e.target === els.achModal) els.achModal.classList.add("hidden");
