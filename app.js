@@ -65,6 +65,14 @@
     combo: 0,
     maxComboEver: 0,
     deadlineMode: false,
+    timerEnabled: (() => {
+      try {
+        const saved = localStorage.getItem("bangchu_timer_enabled");
+        return saved === null ? true : saved === "true";
+      } catch (_) {
+        return true;
+      }
+    })(),
     timeLeft: DEFAULT_TIME_LIMIT,
     timerId: null,
     timeoutResetId: null,
@@ -126,6 +134,8 @@
     btnHint: $("btn-hint"),
     btnHintText: $("btn-hint-text"),
     btnDeadlineMode: $("btn-deadline-mode"),
+    btnToggleTimer: $("btn-toggle-timer"),
+    btnToggleTimerText: $("btn-toggle-timer-text"),
     btnRetryBatch: $("btn-retry-batch"),
     btnRetryMerge: $("btn-retry-merge"),
     hudCombo: $("hud-combo"),
@@ -653,11 +663,35 @@
     els.hudMistakes.classList.toggle("danger", state.mistakes >= state.maxMistakes - 1);
 
     els.btnDeadlineMode.classList.toggle("active", state.deadlineMode);
+    els.btnDeadlineMode.disabled = !state.timerEnabled;
+    els.btnDeadlineMode.title = state.timerEnabled
+      ? "Bật/tắt Tăng tốc: thời gian còn một nửa, thưởng hoàn tất Phiên x1.5 KPI"
+      : "Đang tắt đếm giờ · Bật đếm giờ để sử dụng Tăng tốc";
+
+    if (els.btnToggleTimer) {
+      els.btnToggleTimer.classList.toggle("off", !state.timerEnabled);
+      if (els.btnToggleTimerText) {
+        els.btnToggleTimerText.textContent = state.timerEnabled ? "⏱ Giờ: Bật" : "⏱ Tắt giờ (Max 2★)";
+      }
+      els.btnToggleTimer.title = state.timerEnabled
+        ? "Bật/tắt tính thời gian (Tắt giờ: tối đa 2 sao/phiên)"
+        : "Tính thời gian đang TẮT (Tối đa 2 sao/phiên). Click để bật lại";
+    }
+
     els.hudTimer.classList.remove("hidden");
-    const mm = String(Math.floor(state.timeLeft / 60)).padStart(2, "0");
-    const ss = String(state.timeLeft % 60).padStart(2, "0");
-    els.hudTimer.textContent = `⏱ ${mm}:${ss}`;
-    els.hudTimer.classList.toggle("urgent", state.timeLeft <= 15);
+    if (!state.timerEnabled) {
+      els.hudTimer.textContent = "⏱ Vô hạn";
+      els.hudTimer.title = "Đã tắt tính thời gian (Tối đa 2 sao/phiên) · Click để bật lại";
+      els.hudTimer.classList.remove("urgent");
+      els.hudTimer.classList.add("hud-timer-off");
+    } else {
+      const mm = String(Math.floor(state.timeLeft / 60)).padStart(2, "0");
+      const ss = String(state.timeLeft % 60).padStart(2, "0");
+      els.hudTimer.textContent = `⏱ ${mm}:${ss}`;
+      els.hudTimer.title = "Thời gian còn lại · Click để tắt tính thời gian";
+      els.hudTimer.classList.remove("hud-timer-off");
+      els.hudTimer.classList.toggle("urgent", state.timeLeft <= 15);
+    }
 
     els.hudFever.classList.toggle("hidden", !state.fever);
     els.hudFever.textContent = `🔥 x2 KPI · ${state.fever}s`;
@@ -776,17 +810,21 @@
   // ================= 3 SAO MỖI PHIÊN =================
   function getStarGoals() {
     const limit = getTimeLimit();
+    const isTimerOff = !state.timerEnabled;
     const speedGoal = (bit, ratio) => ({
       bit,
-      label: `Còn ≥ ${Math.round(ratio * 100)}% thời gian`,
-      met: () => state.timeLeft >= limit * ratio
+      label: isTimerOff ? "Thời gian (Khóa khi tắt giờ)" : `Còn ≥ ${Math.round(ratio * 100)}% thời gian`,
+      met: () => (!isTimerOff && state.timeLeft >= limit * ratio),
+      locked: isTimerOff
     });
     return [
       { bit: 1, label: "Không sai lần nào", met: () => state.mistakes === 0 },
       speedGoal(2, 0.5),
-      // 4x4 không có gợi ý nên thay bằng mốc tốc độ cao hơn
+      // 4x4 không có gợi ý nên thay bằng mốc tốc độ cao hơn (khi tắt giờ: thay bằng tối đa 1 lỗi sai)
       state.mode === "connections"
-        ? speedGoal(4, 0.7)
+        ? (isTimerOff
+            ? { bit: 4, label: "Tối đa 1 lỗi sai", met: () => state.mistakes <= 1 }
+            : speedGoal(4, 0.7))
         : { bit: 4, label: "Không dùng gợi ý", met: () => !state.usedHintInBatch }
     ];
   }
@@ -799,18 +837,26 @@
   // Chỉ gọi khi hoàn tất Phiên; sao cộng dồn qua các lần chơi lại
   function earnStars(lvl) {
     const mask = getStarGoals().reduce((m, g) => (g.met() ? m | g.bit : m), 0);
-    state.stars[lvl.id] = (state.stars[lvl.id] || 0) | mask;
-    return starText(mask);
+    // Khi tắt tính thời gian: tuyệt đối loại trừ bit 2 (sao thời gian), tối đa đạt 2 sao/phiên
+    const effectiveMask = state.timerEnabled ? mask : (mask & ~2);
+    state.stars[lvl.id] = (state.stars[lvl.id] || 0) | effectiveMask;
+    return starText(effectiveMask);
   }
 
   function renderStarGoals() {
     const lvl = getCurrentLevel();
     const earned = state.stars[lvl.id] || 0;
     const playing = !state.batchFailed && !isBatchDone();
+    const isTimerOff = !state.timerEnabled;
     const starCount = (earned & 1 ? 1 : 0) + (earned & 2 ? 1 : 0) + (earned & 4 ? 1 : 0);
-    const badgeHtml = `<span class="star-badge-summary"><span class="star-icon">⭐</span> ${starCount}/3 SAO</span>`;
+    const maxStars = isTimerOff ? 2 : 3;
+    const displayCount = isTimerOff ? Math.min(starCount, 2) : starCount;
+    const badgeHtml = `<span class="star-badge-summary"><span class="star-icon">⭐</span> ${displayCount}/${maxStars} SAO${isTimerOff ? ' (Tắt giờ)' : ''}</span>`;
     const goalsHtml = getStarGoals()
       .map((g) => {
+        if (g.locked) {
+          return `<span class="star-goal locked" title="Khóa khi tắt tính thời gian (Tối đa 2 sao/phiên)"><span class="star-icon">⊘</span> ${g.label}</span>`;
+        }
         const got = Boolean(earned & g.bit);
         const missed = !got && (state.batchFailed || (playing && !g.met()));
         const cls = got ? "star-goal got" : missed ? "star-goal missed" : "star-goal";
@@ -963,21 +1009,41 @@
     );
   }
 
+  function toggleTimerEnabled() {
+    state.timerEnabled = !state.timerEnabled;
+    try {
+      localStorage.setItem("bangchu_timer_enabled", String(state.timerEnabled));
+    } catch (_) {}
+    if (!state.timerEnabled) {
+      if (state.deadlineMode) state.deadlineMode = false;
+      stopTimer();
+      state.timeLeft = 9999;
+      setStatus("Đã tắt tính thời gian · Tối đa 2 sao mỗi Phiên!", "warn");
+    } else {
+      setStatus("Đã bật lại tính thời gian · Có thể đạt tối đa 3 sao!", "ok");
+      startTimer();
+    }
+    updateHudUI();
+    renderStarGoals();
+  }
+
   function startTimer() {
     stopTimer();
-    state.timeLeft = getTimeLimit();
+    state.timeLeft = state.timerEnabled ? getTimeLimit() : 9999;
     updateHudUI();
     if (state.batchFailed || isBatchDone()) return;
 
     state.timerId = setInterval(() => {
       if (state.batchFailed || isBatchDone() || isTimerPaused()) return;
-      state.timeLeft -= 1;
+      if (state.timerEnabled) {
+        state.timeLeft -= 1;
+      }
       if (state.fever > 0) {
         state.fever -= 1;
         if (!state.fever) endFever();
       }
       updateHudUI();
-      if (state.timeLeft <= 0) {
+      if (state.timerEnabled && state.timeLeft <= 0) {
         failCurrentBatch("#TIMEOUT! Hết thời gian · Phiên sẽ reset sau 3 giây");
         state.timeoutResetId = setTimeout(() => {
           state.timeoutResetId = null;
@@ -2438,7 +2504,18 @@
       updateTrollButtonUI();
     });
 
+    if (els.btnToggleTimer) {
+      els.btnToggleTimer.addEventListener("click", toggleTimerEnabled);
+    }
+    if (els.hudTimer) {
+      els.hudTimer.addEventListener("click", toggleTimerEnabled);
+    }
+
     els.btnDeadlineMode.addEventListener("click", () => {
+      if (!state.timerEnabled) {
+        setStatus("Vui lòng bật tính thời gian để sử dụng chế độ Tăng tốc!", "warn");
+        return;
+      }
       state.deadlineMode = !state.deadlineMode;
       const hasProgress =
         state.solvedTargets.size > 0 || state.solvedPairs.size > 0 || state.connSolvedLevels.length > 0;
