@@ -799,9 +799,8 @@ body.theme-docs .connections-view {
   border: 1px solid var(--border);
   padding: 10px;
   margin-bottom: 8px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  display: block;
+  text-align: center;
   overflow: auto;
   height: 245px;
   min-height: 140px;
@@ -811,8 +810,9 @@ body.theme-docs .connections-view {
 }
 
 .crossword-grid {
-  display: grid;
+  display: inline-grid;
   gap: 2px;
+  text-align: left;
 }
 
 .cw-cell {

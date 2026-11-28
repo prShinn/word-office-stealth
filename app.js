@@ -1153,15 +1153,16 @@
   // ================= CONNECT MODE =================
   function getNodeLayout(total) {
     const width = 300;
-    const height = 244;
     if (total >= 10) {
-      const cols = total > 16 ? 5 : 4;
+      const cols = total > 24 ? 6 : (total > 16 ? 5 : 4);
       const rows = Math.ceil(total / cols);
-      const stepX = Math.min(68, Math.floor((width - 20) / cols));
-      const stepY = Math.min(total > 12 ? 55 : 68, Math.floor((height - 16) / rows));
-      const size = Math.max(32, Math.min(48, Math.min(stepX, stepY) - 8));
+      const stepX = Math.min(68, Math.floor((width - 16) / cols));
+      const stepY = Math.min(total > 12 ? 52 : 68, Math.max(36, Math.floor(228 / rows)));
+      const height = Math.max(244, rows * stepY + 16);
+      const size = Math.max(28, Math.min(48, Math.min(stepX, stepY) - 6));
       return { width, height, cols, rows, stepX, stepY, size };
     }
+    const height = 244;
     if (total >= 7) {
       const cols = 3;
       const rows = Math.ceil(total / cols);
@@ -1196,6 +1197,7 @@
     els.nodesLayer.innerHTML = "";
     const total = state.letters.length;
     const layout = getNodeLayout(total);
+    els.wheelWrap.style.height = layout.height + "px";
     const half = Math.round(layout.size / 2);
     const fontSize = layout.size <= 38 ? 14 : 17;
     state.letters.forEach((ch, idx) => {
