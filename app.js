@@ -14,6 +14,8 @@
   // Giới hạn thời gian mỗi Phiên: 10 phút (600s); chế độ Tăng tốc còn một nửa (5 phút)
   const TIME_LIMITS = { "Cơ bản": 600, "Trung bình": 600, "Nâng cao": 600, "Sưu tầm": 600 };
   const DEFAULT_TIME_LIMIT = 600;
+  const FEVER_SECONDS = 20;
+  const FEVER_EVERY = 5; // combo đạt bội số này thì vào Giờ cao điểm
   const TIMEOUT_RESET_MS = 3000;
 
   const ACHIEVEMENTS = [
@@ -69,6 +71,8 @@
 
     // Economy & Persistence
     usedHintInBatch: false,
+    fever: 0,             // số giây còn lại của Giờ cao điểm
+    stars: {},            // { levelId: bitmask 3 mục tiêu sao đã đạt }
     hintQuota: INITIAL_HINT_QUOTA,
     hintDay: null,        // ngày gần nhất đã xét quà gợi ý
     score: 0,
@@ -125,6 +129,7 @@
     hudCombo: $("hud-combo"),
     hudMistakes: $("hud-mistakes"),
     hudTimer: $("hud-timer"),
+    hudFever: $("hud-fever"),
     connTopicTitle: $("conn-topic-title"),
     connTierBadge: $("conn-tier-badge"),
     connProgressFill: $("conn-progress-fill"),
@@ -230,6 +235,7 @@
     state.collectedWords = { vi: [], en: [] };
     state.levelIndex = 0;
     state.progress = {};
+    state.stars = {};
     customLevelsCache = { vi: [], en: [] };
   }
 
@@ -332,6 +338,7 @@
       if (["connect", "merge", "connections"].includes(saved.mode)) state.mode = saved.mode;
       if (Number.isInteger(saved.levelIndex) && saved.levelIndex >= 0) state.levelIndex = saved.levelIndex;
       if (saved.progress && typeof saved.progress === "object") state.progress = saved.progress;
+      if (saved.stars && typeof saved.stars === "object") state.stars = saved.stars;
     } catch (_) {}
     updateAuthUI();
   }
@@ -354,6 +361,7 @@
         mode: state.mode,
         levelIndex: state.levelIndex,
         progress: state.progress,
+        stars: state.stars,
         lastActiveAt: Date.now()
       };
       const { trimmed, json } = compactPayloadForStorage(rawPayload);
@@ -643,6 +651,10 @@
     const ss = String(state.timeLeft % 60).padStart(2, "0");
     els.hudTimer.textContent = `⏱ ${mm}:${ss}`;
     els.hudTimer.classList.toggle("urgent", state.timeLeft <= 15);
+
+    els.hudFever.classList.toggle("hidden", !state.fever);
+    els.hudFever.textContent = `🔥 x2 KPI · ${state.fever}s`;
+    renderStarGoals();
   }
 
   function getComboMultiplier() {
@@ -702,8 +714,9 @@
     const dailyIdx = getDailyIndex(levels.length);
     els.levelSelect.innerHTML = levels
       .map((lvl, idx) => {
-        const done = state.completedBatches.has(lvl.id) ? " ✓" : "";
-        const star = idx === dailyIdx ? "★ " : "";
+        const mask = state.stars[lvl.id];
+        const done = mask !== undefined ? ` ${starText(mask)}` : state.completedBatches.has(lvl.id) ? " ✓" : "";
+        const star = idx === dailyIdx ? "◆ " : "";
         return `<option value="${idx}">${star}${lvl.id} [${lvl.tier}]: ${lvl.topic}${done}</option>`;
       })
       .join("");
@@ -724,6 +737,128 @@
     el.className = "tier-badge";
     if (tier === "Trung bình") el.classList.add("tier-mid");
     if (tier === "Nâng cao") el.classList.add("tier-hard");
+  }
+
+  // ================= 3 SAO MỖI PHIÊN =================
+  function getStarGoals() {
+    const limit = getTimeLimit();
+    const speedGoal = (bit, ratio) => ({
+      bit,
+      label: `Còn ≥ ${Math.round(ratio * 100)}% thời gian`,
+      met: () => state.timeLeft >= limit * ratio
+    });
+    return [
+      { bit: 1, label: "Không sai lần nào", met: () => state.mistakes === 0 },
+      speedGoal(2, 0.5),
+      // 4x4 không có gợi ý nên thay bằng mốc tốc độ cao hơn
+      state.mode === "connections"
+        ? speedGoal(4, 0.7)
+        : { bit: 4, label: "Không dùng gợi ý", met: () => !state.usedHintInBatch }
+    ];
+  }
+
+  function starText(mask) {
+    const count = [1, 2, 4].filter((bit) => mask & bit).length;
+    return "★".repeat(count) + "☆".repeat(3 - count);
+  }
+
+  // Chỉ gọi khi hoàn tất Phiên; sao cộng dồn qua các lần chơi lại
+  function earnStars(lvl) {
+    const mask = getStarGoals().reduce((m, g) => (g.met() ? m | g.bit : m), 0);
+    state.stars[lvl.id] = (state.stars[lvl.id] || 0) | mask;
+    return starText(mask);
+  }
+
+  function renderStarGoals() {
+    const lvl = getCurrentLevel();
+    const earned = state.stars[lvl.id] || 0;
+    const playing = !state.batchFailed && !isBatchDone();
+    const html = getStarGoals()
+      .map((g) => {
+        const got = Boolean(earned & g.bit);
+        const missed = !got && (state.batchFailed || (playing && !g.met()));
+        const cls = got ? "star-goal got" : missed ? "star-goal missed" : "star-goal";
+        return `<span class="${cls}">${got ? "★" : "☆"} ${g.label}</span>`;
+      })
+      .join("");
+    document.querySelectorAll(".star-goals").forEach((el) => {
+      if (el.dataset.html === html) return;
+      el.dataset.html = html;
+      el.innerHTML = html;
+    });
+  }
+
+  // ================= GIỜ CAO ĐIỂM =================
+  // Gọi sau khi đã đánh dấu mục vừa giải, trước khi tính KPI
+  function bumpCombo() {
+    state.combo += 1;
+    if (state.combo > state.maxComboEver) state.maxComboEver = state.combo;
+    if (state.combo >= 5) unlockAchievement("combo_5");
+    if (state.combo % FEVER_EVERY === 0 && !state.fever && !isBatchDone()) {
+      state.fever = FEVER_SECONDS;
+      document.body.classList.add("fever");
+      state.notices.push(`🔥 Giờ cao điểm: x2 KPI trong ${FEVER_SECONDS}s`);
+    }
+  }
+
+  function endFever() {
+    state.fever = 0;
+    document.body.classList.remove("fever");
+  }
+
+  // ================= HIỆU ỨNG PHẢN HỒI =================
+  function prefersReducedMotion() {
+    return Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+  }
+
+  function replayClass(el, cls) {
+    if (!el) return;
+    el.classList.remove(cls);
+    void el.offsetWidth; // ép trình duyệt chạy lại animation
+    el.classList.add(cls);
+    el.addEventListener("animationend", () => el.classList.remove(cls), { once: true });
+  }
+
+  function spawnFx(className, text, x, y) {
+    const el = document.createElement("div");
+    el.className = className;
+    el.textContent = text;
+    el.setAttribute("aria-hidden", "true");
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 900);
+    return el;
+  }
+
+  // Từ vừa giải "bay" từ vùng chơi sang dòng đối soát, kèm điểm nổi lên
+  function celebrate(sourceEl, targetEl, label, pts) {
+    replayClass(targetEl, "fx-flash");
+    if (!sourceEl || prefersReducedMotion()) return;
+    const from = sourceEl.getBoundingClientRect();
+    const x = from.left + from.width / 2;
+    const y = from.top + from.height / 2;
+    if (pts) spawnFx(state.fever ? "fx-points fever-points" : "fx-points", `+${pts}`, x, y);
+    if (!targetEl) return;
+    const to = targetEl.getBoundingClientRect();
+    const chip = spawnFx("fx-chip", label, x, y);
+    chip.animate?.(
+      [
+        { transform: "translate(-50%, -50%)", opacity: 1 },
+        {
+          transform: `translate(calc(-50% + ${to.left + 90 - x}px), calc(-50% + ${to.top + to.height / 2 - y}px)) scale(0.8)`,
+          opacity: 0.2
+        }
+      ],
+      { duration: 550, easing: "cubic-bezier(0.4, 0, 0.2, 1)", fill: "forwards" }
+    );
+    setTimeout(() => chip.remove(), 560);
+  }
+
+  function shakeStage() {
+    const stage =
+      state.mode === "connect" ? els.wheelWrap : state.mode === "merge" ? els.mergeTilesGrid : els.connGrid;
+    replayClass(stage, "fx-shake");
   }
 
   // ================= DEADLINE TIMER =================
@@ -768,6 +903,10 @@
     state.timerId = setInterval(() => {
       if (state.batchFailed || isBatchDone() || isTimerPaused()) return;
       state.timeLeft -= 1;
+      if (state.fever > 0) {
+        state.fever -= 1;
+        if (!state.fever) endFever();
+      }
       updateHudUI();
       if (state.timeLeft <= 0) {
         failCurrentBatch("#TIMEOUT! Hết thời gian · Phiên sẽ reset sau 3 giây");
@@ -792,6 +931,8 @@
   function registerMistake(msg) {
     state.combo = 0;
     state.mistakes += 1;
+    endFever();
+    shakeStage();
     updateHudUI();
     if (state.mistakes >= state.maxMistakes) {
       failCurrentBatch(`${msg} — Đã quá giới hạn ${state.maxMistakes} lỗi!`);
@@ -805,6 +946,7 @@
     state.batchFailed = true;
     state.streak = 0;
     stopTimer();
+    endFever();
     setStatus(reason, "err");
     showRetryButtons();
     if (state.mode === "connections") {
@@ -1077,6 +1219,7 @@
     state.maxMistakes = state.mode === "connections" ? 3 : state.mode === "merge" ? 4 : 5;
     state.batchFailed = false;
     state.usedHintInBatch = false;
+    endFever();
     els.keyboardInput.value = "";
     els.btnRetryBatch.classList.add("hidden");
     els.btnRetryMerge.classList.add("hidden");
@@ -1269,7 +1412,7 @@
   }
 
   function addKpiScore(basePts) {
-    const mult = getComboMultiplier() * (isCurrentDaily() ? 2 : 1);
+    const mult = getComboMultiplier() * (isCurrentDaily() ? 2 : 1) * (state.fever ? 2 : 1);
     const totalPts = Math.round(basePts * mult);
     state.score += totalPts;
     return totalPts;
@@ -1328,15 +1471,14 @@
       }
       state.solvedTargets.add(wordKey);
       if (state.focusedTargetKey === wordKey) state.focusedTargetKey = null;
-      state.combo += 1;
-      if (state.combo > state.maxComboEver) state.maxComboEver = state.combo;
-      if (state.combo >= 5) unlockAchievement("combo_5");
+      bumpCombo();
 
       const pts = awardOnce(lvl, wordKey, wordKey.length * 10);
       setStatus(`OK: ${kpiNote(pts)} (Combo ${state.combo})`, "ok");
       trackEngagement("answer", { combo: state.combo });
       renderCrosswordGrid();
       renderTargetsTable();
+      celebrate(els.draftWord, els.targetsTbody.children[lvl.targets.indexOf(wordKey)], wordKey.toUpperCase(), pts);
       checkBatchCompletion(lvl);
       updateStatsUI();
       return;
@@ -1348,7 +1490,7 @@
     }
 
     state.bonusWords.unshift(makeBonusEntry(wordKey));
-    state.combo += 1;
+    bumpCombo();
     const pts = awardOnce(lvl, `b:${wordKey}`, 15);
     const unlockedCustom = collectExtraWord(wordKey);
 
@@ -1373,6 +1515,7 @@
     setStatus(bonusMsg, "ok");
     trackEngagement("extra", { combo: state.combo });
     renderBonusList();
+    celebrate(els.draftWord, els.bonusList.firstElementChild, wordKey.toUpperCase(), pts);
     updateStatsUI();
   }
 
@@ -1401,10 +1544,12 @@
         msg = `Hoàn tất ${lvl.id} (+${clearBonus} KPI)!`;
       }
     }
+    const roundStars = earnStars(lvl);
+    endFever();
     saveProgress();
     populateLevelDropdown();
     showRetryButtons();
-    setStatus(msg, "ok");
+    setStatus(`${msg} · ${roundStars}`, "ok");
     trackEngagement("batch", {
       clean: state.mistakes === 0 && !state.usedHintInBatch,
       isDaily: isCurrentDaily()
@@ -1491,20 +1636,20 @@
 
     const pair = lvl.pairs[pairIdx];
     els.mergePreview.textContent = `${pair[2]} — (${pair[3]})`;
+    let pts = 0;
     if (byHint) {
       // Gợi ý: không KPI, không combo; mục này cũng không được trả thưởng về sau
       claimReward(lvl, `p${pairIdx}`);
     } else {
-      state.combo += 1;
-      if (state.combo > state.maxComboEver) state.maxComboEver = state.combo;
-      if (state.combo >= 5) unlockAchievement("combo_5");
+      bumpCombo();
 
-      const pts = awardOnce(lvl, `p${pairIdx}`, 20);
+      pts = awardOnce(lvl, `p${pairIdx}`, 20);
       setStatus(`OK: "${pair[2]}" (${kpiNote(pts)})`, "ok");
       trackEngagement("answer", { combo: state.combo });
     }
     renderMergeTiles();
     renderTargetsTable();
+    celebrate(els.mergePreview, els.targetsTbody.children[pairIdx], pair[2], pts);
     checkBatchCompletion(lvl);
     updateStatsUI();
   }
@@ -1598,13 +1743,13 @@
     if (topCount === 4) {
       state.connSolvedLevels.push(topLevel);
       state.connSelected = [];
-      state.combo += 1;
-      if (state.combo > state.maxComboEver) state.maxComboEver = state.combo;
-      if (state.combo >= 5) unlockAchievement("combo_5");
+      bumpCombo();
       const pts = awardOnce(lvl, `g${topLevel}`, topLevel * 25);
       setStatus(`Chuẩn nhóm! ${kpiNote(pts)}`, "ok");
       trackEngagement("answer", { combo: state.combo });
       renderConnections();
+      const banner = els.connSolvedList.lastElementChild;
+      celebrate(els.btnConnSubmit, banner, `Nhóm ${state.connSolvedLevels.length}/4`, pts);
       checkBatchCompletion(lvl);
       updateStatsUI();
       return;
