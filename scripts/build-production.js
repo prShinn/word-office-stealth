@@ -154,8 +154,7 @@ const staticFiles = [
   "qr-donate.png",
   "version.json",
   "it-exam-sample.json",
-  "it-quiz-bank.json",
-  "_headers"
+  "it-quiz-bank.json"
 ];
 
 for (const name of staticFiles) {
