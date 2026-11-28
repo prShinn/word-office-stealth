@@ -65,6 +65,7 @@
     combo: 0,
     maxComboEver: 0,
     deadlineMode: false,
+    algoDomain: "all",
     timerEnabled: (() => {
       try {
         const saved = localStorage.getItem("bangchu_timer_enabled");
@@ -155,13 +156,21 @@
     algoTierBadge: $("algo-tier-badge"),
     algoProblemDesc: $("algo-problem-desc"),
     algoCodeSnippet: $("algo-code-snippet"),
+    algoLangTag: $("algo-lang-tag"),
     algoQuestionText: $("algo-question-text"),
     algoOptionsList: $("algo-options-list"),
+    algoInputWrap: $("algo-input-wrap"),
+    algoTextInput: $("algo-text-input"),
     btnAlgoSubmit: $("btn-algo-submit"),
     btnAlgoNext: $("btn-algo-next"),
     btnAlgoRetry: $("btn-algo-retry"),
     algoExplanationBox: $("algo-explanation-box"),
     algoExplainContent: $("algo-explain-content"),
+    algoCustomModal: $("algo-custom-modal"),
+    btnOpenAlgoCustom: $("btn-open-algo-custom"),
+    btnCloseAlgoCustom: $("btn-close-algo-custom"),
+    btnCancelAlgoCustom: $("btn-cancel-algo-custom"),
+    algoCustomForm: $("algo-custom-form"),
     achModal: $("achievements-modal"),
     kpiOverviewCards: $("kpi-overview-cards"),
     achGrid: $("ach-grid"),
@@ -638,10 +647,15 @@
 
   function getLevels() {
     if (state.mode === "algo") {
-      return window.ALGO_DATA?.ALGO_LEVELS || [];
+      const all = window.ALGO_DATA?.getAllLevels?.() || window.ALGO_DATA?.ALGO_LEVELS || [];
+      if (state.algoDomain && state.algoDomain !== "all") {
+        const filtered = all.filter((lvl) => lvl.domain === state.algoDomain);
+        return filtered.length > 0 ? filtered : all;
+      }
+      return all;
     }
     if (state.mode === "connections") {
-      return state.lang === "en" ? window.CONN_DATA.EN_LEVELS : window.CONN_DATA.VI_LEVELS;
+      state.mode = "connect"; // Fallback an toàn vì đã bỏ tab Phân nhóm
     }
     const data = state.lang === "en" ? window.EN_DATA : window.VI_DATA;
     if (state.mode === "connect") {
@@ -1367,13 +1381,14 @@
     }
   }
 
-  // ================= ALGORITHM QUIZ MODE =================
+  // ================= ALGORITHM QUIZ & INPUT MODE =================
   state.selectedAlgoOption = null;
 
   function renderAlgoLevel(lvl) {
     if (!els.algoView || !lvl) return;
     if (els.algoTopicTitle) els.algoTopicTitle.textContent = `Thuật toán: ${lvl.topic}`;
     if (els.algoTierBadge) updateTierBadge(els.algoTierBadge, lvl.tier || "Cơ bản");
+    if (els.algoLangTag) els.algoLangTag.textContent = lvl.langTag || "Algorithm";
     if (els.algoProblemDesc) els.algoProblemDesc.textContent = lvl.problem || "";
     if (els.algoCodeSnippet) els.algoCodeSnippet.textContent = lvl.snippet || "";
     if (els.algoQuestionText) els.algoQuestionText.textContent = lvl.question || "";
@@ -1386,39 +1401,87 @@
     if (els.algoExplanationBox) els.algoExplanationBox.classList.toggle("hidden", !isSolved);
     if (els.algoExplainContent) els.algoExplainContent.textContent = lvl.explanation || "";
 
-    if (els.algoOptionsList) {
-      els.algoOptionsList.innerHTML = "";
-      (lvl.options || []).forEach((optText, idx) => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "algo-opt-btn";
-        btn.dataset.idx = String(idx);
-        btn.textContent = optText;
-        if (isSolved && idx === lvl.correctIndex) {
-          btn.classList.add("correct");
+    // Phân nhánh giữa Dạng 1 (Trắc nghiệm choice) và Dạng 2 (Tự gõ input output)
+    if (lvl.type === "input") {
+      if (els.algoOptionsList) els.algoOptionsList.classList.add("hidden");
+      if (els.algoInputWrap) els.algoInputWrap.classList.remove("hidden");
+      if (els.algoTextInput) {
+        if (isSolved) {
+          els.algoTextInput.value = (lvl.expectedAnswers && lvl.expectedAnswers[0]) || "";
+          els.algoTextInput.disabled = true;
+          if (els.btnAlgoSubmit) els.btnAlgoSubmit.disabled = true;
+        } else {
+          els.algoTextInput.value = "";
+          els.algoTextInput.disabled = false;
+          els.algoTextInput.focus();
         }
-        btn.addEventListener("click", () => {
-          if (state.batchFailed || isBatchDone()) return;
-          document.querySelectorAll(".algo-opt-btn").forEach((b) => b.classList.remove("selected"));
-          btn.classList.add("selected");
-          state.selectedAlgoOption = idx;
-          if (els.btnAlgoSubmit) els.btnAlgoSubmit.disabled = false;
+      }
+    } else {
+      if (els.algoInputWrap) els.algoInputWrap.classList.add("hidden");
+      if (els.algoOptionsList) {
+        els.algoOptionsList.classList.remove("hidden");
+        els.algoOptionsList.innerHTML = "";
+        (lvl.options || []).forEach((optText, idx) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "algo-opt-btn";
+          btn.dataset.idx = String(idx);
+          btn.textContent = optText;
+          if (isSolved && idx === lvl.correctIndex) {
+            btn.classList.add("correct");
+          }
+          btn.addEventListener("click", () => {
+            if (state.batchFailed || isBatchDone()) return;
+            document.querySelectorAll(".algo-opt-btn").forEach((b) => b.classList.remove("selected"));
+            btn.classList.add("selected");
+            state.selectedAlgoOption = idx;
+            if (els.btnAlgoSubmit) els.btnAlgoSubmit.disabled = false;
+          });
+          els.algoOptionsList.appendChild(btn);
         });
-        els.algoOptionsList.appendChild(btn);
-      });
+      }
     }
   }
 
   function submitAlgoAnswer() {
-    if (state.selectedAlgoOption === null || state.batchFailed) return;
+    if (state.batchFailed) return;
     const lvl = getCurrentLevel();
     if (!lvl) return;
-    const idx = state.selectedAlgoOption;
-    const buttons = document.querySelectorAll(".algo-opt-btn");
+    let isCorrect = false;
+    let wrongMsg = "Đáp án chưa chính xác!";
 
-    if (idx === lvl.correctIndex) {
-      if (buttons[idx]) buttons[idx].classList.add("correct");
+    if (lvl.type === "input") {
+      const val = (els.algoTextInput?.value || "").trim().toLowerCase();
+      if (!val) {
+        setStatus("Vui lòng nhập kết quả trước khi bấm Xác nhận", "warn");
+        return;
+      }
+      const expectedList = (lvl.expectedAnswers || []).map((ans) => String(ans).trim().toLowerCase());
+      const cleanVal = val.replace(/[,;]/g, " ").replace(/\s+/g, " ");
+      isCorrect = expectedList.some((exp) => {
+        const cleanExp = exp.replace(/[,;]/g, " ").replace(/\s+/g, " ");
+        return cleanVal === cleanExp || val === exp;
+      });
+      wrongMsg = `Kết quả "${els.algoTextInput.value.trim()}" chưa khớp với output mong đợi!`;
+    } else {
+      if (state.selectedAlgoOption === null) {
+        setStatus("Vui lòng chọn 1 đáp án trước khi bấm Xác nhận", "warn");
+        return;
+      }
+      const idx = state.selectedAlgoOption;
+      isCorrect = idx === lvl.correctIndex;
+      wrongMsg = `Đáp án ${String.fromCharCode(65 + idx)} chưa chính xác!`;
+      const buttons = document.querySelectorAll(".algo-opt-btn");
+      if (isCorrect) {
+        if (buttons[idx]) buttons[idx].classList.add("correct");
+      } else {
+        if (buttons[idx]) buttons[idx].classList.add("wrong");
+      }
+    }
+
+    if (isCorrect) {
       if (els.btnAlgoSubmit) els.btnAlgoSubmit.disabled = true;
+      if (els.algoTextInput) els.algoTextInput.disabled = true;
       if (els.algoExplanationBox) els.algoExplanationBox.classList.remove("hidden");
       if (els.algoExplainContent) els.algoExplainContent.textContent = lvl.explanation;
       if (els.btnAlgoNext) els.btnAlgoNext.classList.remove("hidden");
@@ -1440,8 +1503,7 @@
         setStatus("Chính xác! Bạn đã hoàn thành câu hỏi này trước đó.", "ok");
       }
     } else {
-      if (buttons[idx]) buttons[idx].classList.add("wrong");
-      registerMistake(`Đáp án ${String.fromCharCode(65 + idx)} chưa chính xác!`);
+      registerMistake(wrongMsg);
       if (els.btnAlgoRetry) els.btnAlgoRetry.classList.remove("hidden");
       if (els.algoExplanationBox) els.algoExplanationBox.classList.remove("hidden");
       if (els.algoExplainContent) els.algoExplainContent.textContent = "💡 Gợi ý: " + (lvl.hint || lvl.explanation);
@@ -2857,6 +2919,105 @@
     els.btnAlgoRetry?.addEventListener("click", () => {
       loadLevel(state.levelIndex, true);
     });
+
+    // ALGORITHM INPUT & DOMAIN ACTIONS
+    els.algoTextInput?.addEventListener("input", () => {
+      if (els.btnAlgoSubmit) {
+        els.btnAlgoSubmit.disabled = !els.algoTextInput.value.trim();
+      }
+    });
+    els.algoTextInput?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        submitAlgoAnswer();
+      }
+    });
+
+    // Domain Pills
+    document.querySelectorAll(".domain-pill").forEach((pill) => {
+      pill.addEventListener("click", () => {
+        document.querySelectorAll(".domain-pill").forEach((p) => p.classList.remove("active"));
+        pill.classList.add("active");
+        state.algoDomain = pill.dataset.domain || "all";
+        populateLevelDropdown();
+        loadLevel(0, true);
+      });
+    });
+
+    // Custom Algo Modal
+    const algoCustomModal = $("algo-custom-modal");
+    const customAlgoType = $("custom-algo-type");
+    const customAlgoInputGroup = $("custom-algo-input-group");
+    const customAlgoChoiceGroup = $("custom-algo-choice-group");
+
+    $("btn-open-algo-custom")?.addEventListener("click", () => {
+      algoCustomModal?.classList.remove("hidden");
+      $("custom-algo-topic")?.focus();
+    });
+    const closeAlgoCustom = () => algoCustomModal?.classList.add("hidden");
+    $("btn-close-algo-custom")?.addEventListener("click", closeAlgoCustom);
+    $("btn-cancel-algo-custom")?.addEventListener("click", closeAlgoCustom);
+    algoCustomModal?.addEventListener("click", (e) => {
+      if (e.target === algoCustomModal) closeAlgoCustom();
+    });
+
+    customAlgoType?.addEventListener("change", (e) => {
+      const isChoice = e.target.value === "choice";
+      customAlgoChoiceGroup?.classList.toggle("hidden", !isChoice);
+      customAlgoInputGroup?.classList.toggle("hidden", isChoice);
+    });
+
+    $("algo-custom-form")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const topic = ($("custom-algo-topic")?.value || "").trim();
+      const domain = $("custom-algo-domain")?.value || "dsa";
+      const tier = $("custom-algo-tier")?.value || "Cơ bản";
+      const problem = ($("custom-algo-problem")?.value || "").trim();
+      const snippet = ($("custom-algo-snippet")?.value || "").trim();
+      const question = ($("custom-algo-question")?.value || "").trim();
+      const type = $("custom-algo-type")?.value || "input";
+      const explanation = ($("custom-algo-explanation")?.value || "").trim();
+
+      if (!topic || !problem || !question) return;
+
+      const newLevel = {
+        domain,
+        domainLabel: $("custom-algo-domain")?.selectedOptions?.[0]?.text || "Tự tạo",
+        tier,
+        topic,
+        problem,
+        snippet,
+        question,
+        type,
+        explanation
+      };
+
+      if (type === "choice") {
+        const rawOpts = ($("custom-algo-options")?.value || "").split("\n").map(s => s.trim()).filter(Boolean);
+        newLevel.options = rawOpts.length >= 2 ? rawOpts : ["A. Đáp án 1", "B. Đáp án 2", "C. Đáp án 3", "D. Đáp án 4"];
+        newLevel.correctIndex = Number($("custom-algo-correct-idx")?.value || 0);
+      } else {
+        const rawExpected = ($("custom-algo-expected")?.value || "").split("|").map(s => s.trim()).filter(Boolean);
+        newLevel.expectedAnswers = rawExpected.length > 0 ? rawExpected : ["true"];
+      }
+
+      const created = window.ALGO_DATA?.addCustomLevel?.(newLevel);
+      if (created) {
+        closeAlgoCustom();
+        $("algo-custom-form")?.reset();
+        state.lang = "it";
+        state.mode = "algo";
+        state.algoDomain = "all";
+        document.querySelectorAll(".domain-pill").forEach(p => p.classList.toggle("active", p.dataset.domain === "all"));
+        populateLevelDropdown();
+        const levels = getLevels();
+        const newIdx = levels.findIndex(l => l.id === created.id);
+        loadLevel(newIdx !== -1 ? newIdx : 0, true);
+        saveProgress();
+        setStatus(`Đã thêm bài toán mới: ${created.id} - ${created.topic}!`, "ok");
+      }
+    });
+
     els.achModal.addEventListener("click", (e) => {
       if (e.target === els.achModal) els.achModal.classList.add("hidden");
     });
@@ -2892,10 +3053,12 @@
       }
       const authModalEl = $("auth-modal");
       const legalModalEl = $("legal-modal");
+      const algoCustomModalEl = $("algo-custom-modal");
       const anyModalOpen =
         !els.achModal.classList.contains("hidden") ||
         (authModalEl && !authModalEl.classList.contains("hidden")) ||
-        (legalModalEl && !legalModalEl.classList.contains("hidden"));
+        (legalModalEl && !legalModalEl.classList.contains("hidden")) ||
+        (algoCustomModalEl && !algoCustomModalEl.classList.contains("hidden"));
 
       if (e.key === "Escape") {
         e.preventDefault();
@@ -2905,6 +3068,8 @@
           authModalEl.classList.add("hidden");
         } else if (legalModalEl && !legalModalEl.classList.contains("hidden")) {
           legalModalEl.classList.add("hidden");
+        } else if (algoCustomModalEl && !algoCustomModalEl.classList.contains("hidden")) {
+          algoCustomModalEl.classList.add("hidden");
         } else {
           toggleBossMode();
         }

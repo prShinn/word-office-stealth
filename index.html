@@ -9,7 +9,7 @@
   <meta property="og:type" content="website" />
   <title id="page-title">Bao_Cao_Kinh_Doanh_Q4 - Bảng Chữ</title>
   <link id="page-favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%230f766e'/%3E%3Crect x='5' y='5' width='6' height='6' rx='1.5' fill='white'/%3E%3Crect x='13' y='5' width='6' height='6' rx='1.5' fill='white' opacity='.55'/%3E%3Crect x='5' y='13' width='6' height='6' rx='1.5' fill='white' opacity='.55'/%3E%3Ccircle cx='16' cy='16' r='3' fill='white'/%3E%3C/svg%3E" />
-  <link rel="stylesheet" href="styles.css?v=20261128-19" />
+  <link rel="stylesheet" href="styles.css?v=20261128-20" />
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-5DWNBBMQSX"></script>
   <script>
@@ -313,6 +313,20 @@
           <div class="algo-sub">Ôn tập kiến thức cấu trúc dữ liệu, thuật toán &amp; tối ưu hệ thống thực chiến</div>
         </div>
 
+        <!-- Thanh chọn Lĩnh vực & Đóng góp bài toán -->
+        <div class="algo-domain-bar">
+          <div class="algo-domain-pills" id="algo-domain-pills">
+            <button class="domain-pill active" data-domain="all">Tất cả (All)</button>
+            <button class="domain-pill" data-domain="dsa">⚡ DSA</button>
+            <button class="domain-pill" data-domain="js">🟨 JavaScript / TS</button>
+            <button class="domain-pill" data-domain="java">☕ Java / Spring</button>
+            <button class="domain-pill" data-domain="python">🐍 Python</button>
+            <button class="domain-pill" data-domain="sql">🗄️ SQL / DB</button>
+            <button class="domain-pill" data-domain="system">🏗️ System Design</button>
+          </div>
+          <button class="game-btn" id="btn-open-algo-custom" type="button" title="Đóng góp hoặc tự tạo câu đố thuật toán mới" style="margin-left: auto; white-space: nowrap; font-size: 11.5px; padding: 4px 10px;">➕ Thêm câu hỏi</button>
+        </div>
+
         <div class="star-goals"></div>
 
         <div class="algo-content-grid">
@@ -325,20 +339,30 @@
             <div class="algo-code-wrap">
               <div class="algo-code-header">
                 <span>💻 CODE / MÃ GIẢ THỰC THI</span>
-                <span class="algo-lang-tag">Algorithm</span>
+                <span class="algo-lang-tag" id="algo-lang-tag">Algorithm</span>
               </div>
               <pre class="algo-code" id="algo-code-snippet"></pre>
             </div>
           </div>
 
-          <!-- Cột phải: Câu hỏi & 4 Đáp án A, B, C, D -->
+          <!-- Cột phải: Câu hỏi, Ô nhập kết quả hoặc 4 Đáp án A/B/C/D -->
           <div class="algo-right-col">
             <div class="algo-question-card">
               <div class="algo-card-title">❓ CÂU HỎI THUẬT TOÁN</div>
               <div class="algo-question-text" id="algo-question-text"></div>
             </div>
 
+            <!-- Dạng 1: Trắc nghiệm 4 lựa chọn -->
             <div class="algo-options-list" id="algo-options-list"></div>
+
+            <!-- Dạng 2: Khung tự nhập kết quả đầu ra (Predict Output / Return) -->
+            <div class="algo-input-wrap hidden" id="algo-input-wrap">
+              <label for="algo-text-input" class="algo-input-label">✍️ Nhập kết quả đầu ra in ra màn hình hoặc giá trị trả về (Output / Return):</label>
+              <div class="algo-input-box">
+                <input type="text" id="algo-text-input" class="algo-text-input" placeholder="Ví dụ: 1 4 3 2 hoặc true false hoặc [1, 2]..." autocomplete="off" />
+              </div>
+              <div class="algo-input-hint">💡 Gợi ý: Gõ giá trị in ra, cách nhau bằng dấu cách hoặc phẩy, sau đó nhấn Enter hoặc Xác nhận.</div>
+            </div>
 
             <div class="algo-actions">
               <button class="office-btn" id="btn-algo-submit" disabled>Xác nhận câu trả lời</button>
@@ -453,6 +477,98 @@
     </div>
   </div>
 
+  <!-- Modal Tự nhập / Đóng góp câu đố thuật toán mới -->
+  <div class="modal-backdrop hidden" id="algo-custom-modal">
+    <div class="office-modal" style="max-width: 500px;">
+      <div class="modal-head">
+        <strong>➕ ĐÓNG GÓP / TỰ TẠO BÀI TOÁN THUẬT TOÁN</strong>
+        <button class="modal-close" id="btn-close-algo-custom">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="algo-custom-form" style="display: flex; flex-direction: column; gap: 10px;">
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 3px;">Chủ đề / Tiêu đề bài toán:</label>
+            <input id="custom-algo-topic" class="office-select" style="width: 100%; box-sizing: border-box; padding: 6px 8px;" placeholder="Ví dụ: Event Loop · Microtask vs Macrotask" required />
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <div style="flex: 1;">
+              <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 3px;">Lĩnh vực:</label>
+              <select id="custom-algo-domain" class="office-select" style="width: 100%; box-sizing: border-box; padding: 6px 8px;">
+                <option value="dsa">⚡ DSA &amp; Giải thuật</option>
+                <option value="js">🟨 JavaScript / TS</option>
+                <option value="java">☕ Java &amp; Spring</option>
+                <option value="python">🐍 Python</option>
+                <option value="sql">🗄️ SQL &amp; Database</option>
+                <option value="system">🏗️ System Design</option>
+              </select>
+            </div>
+            <div style="flex: 1;">
+              <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 3px;">Độ khó:</label>
+              <select id="custom-algo-tier" class="office-select" style="width: 100%; box-sizing: border-box; padding: 6px 8px;">
+                <option value="Cơ bản">Cơ bản (Dễ)</option>
+                <option value="Trung bình">Trung bình</option>
+                <option value="Nâng cao">Nâng cao</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 3px;">Mô tả bài toán / Tình huống:</label>
+            <textarea id="custom-algo-problem" class="office-select" style="width: 100%; box-sizing: border-box; height: 50px; padding: 6px 8px; font-family: inherit; font-size: 12.5px;" placeholder="Ví dụ: Cho đoạn mã bất đồng bộ, dự đoán thứ tự in ra console..." required></textarea>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 3px;">Đoạn Code / Snippet thực thi:</label>
+            <textarea id="custom-algo-snippet" class="office-select" style="width: 100%; box-sizing: border-box; height: 80px; padding: 6px 8px; font-family: monospace; font-size: 12px;" placeholder="console.log(1);&#10;setTimeout(() => console.log(2), 0);&#10;..." required></textarea>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 3px;">Câu hỏi:</label>
+            <input id="custom-algo-question" class="office-select" style="width: 100%; box-sizing: border-box; padding: 6px 8px;" placeholder="Ví dụ: Kết quả in ra console là gì?" required />
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 3px;">Hình thức trả lời:</label>
+            <select id="custom-algo-type" class="office-select" style="width: 100%; box-sizing: border-box; padding: 6px 8px;">
+              <option value="input">✍️ Tự nhập kết quả đầu ra (Console output / Return value)</option>
+              <option value="choice">📝 Trắc nghiệm 4 lựa chọn (A, B, C, D)</option>
+            </select>
+          </div>
+
+          <div id="custom-algo-input-group">
+            <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 3px;">Đáp án đúng (nhiều dạng cách nhau bởi dấu gạch |):</label>
+            <input id="custom-algo-expected" class="office-select" style="width: 100%; box-sizing: border-box; padding: 6px 8px;" placeholder="Ví dụ: 1 4 3 2 | 1, 4, 3, 2 | 1432" />
+          </div>
+
+          <div id="custom-algo-choice-group" class="hidden">
+            <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 3px;">4 Lựa chọn (mỗi dòng 1 lựa chọn):</label>
+            <textarea id="custom-algo-options" class="office-select" style="width: 100%; box-sizing: border-box; height: 70px; padding: 6px 8px; font-family: inherit; font-size: 12px;" placeholder="A. O(N) thời gian&#10;B. O(N^2) thời gian&#10;C. O(log N) thời gian&#10;D. O(1) thời gian"></textarea>
+            <div style="margin-top: 4px;">
+              <label style="font-size: 12px; font-weight: 600;">Lựa chọn đúng:</label>
+              <select id="custom-algo-correct-idx" class="office-select" style="padding: 4px 8px; margin-left: 6px;">
+                <option value="0">Đáp án A</option>
+                <option value="1">Đáp án B</option>
+                <option value="2">Đáp án C</option>
+                <option value="3">Đáp án D</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 600; margin-bottom: 3px;">Phân tích &amp; Giải thích chi tiết:</label>
+            <textarea id="custom-algo-explanation" class="office-select" style="width: 100%; box-sizing: border-box; height: 50px; padding: 6px 8px; font-family: inherit; font-size: 12.5px;" placeholder="Giải thích vì sao code chạy như vậy để ae cùng học..." required></textarea>
+          </div>
+
+          <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px;">
+            <button type="button" class="game-btn" id="btn-cancel-algo-custom">Hủy</button>
+            <button type="submit" class="game-btn" style="background: var(--accent); color: #fff; font-weight: 700; border-color: var(--accent);">Lưu &amp; Chơi ngay</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- Màn hình Boss Mode (Esc) -->
   <section class="boss-screen hidden" id="boss-screen">
     <div id="boss-excel-content" class="boss-excel-view">
@@ -528,8 +644,6 @@
       <button class="sheet-tab" data-lang="vi" data-mode="connect">VI · Nối chữ</button>
       <button class="sheet-tab" data-lang="en" data-mode="merge">EN · Ghép từ</button>
       <button class="sheet-tab" data-lang="vi" data-mode="merge">VI · Ghép từ</button>
-      <button class="sheet-tab" data-lang="en" data-mode="connections">EN · Phân nhóm</button>
-      <button class="sheet-tab" data-lang="vi" data-mode="connections">VI · Phân nhóm</button>
       <button class="sheet-tab sheet-tab-algo" data-lang="it" data-mode="algo">⚡ IT · Thuật toán</button>
     </div>
     <div class="status-stats">
@@ -543,15 +657,15 @@
     </div>
   </footer>
 
-  <script src="data-en.js?v=20261128-19"></script>
-  <script src="data-vi.js?v=20261128-19"></script>
-  <script src="data-connections.js?v=20261128-19"></script>
-  <script src="data-algo.js?v=20261128-19"></script>
-  <script src="gist-sync.js?v=20261128-19"></script>
-  <script src="engagement.js?v=20261128-19"></script>
-  <script src="troll.js?v=20261128-19"></script>
-  <script src="ads.js?v=20261128-19"></script>
-  <script src="leaderboard.js?v=20261128-19"></script>
-  <script src="app.js?v=20261128-19"></script>
+  <script src="data-en.js?v=20261128-20"></script>
+  <script src="data-vi.js?v=20261128-20"></script>
+  <script src="data-connections.js?v=20261128-20"></script>
+  <script src="data-algo.js?v=20261128-20"></script>
+  <script src="gist-sync.js?v=20261128-20"></script>
+  <script src="engagement.js?v=20261128-20"></script>
+  <script src="troll.js?v=20261128-20"></script>
+  <script src="ads.js?v=20261128-20"></script>
+  <script src="leaderboard.js?v=20261128-20"></script>
+  <script src="app.js?v=20261128-20"></script>
 </body>
 </html>
